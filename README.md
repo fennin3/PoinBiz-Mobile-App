@@ -1,4 +1,4 @@
-# treva_shop_flutter
+# PoinBiz Mobile APP
 
 A new Flutter project.
 
