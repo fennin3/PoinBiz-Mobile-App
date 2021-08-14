@@ -8,9 +8,15 @@ import 'package:treva_shop_flutter/UI/OnBoarding.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
+import 'package:hive/hive.dart';
+import 'package:treva_shop_flutter/database/cart_model.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 /// Run first apps open
-void main() {
+void main() async{
+
+  Hive.initFlutter();
+  Hive.registerAdapter(CartModelAdapter());
   runApp(
       MultiProvider(
         providers: [
@@ -96,11 +102,21 @@ class _SplashScreenState extends State<SplashScreen> {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
 
     if (sharedPreferences.getBool("installed") == null) {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => onBoarding()));
+
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (BuildContext context) => onBoarding(),
+        ),
+            (Route<dynamic> route) => false,
+      );
     } else {
-      Navigator.push(context,
-          MaterialPageRoute(builder: (context) => bottomNavigationBar()));
+
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (BuildContext context) => bottomNavigationBar(),
+        ),
+            (Route<dynamic> route) => false,
+      );
     }
   }
 

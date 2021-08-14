@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:treva_shop_flutter/API/provider_class.dart';
 import 'package:treva_shop_flutter/ListItem/CartItemData.dart';
 import 'package:treva_shop_flutter/UI/CartUIComponent/Delivery.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:provider/provider.dart';
 
 class cart extends StatefulWidget {
   @override
@@ -12,20 +16,14 @@ class _cartState extends State<cart> {
 
   final  List<cartItem> items =[];
 
+
+
   @override
   void initState() {
+
     super.initState();
-    setState(() {
-      items.add(
-        cartItem(
-          img:"assets/imgItem/flashsale3.jpg",
-          id: 1,
-          title:"Samsung Galaxy Note 9 8 GB RAM ",
-          desc: "Internal 1 TB",
-          price: "\$ 950",
-        ),
-        );
-    });
+    final _pro = Provider.of<PoinBizProvider>(context, listen: false);
+
   }
   /// Declare price and value for chart
   int value = 1;
@@ -33,6 +31,9 @@ class _cartState extends State<cart> {
 
   @override
   Widget build(BuildContext context) {
+
+      final _pro = Provider.of<PoinBizProvider>(context, listen: true);
+
       return Scaffold(
           appBar: AppBar(
             iconTheme: IconThemeData(color: Color(0xFF6991C7)),
@@ -54,241 +55,208 @@ class _cartState extends State<cart> {
           /// Checking item value of cart
           ///
           ///
-          body: items.length>0?
+          body: _pro.cart.length>0?
           ListView.builder(
-              itemCount: items.length,
+              itemCount: _pro.cart.length,
               itemBuilder: (context,position){
 
-                return Slidable(
-                  // delegate: new SlidableDrawerDelegate(),
-                  // actionExtentRatio: 0.25,
-                  // actions: <Widget>[
-                     // IconSlideAction(
-                    //   caption: 'Archive',
-                    //   color: Colors.blue,
-                    //   icon: Icons.archive,
-                    //   onTap: () {
-                    //      ///
-                    //     /// SnackBar show if cart Archive
-                    //     ///
-                    //     Scaffold.of(context)
-                    //         .showSnackBar(SnackBar(content: Text("Items Cart Archive"),duration: Duration(seconds: 2),backgroundColor: Colors.blue,));
-                    //   },
-                    // ),
-                    // Text("Hello")
-                  // ],
-                  // secondaryActions: <Widget>[
-                    // new IconSlideAction(
-                    //   key: Key(items[position].id.toString()),
-                    //   caption: 'Delete',
-                    //   color: Colors.red,
-                    //   icon: Icons.delete,
-                    //   onTap: () {
-                    //     setState(() {
-                    //       items.removeAt(position);
-                    //     });
-                    //     ///
-                    //     /// SnackBar show if cart delet
-                    //     ///
-                    //     Scaffold.of(context)
-                    //         .showSnackBar(SnackBar(content: Text("Items Cart Deleted"),duration: Duration(seconds: 2),backgroundColor: Colors.redAccent,));
-                    //   },
-                    // ),
-                  // ],
+                return Padding(
+                  padding: const EdgeInsets.only(top: 1.0, left: 13.0, right: 13.0),
+                  /// Background Constructor for card
+                  child: Container(
+                    height: 220.0,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12.withOpacity(0.1),
+                          blurRadius: 3.5,
+                          spreadRadius: 0.4,
+                        )
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
 
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 1.0, left: 13.0, right: 13.0),
-                    /// Background Constructor for card
-                    child: Container(
-                      height: 220.0,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black12.withOpacity(0.1),
-                            blurRadius: 3.5,
-                            spreadRadius: 0.4,
-                          )
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Padding(
+                                padding: EdgeInsets.all(10.0),
 
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Padding(
-                                  padding: EdgeInsets.all(10.0),
+                                /// Image item
+                                child: Container(
+                                    decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.1),
+                                        boxShadow: [
+                                          BoxShadow(
+                                              color: Colors.black12.withOpacity(0.1),
+                                              blurRadius: 0.5,
+                                              spreadRadius: 0.1)
+                                        ]),
+                                    child: Image.file(File('${_pro.cart[position].image}'),
+                                      height: 130.0,
+                                      width: 120.0,
+                                      fit: BoxFit.cover,
+                                    ))),
+                            Flexible(
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                    top: 25.0, left: 10.0, right: 5.0),
+                                child: Column(
 
-                                  /// Image item
-                                  child: Container(
-                                      decoration: BoxDecoration(
-                                          color: Colors.white.withOpacity(0.1),
-                                          boxShadow: [
-                                            BoxShadow(
-                                                color: Colors.black12.withOpacity(0.1),
-                                                blurRadius: 0.5,
-                                                spreadRadius: 0.1)
-                                          ]),
-                                      child: Image.asset('${items[position].img}',
-                                        height: 130.0,
-                                        width: 120.0,
-                                        fit: BoxFit.cover,
-                                      ))),
-                              Flexible(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      top: 25.0, left: 10.0, right: 5.0),
-                                  child: Column(
-
-                                    /// Text Information Item
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: <Widget>[
-                                      Text(
-                                        '${items[position].title}',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w700,
-                                          fontFamily: "Sans",
-                                          color: Colors.black87,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
+                                  /// Text Information Item
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: <Widget>[
+                                    Text(
+                                      '${_pro.cart[position].title}',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        fontFamily: "Sans",
+                                        color: Colors.black87,
                                       ),
-                                      Padding(padding: EdgeInsets.only(top: 10.0)),
-                                      Text(
-                                        '${items[position].desc}',
-                                        style: TextStyle(
-                                          color: Colors.black54,
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 12.0,
-                                        ),
-                                      ),
-                                      Padding(padding: EdgeInsets.only(top: 10.0)),
-                                      Text('${items[position].price}'),
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            top: 18.0, left: 0.0),
-                                        child: Container(
-                                          width: 112.0,
-                                          decoration: BoxDecoration(
-                                              color: Colors.white70,
-                                              border: Border.all(
-                                                  color: Colors.black12.withOpacity(0.1))),
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment
-                                                .spaceAround,
-                                            children: <Widget>[
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    // Padding(padding: EdgeInsets.only(top: 10.0)),
+                                    // Text(
+                                    //   '${items[position].desc}',
+                                    //   style: TextStyle(
+                                    //     color: Colors.black54,
+                                    //     fontWeight: FontWeight.w500,
+                                    //     fontSize: 12.0,
+                                    //   ),
+                                    // ),
+                                    Padding(padding: EdgeInsets.only(top: 10.0)),
+                                    Text('${_pro.cart[position].price}'),
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      textBaseline: TextBaseline.ideographic,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                              top: 18.0, left: 0.0),
+                                          child: Container(
+                                            width: 112.0,
+                                            decoration: BoxDecoration(
+                                                color: Colors.white70,
+                                                border: Border.all(
+                                                    color: Colors.black12.withOpacity(0.1))),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment
+                                                  .spaceAround,
+                                              children: <Widget>[
 
-                                              /// Decrease of value item
-                                              InkWell(
-                                                onTap: () {
-                                                  setState(() {
-                                                    value = value - 1;
-                                                    pay= 950 * value;
-                                                  });
-                                                },
-                                                child: Container(
-                                                  height: 30.0,
-                                                  width: 30.0,
-                                                  decoration: BoxDecoration(
-                                                      border: Border(
-                                                          right: BorderSide(
-                                                              color: Colors.black12
-                                                                  .withOpacity(0.1)))),
-                                                  child: Center(child: Text("-")),
+                                                /// Decrease of value item
+                                                InkWell(
+                                                  onTap: () {
+                                                    _pro.updateSubItem(_pro.cart[position]);
+                                                  },
+                                                  child: Container(
+                                                    height: 30.0,
+                                                    width: 30.0,
+                                                    decoration: BoxDecoration(
+                                                        border: Border(
+                                                            right: BorderSide(
+                                                                color: Colors.black12
+                                                                    .withOpacity(0.1)))),
+                                                    child: Center(child: Text("-")),
+                                                  ),
                                                 ),
-                                              ),
-                                              Padding(
-                                                padding: const EdgeInsets.symmetric(
-                                                    horizontal: 18.0),
-                                                child: Text(value.toString()),
-                                              ),
+                                                Padding(
+                                                  padding: const EdgeInsets.symmetric(
+                                                      horizontal: 18.0),
+                                                  child: Text(_pro.cart[position].quantity),
+                                                ),
 
-                                              /// Increasing value of item
-                                              InkWell(
-                                                onTap: () {
-                                                  setState(() {
-                                                    value = value + 1;
-                                                    pay = 950 * value;
-                                                  });
-                                                },
-                                                child: Container(
-                                                  height: 30.0,
-                                                  width: 28.0,
-                                                  decoration: BoxDecoration(
-                                                      border: Border(
-                                                          left: BorderSide(
-                                                              color: Colors.black12
-                                                                  .withOpacity(0.1)))),
-                                                  child: Center(child: Text("+")),
+                                                /// Increasing value of item
+                                                InkWell(
+                                                  onTap: () {
+                                                    // _pro.updateaddCartItem(_pro.cart[position]);
+                                                    _pro.updateAddItem(_pro.cart[position]);
+                                                  },
+                                                  child: Container(
+                                                    height: 30.0,
+                                                    width: 28.0,
+                                                    decoration: BoxDecoration(
+                                                        border: Border(
+                                                            left: BorderSide(
+                                                                color: Colors.black12
+                                                                    .withOpacity(0.1)))),
+                                                    child: Center(child: Text("+")),
+                                                  ),
                                                 ),
-                                              ),
-                                            ],
+                                              ],
+                                            ),
                                           ),
                                         ),
+                                        GestureDetector(
+                                            onTap: ()=>_pro.removeCartItem(_pro.cart[position]),
+                                            child: Icon(Icons.delete, size: 28, color: Color(0xFFA3BDED),))
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Padding(padding: EdgeInsets.only(top: 8.0)),
+                        Divider(
+                          height: 2.0,
+                          color: Colors.black12,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                              top: 9.0, left: 10.0, right: 10.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.only(left: 10.0),
+
+                                /// Total price of item buy
+                                child: Text(
+                                  "Total : Ghc " + _pro.getTotal().toString(),
+                                  style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 15.5,
+                                      fontFamily: "Sans"),
+                                ),
+                              ),
+                              InkWell(
+                                onTap: () {
+                                  Navigator.of(context).push(PageRouteBuilder(
+                                      pageBuilder: (_, __, ___) => delivery()));
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.only(right: 10.0),
+                                  child: Container(
+                                    height: 40.0,
+                                    width: 120.0,
+                                    decoration: BoxDecoration(
+                                      color: Color(0xFFA3BDED),
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        "Pay",
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontFamily: "Sans",
+                                            fontWeight: FontWeight.w600),
                                       ),
-                                    ],
+                                    ),
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                          Padding(padding: EdgeInsets.only(top: 8.0)),
-                          Divider(
-                            height: 2.0,
-                            color: Colors.black12,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(
-                                top: 9.0, left: 10.0, right: 10.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 10.0),
-
-                                  /// Total price of item buy
-                                  child: Text(
-                                    "Total : \$ " + pay.toString(),
-                                    style: TextStyle(
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 15.5,
-                                        fontFamily: "Sans"),
-                                  ),
-                                ),
-                                InkWell(
-                                  onTap: () {
-                                    Navigator.of(context).push(PageRouteBuilder(
-                                        pageBuilder: (_, __, ___) => delivery()));
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(right: 10.0),
-                                    child: Container(
-                                      height: 40.0,
-                                      width: 120.0,
-                                      decoration: BoxDecoration(
-                                        color: Color(0xFFA3BDED),
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          "Pay",
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontFamily: "Sans",
-                                              fontWeight: FontWeight.w600),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 );
@@ -327,7 +295,7 @@ class noItemCart extends StatelessWidget {
             ),
             Padding(padding: EdgeInsets.only(bottom: 10.0)),
             Text(
-              "Not Have Item",
+              "Your Cart Is Empty",
               style: TextStyle(
                   fontWeight: FontWeight.w400,
                   fontSize: 18.5,

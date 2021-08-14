@@ -40,7 +40,7 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
 
   void _getInitData(){
     final _pro = Provider.of<PoinBizProvider>(context, listen: false);
-
+    _pro.getCartItem();
     _pro.getallCategories();
   }
 
@@ -62,6 +62,7 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final _pro = Provider.of<PoinBizProvider>(context,listen: true);
+    print(_pro.allcategories);
     MediaQueryData mediaQueryData = MediaQuery.of(context);
     double size = mediaQueryData.size.height;
 
@@ -172,23 +173,26 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
             maxCrossAxisExtent: 100.0,
             children: [
               for(var cat in _pro.allcategories)
-              Column(
-                children: <Widget>[
+              InkWell(
+                onTap: ()=> onClickCategory(),
+                child: Column(
+                  children: <Widget>[
 
-                  Image.network(
-                    cat['icon']['path'],
-                    height: 19.2,
-                  ),
-                  Padding(padding: EdgeInsets.only(top: 7.0)),
-                  Text(
-                    cat['name'],
-                    style: TextStyle(
-                      fontFamily: "Sans",
-                      fontSize: 10.0,
-                      fontWeight: FontWeight.w500,
+                    Image.network(
+                      cat['icon']['path'],
+                      height: 19.2,
                     ),
-                  )
-                ],
+                    Padding(padding: EdgeInsets.only(top: 7.0)),
+                    Text(
+                      cat['name'],
+                      style: TextStyle(
+                        fontFamily: "Sans",
+                        fontSize: 10.0,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    )
+                  ],
+                ),
               ),
             ],
             shrinkWrap: true,
@@ -515,8 +519,6 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
     );
 
     /// Category Component in bottom of flash sale
-
-
     var categoryImageBottom = _pro.allcategories != null ?
     Container(
       height: 210,
@@ -550,7 +552,7 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
         maxCrossAxisExtent: 105.0,
 
         children: [
-          for (var cat in _pro.allcategories)
+          for (var cat in [1,2,3,4,5,6,7,8,9,10])
             Container(
 
               child: Center(
@@ -738,7 +740,7 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
                 padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
                 crossAxisSpacing: 10.0,
                 mainAxisSpacing: 17.0,
-                childAspectRatio: 0.545,
+                childAspectRatio: 0.65,
                 crossAxisCount: 2,
                 primary: false,
                 children: List.generate(

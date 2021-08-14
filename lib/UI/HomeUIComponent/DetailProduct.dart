@@ -1,10 +1,11 @@
+import 'package:treva_shop_flutter/API/provider_class.dart';
 import 'package:treva_shop_flutter/Library/carousel_pro/carousel_pro.dart';
 import 'package:flutter/material.dart';
 import 'package:treva_shop_flutter/ListItem/HomeGridItemRecomended.dart';
 import 'package:treva_shop_flutter/UI/CartUIComponent/CartLayout.dart';
 import 'package:treva_shop_flutter/UI/HomeUIComponent/ChatItem.dart';
 import 'package:treva_shop_flutter/UI/CartUIComponent/Delivery.dart';
-
+import 'package:provider/provider.dart';
 import 'package:flutter_rating/flutter_rating.dart';
 import 'package:treva_shop_flutter/UI/HomeUIComponent/ReviewLayout.dart';
 
@@ -190,6 +191,7 @@ class _detailProdukState extends State<detailProduk> {
   );
 
   Widget build(BuildContext context) {
+    final _pro = Provider.of<PoinBizProvider>(context, listen: true);
     return Scaffold(
       key: _key,
       appBar: AppBar(
@@ -212,7 +214,7 @@ class _detailProdukState extends State<detailProduk> {
                   radius: 10.0,
                   backgroundColor: Colors.red,
                   child: Text(
-                    valueItemChart.toString(),
+                    _pro.cart.length.toString(),
                     style: TextStyle(color: Colors.white, fontSize: 13.0),
                   ),
                 ),
@@ -224,7 +226,7 @@ class _detailProdukState extends State<detailProduk> {
         centerTitle: true,
         backgroundColor: Colors.white,
         title: Text(
-          "Produk Detail",
+          "Product Detail",
           style: TextStyle(
             fontWeight: FontWeight.w500,
             color: Colors.black54,
@@ -583,6 +585,14 @@ class _detailProdukState extends State<detailProduk> {
           /// and Increase a valueItemChart + 1
           InkWell(
             onTap: () {
+              _pro.addToCart(
+                  {
+                    "title":gridItemArray[0].title,
+                    "image":"https://www.cnet.com/a/img/YQlXeeHCk-e--zjAOA19Cc-ISPs=/940x0/2020/10/18/bdb7ea97-cb99-48d8-a69c-38d26109f33b/05-iphone-12-pro-2020.jpg",
+                    "price":gridItemArray[0].price.toString().split("\$ ")[1],
+                    "quantity":"1"
+                  }
+              );
               var snackbar = SnackBar(
                 content: Text("Item Added"),
               );

@@ -1,11 +1,12 @@
 import 'dart:async';
 
 import 'package:shimmer/shimmer.dart';
+import 'package:treva_shop_flutter/Components/product_item.dart';
 import 'package:treva_shop_flutter/Library/carousel_pro/carousel_pro.dart';
 import 'package:flutter/material.dart';
 import 'package:treva_shop_flutter/ListItem/CategoryItem.dart';
-import 'package:treva_shop_flutter/ListItem/CategoryItem.dart';
-import 'package:treva_shop_flutter/ListItem/CategoryItem.dart';
+import 'package:treva_shop_flutter/ListItem/HomeGridItemRecomended.dart';
+
 import 'package:treva_shop_flutter/ListItem/PromotionData.dart';
 import 'package:treva_shop_flutter/UI/HomeUIComponent/PromotionDetail.dart';
 import 'package:treva_shop_flutter/UI/HomeUIComponent/Search.dart';
@@ -44,16 +45,21 @@ class _categoryDetailState extends State<categoryDetail> {
       fontWeight: FontWeight.w700,
       fontSize: 15.0);
 
+
+  void setLoadOff(){
+    Timer(Duration(seconds: 3),(){
+      setState(() {
+        loadImage=false;
+      });
+    });
+  }
+
   ///
   /// SetState after imageNetwork loaded to change list card
   ///
   @override
   void initState() {
-     Timer(Duration(seconds: 3),(){
-setState(() {
-  loadImage=false;
-});
-    });
+    setLoadOff();
     // TODO: implement initState
     super.initState();
   }
@@ -80,7 +86,45 @@ setState(() {
     }
 
     /// imageSlider in header layout category detail
-    var _imageSlider = Padding(
+    var _imageSlider = loadImage ? Container(
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.all(Radius.circular(5.0)),
+          boxShadow: [
+            BoxShadow(
+              color: Color(0xFF656565).withOpacity(0.15),
+              blurRadius: 2.0,
+              spreadRadius: 1.0,
+//           offset: Offset(4.0, 10.0)
+            )
+          ]),
+      child: Wrap(
+        children: <Widget>[
+          Shimmer.fromColors(
+            baseColor: Colors.black38,
+            highlightColor: Colors.white,
+            child: Container(
+              width: double.infinity,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Container(
+                    height: 180.0,
+                    width: double.infinity,
+                    color: Colors.black12,
+                  ),
+
+
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    ):
+    Padding(
       padding: const EdgeInsets.only(
           top: 0.0, left: 10.0, right: 10.0, bottom: 35.0),
       child: Container(
@@ -121,7 +165,7 @@ setState(() {
                 InkWell(
                   onTap: () {
                     Navigator.of(context).push(PageRouteBuilder(
-                        pageBuilder: (_, __, ___) => new promoDetail()));
+                        pageBuilder: (_, __, ___) => new promoDetail(),),);
                   },
                   child: Text("See More",
                       style:
@@ -130,6 +174,7 @@ setState(() {
               ],
             ),
           ),
+          !loadImage ?
           SingleChildScrollView(
             child: Container(
               color: Colors.white,
@@ -162,17 +207,51 @@ setState(() {
                 ],
               ),
             ),
+          ):
+          SingleChildScrollView(
+            child: Container(
+              color: Colors.white,
+              margin: EdgeInsets.only(right: 10.0, top: 5.0),
+              height: 110.0,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: <Widget>[
+                  Padding(padding: EdgeInsets.only(left: 20.0)),
+                  KeywordItem(
+                    title: "",
+                    title2: "",
+                  ),
+                  Padding(padding: EdgeInsets.only(left: 15.0)),
+                  KeywordItem(
+                    title: "",
+                    title2: "",
+                  ),
+                  Padding(padding: EdgeInsets.only(left: 15.0)),
+                  KeywordItem(
+                    title: "",
+                    title2: "",
+                  ),
+                  Padding(padding: EdgeInsets.only(left: 15.0)),
+                  KeywordItem(
+                    title: "",
+                    title2: "",
+                  ),
+                  Padding(padding: EdgeInsets.only(right: 20.0)),
+                ],
+              ),
+            ),
           )
         ],
       ),
     );
+
 
     /// Variable item Discount with Card
     var _itemDiscount = Container(
       child: Column(
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.only(right: 20.0, left: 20.0, top: 30.0),
+            padding: const EdgeInsets.only(right: 20.0, left: 20.0, top: 10.0, bottom: 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
@@ -200,7 +279,8 @@ setState(() {
               /// Card to set card loading animation
               ///
               ///
-              child: loadImage? _loadingImageAnimationDiscount(context):
+              child:
+              // loadImage? _loadingImageAnimationDiscount(context):
               // ListView.builder(
               //   scrollDirection: Axis.horizontal,
               //   itemBuilder: (BuildContext context, int index)=>discountItem(itemDiscount[index]),
@@ -230,7 +310,7 @@ setState(() {
                         children:List.generate(
                           /// Get data in flashSaleItem.dart (ListItem folder)
                           promotionItem.length,
-                              (index) => ItemGrid(promotionItem[index]),
+                              (index) => ItemGridMain(gridItemArray[index]),
                         ),
                       )
                     ],

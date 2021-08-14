@@ -256,7 +256,7 @@ class _loginScreenState extends State<loginScreen>
                                                     letterSpacing: 0.3,
                                                     color: Colors.black38,
                                                     fontWeight: FontWeight.w600)),
-                                            keyboardType: TextInputType.text,
+                                            keyboardType: TextInputType.emailAddress,
                                           ),
                                         ),
                                       ),
