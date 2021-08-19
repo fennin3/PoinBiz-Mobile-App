@@ -24,8 +24,8 @@ class _AddAuctionState extends State<AddAuction> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
 
+    return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         title: Text(

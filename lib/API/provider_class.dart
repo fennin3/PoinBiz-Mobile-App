@@ -19,33 +19,17 @@ String getRandomString(int length) => String.fromCharCodes(Iterable.generate(
 class PoinBizProvider with ChangeNotifier{
   List allcategories;
   List allbanners=[];
+  List allpromos=[];
+  List allProducts=[];
   bool loading;
   List<CartModel> cart = [];
+  List<SearchedWord> searchedWords = [];
   int totalPrice = 0;
 
 
 
-  // void addToCart2(Map item)async{
-  //
-  //       final imageName = getRandomString(10);
-  //
-  //       await MyUtils.downloadAndSaveImage(item['image'], imageName);
-  //
-  //       final _item = CartItem(
-  //         title: item['title'],
-  //         image: item['image'],
-  //         price: item['price'],
-  //         quantity: item['quantity'],
-  //       );
-  //
-  //
-  //
-  //       cart.add(_item);
-  //       totalPrice=0;
-  //       notifyListeners();
-  // }
-
-  addToCart(Map item) async {
+  ///Cart
+  addToCart(Map item, _key) async {
 
     final imageName = getRandomString(10);
 
@@ -63,6 +47,13 @@ class PoinBizProvider with ChangeNotifier{
     );
     box.add(_item);
     getCartItem();
+    var snackbar = SnackBar(
+      content: Text("Item Added"),
+    );
+    // setState(() {
+    //   valueItemChart++;
+    // });
+    _key.currentState.showSnackBar(snackbar);
 
 
     notifyListeners();
@@ -74,15 +65,6 @@ class PoinBizProvider with ChangeNotifier{
     cart = box.values.toList();
 
     notifyListeners();
-  }
-
-  void deleteAll()async{
-    var box = await Hive.openBox<CartModel>('cart');
-
-    // box.delete('cart');
-    box.deleteFromDisk();
-
-    getCartItem();
   }
 
   void updateAddItem(CartModel _item){
@@ -122,16 +104,61 @@ class PoinBizProvider with ChangeNotifier{
     getCartItem();
   }
 
+  ///End of Cart
 
-  void getallCategories()async{
-    allcategories = await GetFunc.getCategories();
 
-    print(allcategories);
+  ///Searched Words
+
+  saveWord(String _word) async {
+
+    var box = await Hive.openBox<SearchedWord>('searched');
+
+    final _item = SearchedWord(
+      text: _word
+    );
+
+    box.add(_item);
+    getSearchwords();
+    notifyListeners();
+  }
+
+
+  getSearchwords() async {
+    final box = await Hive.openBox<SearchedWord>('searched');
+
+    searchedWords = box.values.toList().reversed.toList();
 
     notifyListeners();
   }
 
 
+  ///End of Searched Words
+
+  void getBanners()async{
+    allbanners = await GetFunc.getBanners();
+
+    notifyListeners();
+  }
+
+  void getPromos()async{
+    allpromos = await GetFunc.getPromos();
+
+    notifyListeners();
+  }
+
+  void getProducts()async{
+    allProducts = await GetFunc.getProducts();
+
+    notifyListeners();
+  }
+
+  void getallCategories()async{
+    allcategories = await GetFunc.getCategories();
+
+
+
+    notifyListeners();
+  }
 
 
 

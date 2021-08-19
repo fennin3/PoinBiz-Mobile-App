@@ -29,6 +29,11 @@ dependencies:
   dropdown_search: ^0.6.3
   image_picker: ^0.8.3+2
   flutter_paystack: ^1.0.5+1
+  expandable_text: ^2.2.0
+  hexcolor: ^2.0.4
+  flutter_countdown_timer: ^4.1.0
+  sms_otp_auto_verify: ^1.2.2
+
 
 
 dev_dependencies:
@@ -195,6 +200,8 @@ flutter:
     - assets/img/flashsalebanner.png
     - assets/icon/flashSaleIcon.png
     - assets/img/headerProfile.png
+    - assets/img/ticket.png
+    - assets/img/ticket2.png
     - assets/img/SliderLogin2.png
     - assets/img/SliderLogin3.png
     - assets/img/SliderLogin4.png

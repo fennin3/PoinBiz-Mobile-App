@@ -48,3 +48,37 @@ class CartModelAdapter extends TypeAdapter<CartModel> {
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
+
+class SearchedWordAdapter extends TypeAdapter<SearchedWord> {
+  @override
+  final int typeId = 1;
+
+  @override
+  SearchedWord read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return SearchedWord(
+      text: fields[0] as String,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, SearchedWord obj) {
+    writer
+      ..writeByte(1)
+      ..writeByte(0)
+      ..write(obj.text);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SearchedWordAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}

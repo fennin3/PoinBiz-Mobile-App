@@ -1,3 +1,6 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter_countdown_timer/current_remaining_time.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:treva_shop_flutter/API/provider_class.dart';
 import 'package:treva_shop_flutter/Library/carousel_pro/carousel_pro.dart';
 import 'package:flutter/material.dart';
@@ -12,10 +15,13 @@ import 'package:treva_shop_flutter/UI/HomeUIComponent/PromotionDetail.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:treva_shop_flutter/constant.dart';
+import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 
 class Menu extends StatefulWidget {
   final scaKey;
+
   Menu({this.scaKey});
+
   @override
   _MenuState createState() => _MenuState();
 }
@@ -27,42 +33,30 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
 
   bool isStarted = false;
   var hourssub, minutesub, secondsub;
+
   /// CountDown for timer
   CountDown hours, minutes, seconds;
   int hourstime, minute, second = 0;
 
-
-  void _getBannerData()async{
-    http.Response response = await http.get(Uri.parse(base_url+"general/banners/"));
-  }
-
-
-
-  void _getInitData(){
+  void _getInitData() {
     final _pro = Provider.of<PoinBizProvider>(context, listen: false);
     _pro.getCartItem();
     _pro.getallCategories();
+    _pro.getBanners();
+    _pro.getPromos();
+    _pro.getProducts();
   }
-
-
-
 
   @override
   void initState() {
     _getInitData();
-    hours = new CountDown(new Duration(hours: 24));
-    minutes = new CountDown(new Duration(hours: 1));
-    seconds = new CountDown(new Duration(minutes: 1));
-
-    // onStartStopPress();
     // TODO: implement initState
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final _pro = Provider.of<PoinBizProvider>(context,listen: true);
-    print(_pro.allcategories);
+    final _pro = Provider.of<PoinBizProvider>(context, listen: true);
     MediaQueryData mediaQueryData = MediaQuery.of(context);
     double size = mediaQueryData.size.height;
 
@@ -71,6 +65,7 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
       Navigator.of(context).push(PageRouteBuilder(
           pageBuilder: (_, __, ___) => new menuDetail(),
           transitionDuration: Duration(milliseconds: 750),
+
           /// Set animation with opacity
           transitionsBuilder:
               (_, Animation<double> animation, __, Widget child) {
@@ -84,7 +79,9 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
     /// Navigation to promoDetail.dart if user Click icon in Week Promotion
     var onClickWeekPromotion = () {
       Navigator.of(context).push(PageRouteBuilder(
-          pageBuilder: (_, __, ___) => new promoDetail(title: "Weekly Promotion",),
+          pageBuilder: (_, __, ___) => new promoDetail(
+                title: "Weekly Promotion",
+              ),
           transitionDuration: Duration(milliseconds: 750),
           transitionsBuilder:
               (_, Animation<double> animation, __, Widget child) {
@@ -96,10 +93,12 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
     };
 
     /// Navigation to categoryDetail.dart if user Click icon in Category
-    var onClickCategory = () {
+    onClickCategory(Map data) {
       Navigator.of(context).push(PageRouteBuilder(
-          pageBuilder: (_, __, ___) => new categoryDetail(),
-          transitionDuration: Duration(milliseconds: 750),
+          pageBuilder: (_, __, ___) => new categoryDetail(
+                data: data,
+              ),
+          transitionDuration: Duration(milliseconds: 450),
           transitionsBuilder:
               (_, Animation<double> animation, __, Widget child) {
             return Opacity(
@@ -107,33 +106,84 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
               child: child,
             );
           }));
-    };
+    }
+
+    ;
 
     /// Declare device Size
     var deviceSize = MediaQuery.of(context).size;
 
     /// ImageSlider in header
-    var imageSlider = Container(
-      height: 182.0,
-      child: new Carousel(
-        boxFit: BoxFit.cover,
-        dotColor: Color(0xFF6991C7).withOpacity(0.8),
-        dotSize: 5.5,
-        dotSpacing: 16.0,
-        dotBgColor: Colors.transparent,
-        showIndicator: true,
-        overlayShadow: true,
-        overlayShadowColors: Colors.white.withOpacity(0.9),
-        overlayShadowSize: 0.9,
-        images: [
-          AssetImage("assets/img/baner1.png"),
-          AssetImage("assets/img/baner12.png"),
-          AssetImage("assets/img/baner2.png"),
-          AssetImage("assets/img/baner3.png"),
-          AssetImage("assets/img/baner4.png"),
-        ],
-      ),
-    );
+    var imageSlider = _pro.allbanners.isNotEmpty
+        ? Container(
+            height: 182.0,
+            width: double.infinity,
+            child: new Carousel(
+              boxFit: BoxFit.cover,
+              dotColor: Color(0xFF6991C7).withOpacity(0.8),
+              dotSize: 5.5,
+              dotSpacing: 16.0,
+              dotBgColor: Colors.transparent,
+              showIndicator: true,
+              overlayShadow: true,
+              overlayShadowColors: Colors.white.withOpacity(0.9),
+              overlayShadowSize: 0.9,
+              images: [
+                for (var banner in _pro.allbanners)
+                  Container(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (banner['caption_one'].length < 1)
+                          Container(
+                              color: appColor,
+                              child: Text(
+                                "${banner['caption_one']}",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    fontSize: 35,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white),
+                              )),
+                        SizedBox(
+                          height: 3,
+                        ),
+                        if (banner['caption_two'].length < 1)
+                          Container(
+                              color: appColor,
+                              child: Text(
+                                "${banner['caption_two']}",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w400,
+                                    color: Colors.white),
+                              )),
+                      ],
+                    ),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                        image: DecorationImage(
+                            fit: BoxFit.cover,
+                            image: NetworkImage("${banner['image']['path']}"))),
+                    height: 182,
+                  ),
+                // AssetImage("assets/img/baner12.png"),
+                // AssetImage("assets/img/baner2.png"),
+                // AssetImage("assets/img/baner3.png"),
+                // AssetImage("assets/img/baner4.png"),
+              ],
+            ),
+          )
+        : Shimmer.fromColors(
+            baseColor: Colors.white,
+            highlightColor: Colors.grey.withOpacity(0.5),
+            child: Container(
+              height: 182.0,
+              width: double.infinity,
+              color: Colors.black,
+            ),
+          );
 
     /// CategoryIcon Component
     var categoryIcon = Container(
@@ -154,217 +204,143 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
             ),
           ),
           Padding(padding: EdgeInsets.only(top: 20.0)),
+          _pro.allcategories != null
+              ? GridView.extent(
+                  // childAspectRatio: (2 / 2),
+                  crossAxisSpacing: 4,
+                  mainAxisSpacing: 4,
 
-          /// Get class CategoryIconValue
-
-          // GridView.extent(maxCrossAxisExtent: 100,
-          //   crossAxisSpacing: 5,
-          //   mainAxisSpacing: 5,
-          //   children: [
-          //     Column
-          //   ],
-          // ),
-          _pro.allcategories != null ?
-          GridView.extent(
-            // childAspectRatio: (2 / 2),
-            crossAxisSpacing: 4,
-            mainAxisSpacing: 4,
-            padding: EdgeInsets.all(10.0),
-            maxCrossAxisExtent: 100.0,
-            children: [
-              for(var cat in _pro.allcategories)
-              InkWell(
-                onTap: ()=> onClickCategory(),
-                child: Column(
-                  children: <Widget>[
-
-                    Image.network(
-                      cat['icon']['path'],
-                      height: 19.2,
-                    ),
-                    Padding(padding: EdgeInsets.only(top: 7.0)),
-                    Text(
-                      cat['name'],
-                      style: TextStyle(
-                        fontFamily: "Sans",
-                        fontSize: 10.0,
-                        fontWeight: FontWeight.w500,
+                  maxCrossAxisExtent: 100.0,
+                  children: [
+                    for (var cat in _pro.allcategories)
+                      InkWell(
+                        onTap: () => onClickCategory(cat),
+                        child: Column(
+                          children: <Widget>[
+                            Image.network(
+                              cat['icon']['path'],
+                              height: 25,
+                            ),
+                            Padding(padding: EdgeInsets.only(top: 7.0)),
+                            Text(
+                              cat['name'],
+                              style: TextStyle(
+                                fontFamily: "Sans",
+                                fontSize: 10.0,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            )
+                          ],
+                        ),
                       ),
-                    )
                   ],
+                  shrinkWrap: true,
+                )
+              : GridView.extent(
+                  // childAspectRatio: (2 / 2),
+                  crossAxisSpacing: 4,
+                  mainAxisSpacing: 4,
+                  padding: EdgeInsets.all(10.0),
+                  maxCrossAxisExtent: 100.0,
+                  children: List.generate(12, (index) {
+                    return Column(
+                      children: <Widget>[
+                        CircularProgressIndicator(
+                          strokeWidth: 1.5,
+                        ),
+                        Padding(padding: EdgeInsets.only(top: 7.0)),
+                        Text(
+                          "Category name",
+                          style: TextStyle(
+                            fontFamily: "Sans",
+                            fontSize: 10.0,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        )
+                      ],
+                    );
+                  }),
+                  shrinkWrap: true,
                 ),
-              ),
-            ],
-            shrinkWrap: true,
-          ):
-          GridView.extent(
-            // childAspectRatio: (2 / 2),
-            crossAxisSpacing: 4,
-            mainAxisSpacing: 4,
-            padding: EdgeInsets.all(10.0),
-            maxCrossAxisExtent: 100.0,
-            children: List.generate(12, (index){
-              return Column(
-                children: <Widget>[
-
-                  CircularProgressIndicator(
-                  strokeWidth: 1.5,
-                  ),
-                  Padding(padding: EdgeInsets.only(top: 7.0)),
-                  Text(
-                    "Category name",
-                    style: TextStyle(
-                      fontFamily: "Sans",
-                      fontSize: 10.0,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  )
-                ],
-              );
-            }),
-            shrinkWrap: true,
-          ),
-              
-
-
-          // Padding(padding: EdgeInsets.only(top: 23.0)),
-          // CategoryIconValue(
-          //   icon1: "assets/icon/fashion.png",
-          //   tap1: onClickMenuIcon,
-          //   title1: "Fashion",
-          //   icon2: "assets/icon/health.png",
-          //   tap2: onClickMenuIcon,
-          //   title2: "Health Care",
-          //   icon3: "assets/icon/pc.png",
-          //   tap3: onClickMenuIcon,
-          //   title3: "Computer",
-          //   icon4: "assets/icon/mesin.png",
-          //   tap4: onClickMenuIcon,
-          //   title4: "Equipment",
-          // ),
-          // Padding(padding: EdgeInsets.only(top: 23.0)),
-          // CategoryIconValue(
-          //   icon1: "assets/icon/fashion.png",
-          //   tap1: onClickMenuIcon,
-          //   title1: "Fashion",
-          //   icon2: "assets/icon/health.png",
-          //   tap2: onClickMenuIcon,
-          //   title2: "Health Care",
-          //   icon3: "assets/icon/pc.png",
-          //   tap3: onClickMenuIcon,
-          //   title3: "Computer",
-          //   icon4: "assets/icon/mesin.png",
-          //   tap4: onClickMenuIcon,
-          //   title4: "Equipment",
-          // ),
-          // Padding(padding: EdgeInsets.only(top: 23.0)),
-          // CategoryIconValue(
-          //   icon1: "assets/icon/fashion.png",
-          //   tap1: onClickMenuIcon,
-          //   title1: "Fashion",
-          //   icon2: "assets/icon/health.png",
-          //   tap2: onClickMenuIcon,
-          //   title2: "Health Care",
-          //   icon3: "assets/icon/pc.png",
-          //   tap3: onClickMenuIcon,
-          //   title3: "Computer",
-          //   icon4: "assets/icon/mesin.png",
-          //   tap4: onClickMenuIcon,
-          //   title4: "Equipment",
-          // ),
-          // _pro.allcategories != null ?
-          // GridView.extent(
-          //   primary: false,
-          //   padding: const EdgeInsets.all(20),
-          //   crossAxisSpacing: 2,
-          //   mainAxisSpacing: 2,
-          //   maxCrossAxisExtent: 100.0,
-          //   shrinkWrap: true,
-          //   children: <Widget>[
-          //     for (var cat in _pro.allcategories)
-          //     InkWell(
-          //       onTap: (){
-          //         print("${cat['name']}");
-          //       },
-          //       child: Column(
-          //         children: <Widget>[
-          //           Image.network(
-          //             cat['icon']['path'].toString().replaceAll("http://192.168.43.121/poinbiz/", base_url),
-          //             height: 19.2,
-          //           ),
-          //           Padding(padding: EdgeInsets.only(top: 7.0)),
-          //           Text(
-          //             cat['name'],
-          //             style: TextStyle(
-          //               fontFamily: "Sans",
-          //               fontSize: 10.0,
-          //               fontWeight: FontWeight.w500,
-          //             ),
-          //           )
-          //         ],
-          //       ),
-          //     ),
-          //
-          //   ],
-          // ):Container()
-
         ],
       ),
     );
 
     /// ListView a WeekPromotion Component
-    var PromoHorizontalList = Container(
-      color: Colors.white,
-      height: 230.0,
-      padding: EdgeInsets.only(bottom: 40.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Padding(
-              padding: EdgeInsets.only(left: 20.0, top: 15.0, bottom: 3.0),
-              child: Text(
-                "Week Promotion",
-                style: TextStyle(
-                    fontSize: 15.0,
-                    fontFamily: "Sans",
-                    fontWeight: FontWeight.w700),
-              )),
-          Expanded(
-            child: ListView(
-              shrinkWrap: true,
-              padding: EdgeInsets.only(top: 10.0),
-              scrollDirection: Axis.horizontal,
+    var PromoHorizontalList = _pro.allpromos.length > 0
+        ? Container(
+            color: Colors.white,
+            height: 230.0,
+            padding: EdgeInsets.only(bottom: 40.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Padding(padding: EdgeInsets.only(left: 20.0)),
-                InkWell(
-                    onTap: onClickWeekPromotion,
-                    child: Image.asset("assets/imgPromo/Discount1.png")),
-                Padding(padding: EdgeInsets.only(left: 10.0)),
-                InkWell(
-                    onTap: onClickWeekPromotion,
-                    child: Image.asset("assets/imgPromo/Discount3.png")),
-                Padding(padding: EdgeInsets.only(left: 10.0)),
-                InkWell(
-                    onTap: onClickWeekPromotion,
-                    child: Image.asset("assets/imgPromo/Discount2.png")),
-                Padding(padding: EdgeInsets.only(left: 10.0)),
-                InkWell(
-                    onTap: onClickWeekPromotion,
-                    child: Image.asset("assets/imgPromo/Discount4.png")),
-                Padding(padding: EdgeInsets.only(left: 10.0)),
-                InkWell(
-                    onTap: onClickWeekPromotion,
-                    child: Image.asset("assets/imgPromo/Discount5.png")),
-                Padding(padding: EdgeInsets.only(left: 10.0)),
-                InkWell(
-                    onTap: onClickWeekPromotion,
-                    child: Image.asset("assets/imgPromo/Discount6.png")),
+                Padding(
+                    padding:
+                        EdgeInsets.only(left: 20.0, top: 15.0, bottom: 3.0),
+                    child: Text(
+                      "Promotions",
+                      style: TextStyle(
+                          fontSize: 15.0,
+                          fontFamily: "Sans",
+                          fontWeight: FontWeight.w700),
+                    )),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 10.0),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: _pro.allpromos.length,
+                      padding: EdgeInsets.only(top: 10.0),
+                      scrollDirection: Axis.horizontal,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: InkWell(
+                            onTap: onClickWeekPromotion,
+                            child: Stack(
+                              children: [
+                                Image.network(
+                                    _pro.allpromos[index]['image']['path']),
+                                Positioned(
+                                    right: 0,
+                                    child: Container(
+                                      color: appColor,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(3.0),
+                                        child: _pro.allpromos[index]['product']
+                                                    ['discount_type'] ==
+                                                "amount"
+                                            ? Text(
+                                                "GHc ${_pro.allpromos[index]['product']['discount']} OFF",
+                                                style: TextStyle(
+                                                    fontSize: 16,
+                                                    color: Colors.white,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              )
+                                            : Text(
+                                                "10% OFF",
+                                                style: TextStyle(
+                                                    fontSize: 16,
+                                                    color: Colors.white,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                      ),
+                                    ))
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
               ],
             ),
-          ),
-        ],
-      ),
-    );
+          )
+        : Container();
 
     /// FlashSale component
     var FlashSell = Container(
@@ -381,14 +357,13 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
       /// To set FlashSale Scrolling horizontal
       child: ListView(
         scrollDirection: Axis.horizontal,
-
         children: <Widget>[
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               Padding(
                 padding:
-                EdgeInsets.only(left: mediaQueryData.padding.left + 20),
+                    EdgeInsets.only(left: mediaQueryData.padding.left + 20),
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -418,34 +393,7 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
                   ),
                   Padding(
                     padding:
-                    EdgeInsets.only(top: mediaQueryData.padding.top + 30),
-                  ),
-                  Text(
-                    "End sale in :",
-                    style: TextStyle(
-                      fontFamily: "Sans",
-                      fontSize: 15.0,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(top: 2.0),
-                  ),
-                  /// Get a countDown variable
-                  Text(
-                    hourstime.toString() +
-                        " : " +
-                        minute.toString() +
-                        " : " +
-                        second.toString(),
-                    style: TextStyle(
-                      fontFamily: "Sans",
-                      fontSize: 19.0,
-                      letterSpacing: 2.0,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
+                        EdgeInsets.only(top: mediaQueryData.padding.top + 30),
                   ),
                 ],
               )
@@ -454,268 +402,222 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
           Padding(padding: EdgeInsets.only(left: 40.0)),
 
           /// Get a component flashSaleItem class
-          flashSaleItem(
-            image: "assets/imgItem/mackbook.jpg",
-            title: "Apple Macbook Pro 13 with Touch Bar",
-            normalprice: "\$ 2,020",
-            discountprice: "\$ 1,300",
-            ratingvalue: "(56)",
-            place: "United Kingdom",
-            stock: "9 Available",
-            colorLine: 0xFFFFA500,
-            widthLine: 50.0,
+          for(var item in _pro.allpromos)
+          Padding(
+            padding: EdgeInsets.only(left: 10.0),
+            child: flashSaleItem(
+              image: item['image']['path'],
+              title: item['product']['name'],
+              normalprice: "Ghc ${item['product']['price']}",
+              discountprice: "\$ 1,300",
+              ratingvalue: "(56)",
+              place: "Ghana",
+              stock: item['product']['stock'].toString(),
+              colorLine: 0xFFFFA500,
+              widthLine: double.infinity,
+            ),
           ),
-          Padding(padding: EdgeInsets.only(left: 10.0)),
-          flashSaleItem(
-            image: "assets/imgItem/flashsale2.jpg",
-            title: "7 Level Karina Dress Sweet Pesta",
-            normalprice: "\$ 14",
-            discountprice: "\$ 10",
-            ratingvalue: "(16)",
-            place: "United Kingdom",
-            stock: "24 Available",
-            colorLine: 0xFF52B640,
-            widthLine: 100.0,
-          ),
-          Padding(padding: EdgeInsets.only(left: 10.0)),
-          flashSaleItem(
-            image: "assets/imgItem/flashsale3.jpg",
-            title: "Samsung Galaxy Note 9 8GB - 512GB",
-            normalprice: "\$ 1,000",
-            discountprice: "\$ 950",
-            ratingvalue: "(20)",
-            place: "United Kingdom",
-            stock: "14 Available",
-            colorLine: 0xFF52B640,
-            widthLine: 90.0,
-          ),
-          Padding(padding: EdgeInsets.only(left: 10.0)),
-          flashSaleItem(
-            image: "assets/imgItem/flashsale4.jpg",
-            title: "Harry Potter Spesial Edition ",
-            normalprice: "\$ 25",
-            discountprice: "\$ 20",
-            ratingvalue: "(22)",
-            place: "United Kingdom",
-            stock: "5 Available",
-            colorLine: 0xFFFFA500,
-            widthLine: 30.0,
-          ),
-          Padding(padding: EdgeInsets.only(left: 10.0)),
-          flashSaleItem(
-            image: "assets/imgItem/flashsale5.jpg",
-            title: "Pro Evolution Soccer 2019 Steam Original PC Games",
-            normalprice: "\$ 50",
-            discountprice: "\$ 30",
-            ratingvalue: "(10)",
-            place: "United Kingdom",
-            stock: "30 Available",
-            colorLine: 0xFF52B640,
-            widthLine: 100.0,
-          ),
-          Padding(padding: EdgeInsets.only(left: 10.0)),
+
+
         ],
       ),
     );
 
     /// Category Component in bottom of flash sale
-    var categoryImageBottom = _pro.allcategories != null ?
-    Container(
-      height: 210,
-      child: GridView.extent(
-        scrollDirection: Axis.horizontal,
-        childAspectRatio: (2 / 3),
-        crossAxisSpacing: 5,
-        mainAxisSpacing: 5,
-
-        maxCrossAxisExtent: 105.0,
-
-        children: [
-          for (var cat in _pro.allcategories)
-            CategoryItemValue(
-              image: cat['image']['path'],
-              title: cat['name'],
-              tap: onClickCategory,
-            )
-        ],
-        shrinkWrap: true,
-      ),
-    ):
-    Container(
-      height: 210,
-      child: GridView.extent(
-        scrollDirection: Axis.horizontal,
-        childAspectRatio: (2 / 3),
-        crossAxisSpacing: 5,
-        mainAxisSpacing: 5,
-
-        maxCrossAxisExtent: 105.0,
-
-        children: [
-          for (var cat in [1,2,3,4,5,6,7,8,9,10])
-            Container(
-
-              child: Center(
-                child: Container(
-                  height: 30,
-                    width: 30,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 1.5,
-                    )),
-              ),
-              color: Colors.grey.withOpacity(0.3),
-            )
-        ],
-        shrinkWrap: true,
-      ),
-    );
-
-
-    var categoryImageBottom2 = Container(
-      height: 310.0,
-      color: Colors.white,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(left: 20.0, top: 20.0),
-            child: Text(
-              "Category",
-              style: TextStyle(
-                  fontSize: 17.0,
-                  fontWeight: FontWeight.w700,
-                  fontFamily: "Sans"),
-            ),
-          ),
-          // _pro.allcategories == null ?
-          Expanded(
-            child:  ListView(
+    var categoryImageBottom = _pro.allcategories != null
+        ? Container(
+            height: 210,
+            child: GridView.extent(
               scrollDirection: Axis.horizontal,
-              children:  <Widget> [
-                Padding(
-                  padding: const EdgeInsets.only(left: 20.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Padding(padding: EdgeInsets.only(top: 15.0)),
-                      CategoryItemValue(
-                        image: "assets/imgItem/category2.png",
-                        title: "Fashion Man",
-                        tap: onClickCategory,
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(top: 10.0),
-                      ),
-                      CategoryItemValue(
-                        image: "assets/imgItem/category1.png",
-                        title: "Fashion Girl",
-                        tap: onClickCategory,
-                      ),
-                    ],
+              childAspectRatio: (2 / 3),
+              crossAxisSpacing: 5,
+              mainAxisSpacing: 5,
+              maxCrossAxisExtent: 105.0,
+              children: [
+                for (var cat in _pro.allcategories)
+                  InkWell(
+                    onTap: () => onClickCategory(cat),
+                    child: CategoryItemValue(
+                      image: cat['image'].toString() == 'false'
+                          ? cat['icon']['path']
+                          : cat['image']['path'],
+                      title: cat['name'],
+                    ),
                   ),
-                ),
-                Padding(padding: EdgeInsets.only(left: 10.0)),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Padding(padding: EdgeInsets.only(top: 15.0)),
-                    CategoryItemValue(
-                      image: "assets/imgItem/category3.png",
-                      title: "Smartphone",
-                      tap: onClickCategory,
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(top: 10.0),
-                    ),
-                    CategoryItemValue(
-                      image: "assets/imgItem/category4.png",
-                      title: "Computer",
-                      tap: onClickCategory,
-                    ),
-                  ],
-                ),
-                Padding(padding: EdgeInsets.only(left: 10.0)),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Padding(padding: EdgeInsets.only(top: 15.0)),
-                    CategoryItemValue(
-                      image: "assets/imgItem/category5.png",
-                      title: "Sport",
-                      tap: onClickCategory,
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(top: 10.0),
-                    ),
-                    CategoryItemValue(
-                      image: "assets/imgItem/category6.png",
-                      title: "Fashion Kids",
-                      tap: onClickCategory,
-                    ),
-                  ],
-                ),
-                Padding(padding: EdgeInsets.only(left: 10.0)),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Padding(padding: EdgeInsets.only(top: 15.0)),
-                    CategoryItemValue(
-                      image: "assets/imgItem/category7.png",
-                      title: "Health",
-                      tap: onClickCategory,
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(top: 10.0),
-                    ),
-                    CategoryItemValue(
-                      image: "assets/imgItem/category8.png",
-                      title: "Makeup",
-                      tap: onClickCategory,
-                    ),
-                  ],
-                ),
               ],
-            )
+              shrinkWrap: true,
+            ),
           )
+        : Container(
+            height: 210,
+            child: GridView.extent(
+              scrollDirection: Axis.horizontal,
+              childAspectRatio: (2 / 3),
+              crossAxisSpacing: 5,
+              mainAxisSpacing: 5,
+              maxCrossAxisExtent: 105.0,
+              children: [
+                for (var cat in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+                  Container(
+                    child: Center(
+                      child: Container(
+                          height: 30,
+                          width: 30,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 1.5,
+                          )),
+                    ),
+                    color: Colors.grey.withOpacity(0.3),
+                  )
+              ],
+              shrinkWrap: true,
+            ),
+          );
 
-          // GridView.extent(
-          //   scrollDirection: Axis.horizontal,
-          //   primary: false,
-          //   padding: const EdgeInsets.all(5),
-          //   crossAxisSpacing: 0,
-          //   mainAxisSpacing: 0,
-          //   maxCrossAxisExtent: 50.0,
-          //   shrinkWrap: true,
-          //   children: <Widget>[
-          //     for (var cat in _pro.allcategories)
-          //       InkWell(
-          //         onTap: (){
-          //           print("${cat['name']}");
-          //         },
-          //         child: Column(
-          //           children: <Widget>[
-          //             Image.network(
-          //               cat['icon']['path'],
-          //               height: 19.2,
-          //             ),
-          //             Padding(padding: EdgeInsets.only(top: 7.0)),
-          //             Text(
-          //               cat['name'],
-          //               style: TextStyle(
-          //                 fontFamily: "Sans",
-          //                 fontSize: 10.0,
-          //                 fontWeight: FontWeight.w500,
-          //               ),
-          //             )
-          //           ],
-          //         ),
-          //       ),
-          //
-          //   ],
-          // ),
-        ],
-      ),
-    );
+    // var categoryImageBottom2 = Container(
+    //   height: 310.0,
+    //   color: Colors.white,
+    //   child: Column(
+    //     crossAxisAlignment: CrossAxisAlignment.start,
+    //     children: <Widget>[
+    //       Padding(
+    //         padding: const EdgeInsets.only(left: 20.0, top: 20.0),
+    //         child: Text(
+    //           "Category",
+    //           style: TextStyle(
+    //               fontSize: 17.0,
+    //               fontWeight: FontWeight.w700,
+    //               fontFamily: "Sans"),
+    //         ),
+    //       ),
+    //       // _pro.allcategories == null ?
+    //       Expanded(
+    //           child: ListView(
+    //         scrollDirection: Axis.horizontal,
+    //         children: <Widget>[
+    //           Padding(
+    //             padding: const EdgeInsets.only(left: 20.0),
+    //             child: Column(
+    //               crossAxisAlignment: CrossAxisAlignment.start,
+    //               children: <Widget>[
+    //                 Padding(padding: EdgeInsets.only(top: 15.0)),
+    //                 CategoryItemValue(
+    //                   image: "assets/imgItem/category2.png",
+    //                   title: "Fashion Man",
+    //                   tap: onClickCategory,
+    //                 ),
+    //                 Padding(
+    //                   padding: EdgeInsets.only(top: 10.0),
+    //                 ),
+    //                 CategoryItemValue(
+    //                   image: "assets/imgItem/category1.png",
+    //                   title: "Fashion Girl",
+    //                   tap: onClickCategory,
+    //                 ),
+    //               ],
+    //             ),
+    //           ),
+    //           Padding(padding: EdgeInsets.only(left: 10.0)),
+    //           Column(
+    //             crossAxisAlignment: CrossAxisAlignment.start,
+    //             children: <Widget>[
+    //               Padding(padding: EdgeInsets.only(top: 15.0)),
+    //               CategoryItemValue(
+    //                 image: "assets/imgItem/category3.png",
+    //                 title: "Smartphone",
+    //                 tap: onClickCategory,
+    //               ),
+    //               Padding(
+    //                 padding: EdgeInsets.only(top: 10.0),
+    //               ),
+    //               CategoryItemValue(
+    //                 image: "assets/imgItem/category4.png",
+    //                 title: "Computer",
+    //                 tap: onClickCategory,
+    //               ),
+    //             ],
+    //           ),
+    //           Padding(padding: EdgeInsets.only(left: 10.0)),
+    //           Column(
+    //             crossAxisAlignment: CrossAxisAlignment.start,
+    //             children: <Widget>[
+    //               Padding(padding: EdgeInsets.only(top: 15.0)),
+    //               CategoryItemValue(
+    //                 image: "assets/imgItem/category5.png",
+    //                 title: "Sport",
+    //                 tap: onClickCategory,
+    //               ),
+    //               Padding(
+    //                 padding: EdgeInsets.only(top: 10.0),
+    //               ),
+    //               CategoryItemValue(
+    //                 image: "assets/imgItem/category6.png",
+    //                 title: "Fashion Kids",
+    //                 tap: onClickCategory,
+    //               ),
+    //             ],
+    //           ),
+    //           Padding(padding: EdgeInsets.only(left: 10.0)),
+    //           Column(
+    //             crossAxisAlignment: CrossAxisAlignment.start,
+    //             children: <Widget>[
+    //               Padding(padding: EdgeInsets.only(top: 15.0)),
+    //               CategoryItemValue(
+    //                 image: "assets/imgItem/category7.png",
+    //                 title: "Health",
+    //                 tap: onClickCategory,
+    //               ),
+    //               Padding(
+    //                 padding: EdgeInsets.only(top: 10.0),
+    //               ),
+    //               CategoryItemValue(
+    //                 image: "assets/imgItem/category8.png",
+    //                 title: "Makeup",
+    //                 tap: onClickCategory,
+    //               ),
+    //             ],
+    //           ),
+    //         ],
+    //       ))
+    //
+    //       // GridView.extent(
+    //       //   scrollDirection: Axis.horizontal,
+    //       //   primary: false,
+    //       //   padding: const EdgeInsets.all(5),
+    //       //   crossAxisSpacing: 0,
+    //       //   mainAxisSpacing: 0,
+    //       //   maxCrossAxisExtent: 50.0,
+    //       //   shrinkWrap: true,
+    //       //   children: <Widget>[
+    //       //     for (var cat in _pro.allcategories)
+    //       //       InkWell(
+    //       //         onTap: (){
+    //       //           print("${cat['name']}");
+    //       //         },
+    //       //         child: Column(
+    //       //           children: <Widget>[
+    //       //             Image.network(
+    //       //               cat['icon']['path'],
+    //       //               height: 19.2,
+    //       //             ),
+    //       //             Padding(padding: EdgeInsets.only(top: 7.0)),
+    //       //             Text(
+    //       //               cat['name'],
+    //       //               style: TextStyle(
+    //       //                 fontFamily: "Sans",
+    //       //                 fontSize: 10.0,
+    //       //                 fontWeight: FontWeight.w500,
+    //       //               ),
+    //       //             )
+    //       //           ],
+    //       //         ),
+    //       //       ),
+    //       //
+    //       //   ],
+    //       // ),
+    //     ],
+    //   ),
+    // );
 
     ///  Grid item in bottom of Category
     var Grid = SingleChildScrollView(
@@ -734,18 +636,19 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
                 ),
               ),
             ),
+
             /// To set GridView item
             GridView.count(
                 shrinkWrap: true,
                 padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
                 crossAxisSpacing: 10.0,
                 mainAxisSpacing: 17.0,
-                childAspectRatio: 0.65,
+                childAspectRatio: 0.55,
                 crossAxisCount: 2,
                 primary: false,
                 children: List.generate(
-                  gridItemArray.length,
-                      (index) => ItemGrid(gridItemArray[index]),
+                  _pro.allProducts.length,
+                  (index) => ItemGrid(_pro.allProducts[index]),
                 ))
           ],
         ),
@@ -763,20 +666,22 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
                   Padding(
                       padding: EdgeInsets.only(
                           top: mediaQueryData.padding.top + 35.5)),
+
                   /// Call var imageSlider
                   imageSlider,
 
                   /// Call var categoryIcon
                   categoryIcon,
-                  Padding(
-                    padding: EdgeInsets.only(top: 10.0),
-                  ),
+                  // Padding(
+                  //   padding: EdgeInsets.only(top: 10.0),
+                  // ),
 
                   /// Call var PromoHorizontalList
-                  PromoHorizontalList,
+
 
                   /// Call var a FlashSell, i am sorry Typo :v
-                  // FlashSell,
+                  if(_pro.allpromos.length > 0)
+                  FlashSell,
                   Padding(
                     padding: EdgeInsets.only(top: 10.0),
                   ),
@@ -793,7 +698,9 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
 
             /// Get a class AppbarGradient
             /// This is a Appbar in home activity
-            AppbarGradient(scaKey: widget.scaKey,),
+            AppbarGradient(
+              scaKey: widget.scaKey,
+            ),
           ],
         ),
       ),
@@ -804,8 +711,9 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
 /// ItemGrid in bottom item "Recomended" item
 class ItemGrid extends StatelessWidget {
   /// Get data from HomeGridItem.....dart class
-  GridItem gridItem;
-  ItemGrid(this.gridItem);
+  Map _data;
+
+  ItemGrid(this._data);
 
   @override
   Widget build(BuildContext context) {
@@ -813,7 +721,7 @@ class ItemGrid extends StatelessWidget {
     return InkWell(
       onTap: () {
         Navigator.of(context).push(PageRouteBuilder(
-            pageBuilder: (_, __, ___) => new detailProduk(gridItem),
+            pageBuilder: (_, __, ___) => new detailProduk(_data),
             transitionDuration: Duration(milliseconds: 900),
 
             /// Set animation Opacity in route to detailProduk layout
@@ -844,10 +752,9 @@ class ItemGrid extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-
                 /// Set Animation image to detailProduk layout
                 Hero(
-                  tag: "hero-grid-${gridItem.id}",
+                  tag: "hero-grid-${_data['id']}",
                   child: Material(
                     child: InkWell(
                       onTap: () {
@@ -860,9 +767,9 @@ class ItemGrid extends StatelessWidget {
                                   padding: EdgeInsets.all(30.0),
                                   child: InkWell(
                                     child: Hero(
-                                        tag: "hero-grid-${gridItem.id}",
-                                        child: Image.asset(
-                                          gridItem.img,
+                                        tag: "hero-grid-${_data['id']}",
+                                        child: Image.network(
+                                          _data['image']['path'],
                                           width: 300.0,
                                           height: 300.0,
                                           alignment: Alignment.center,
@@ -885,7 +792,7 @@ class ItemGrid extends StatelessWidget {
                                 topLeft: Radius.circular(7.0),
                                 topRight: Radius.circular(7.0)),
                             image: DecorationImage(
-                                image: AssetImage(gridItem.img),
+                                image: NetworkImage(_data['image']['path']),
                                 fit: BoxFit.cover)),
                       ),
                     ),
@@ -895,7 +802,7 @@ class ItemGrid extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(left: 15.0, right: 15.0),
                   child: Text(
-                    gridItem.title,
+                    _data['name'],
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                         letterSpacing: 0.5,
@@ -909,7 +816,7 @@ class ItemGrid extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(left: 15.0, right: 15.0),
                   child: Text(
-                    gridItem.price,
+                    "GHc" + _data['price'].toString(),
                     style: TextStyle(
                         fontFamily: "Sans",
                         fontWeight: FontWeight.w500,
@@ -918,7 +825,7 @@ class ItemGrid extends StatelessWidget {
                 ),
                 Padding(
                   padding:
-                  const EdgeInsets.only(left: 15.0, right: 15.0, top: 5.0),
+                      const EdgeInsets.only(left: 15.0, right: 15.0, top: 5.0),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -926,7 +833,7 @@ class ItemGrid extends StatelessWidget {
                       Row(
                         children: <Widget>[
                           Text(
-                            gridItem.rattingValue,
+                            "4.5",
                             style: TextStyle(
                                 fontFamily: "Sans",
                                 color: Colors.black26,
@@ -941,7 +848,7 @@ class ItemGrid extends StatelessWidget {
                         ],
                       ),
                       Text(
-                        gridItem.itemSale,
+                        "4332",
                         style: TextStyle(
                             fontFamily: "Sans",
                             color: Colors.black26,
@@ -961,7 +868,7 @@ class ItemGrid extends StatelessWidget {
 }
 
 /// Component FlashSaleItem
-class flashSaleItem extends StatelessWidget {
+class flashSaleItem extends StatefulWidget {
   final String image;
   final String title;
   final String normalprice;
@@ -974,14 +881,21 @@ class flashSaleItem extends StatelessWidget {
 
   flashSaleItem(
       {this.image,
-        this.title,
-        this.normalprice,
-        this.discountprice,
-        this.ratingvalue,
-        this.place,
-        this.stock,
-        this.colorLine,
-        this.widthLine});
+      this.title,
+      this.normalprice,
+      this.discountprice,
+      this.ratingvalue,
+      this.place,
+      this.stock,
+      this.colorLine,
+      this.widthLine});
+
+  @override
+  State<flashSaleItem> createState() => _flashSaleItemState();
+}
+
+class _flashSaleItemState extends State<flashSaleItem> {
+  int endTime = DateTime.now().millisecondsSinceEpoch + 1000 * 60000;
 
   @override
   Widget build(BuildContext context) {
@@ -1005,7 +919,6 @@ class flashSaleItem extends StatelessWidget {
                     transitionDuration: Duration(milliseconds: 850)));
               },
               child: Container(
-                height: 305.0,
                 width: 145.0,
                 color: Colors.white,
                 child: Column(
@@ -1016,14 +929,14 @@ class flashSaleItem extends StatelessWidget {
                       height: 140.0,
                       width: 145.0,
                       child: Image.asset(
-                        image,
+                        widget.image,
                         fit: BoxFit.cover,
                       ),
                     ),
                     Padding(
                       padding:
-                      EdgeInsets.only(left: 8.0, right: 3.0, top: 15.0),
-                      child: Text(title,
+                          EdgeInsets.only(left: 8.0, right: 3.0, top: 15.0),
+                      child: Text(widget.title,
                           style: TextStyle(
                               fontSize: 10.5,
                               fontWeight: FontWeight.w500,
@@ -1031,7 +944,7 @@ class flashSaleItem extends StatelessWidget {
                     ),
                     Padding(
                       padding: EdgeInsets.only(left: 10.0, top: 5.0),
-                      child: Text(normalprice,
+                      child: Text(widget.normalprice,
                           style: TextStyle(
                               fontSize: 10.5,
                               decoration: TextDecoration.lineThrough,
@@ -1041,7 +954,7 @@ class flashSaleItem extends StatelessWidget {
                     ),
                     Padding(
                       padding: EdgeInsets.only(left: 10.0, top: 5.0),
-                      child: Text(discountprice,
+                      child: Text(widget.discountprice,
                           style: TextStyle(
                               fontSize: 12.0,
                               color: Color(0xFF7F7FD5),
@@ -1078,7 +991,7 @@ class flashSaleItem extends StatelessWidget {
                             color: Colors.yellow,
                           ),
                           Text(
-                            ratingvalue,
+                            widget.ratingvalue,
                             style: TextStyle(
                                 fontSize: 10.0,
                                 fontWeight: FontWeight.w500,
@@ -1088,30 +1001,11 @@ class flashSaleItem extends StatelessWidget {
                         ],
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10.0, top: 5.0),
-                      child: Row(
-                        children: <Widget>[
-                          Icon(
-                            Icons.location_on,
-                            size: 11.0,
-                            color: Colors.black38,
-                          ),
-                          Text(
-                            place,
-                            style: TextStyle(
-                                fontSize: 10.0,
-                                fontWeight: FontWeight.w500,
-                                fontFamily: "Sans",
-                                color: Colors.black38),
-                          ),
-                        ],
-                      ),
-                    ),
+
                     Padding(
                       padding: const EdgeInsets.only(top: 10.0, left: 10.0),
                       child: Text(
-                        stock,
+                        widget.stock,
                         style: TextStyle(
                             fontSize: 10.0,
                             fontWeight: FontWeight.w500,
@@ -1123,13 +1017,60 @@ class flashSaleItem extends StatelessWidget {
                       padding: const EdgeInsets.only(top: 4.0, left: 10.0),
                       child: Container(
                         height: 5.0,
-                        width: widthLine,
+                        width: widget.widthLine,
                         decoration: BoxDecoration(
-                            color: Color(colorLine),
+                            color: Color(widget.colorLine),
                             borderRadius:
-                            BorderRadius.all(Radius.circular(4.0)),
+                                BorderRadius.all(Radius.circular(4.0)),
                             shape: BoxShape.rectangle),
                       ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10.0, left: 10.0),
+                      child: Text(
+                        "End sale in :",
+                        style: TextStyle(
+                          fontFamily: "Sans",
+                          fontSize: 11.0,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(top: 2.0),
+                    ),
+
+                    /// Get a countDown variable
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4.0, left: 10.0),
+                      child: Text(
+                        "D" + ": " + "H" + " : " + "M " + ": " + "S",
+                        style: TextStyle(
+                          fontFamily: "Sans",
+                          fontSize: 12.0,
+                          letterSpacing: 2.0,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4.0, left: 10.0),
+                      child: CountdownTimer(
+                        endTime: endTime,
+                        widgetBuilder: (_, CurrentRemainingTime time) {
+                          if (time == null) {
+                            return Text('Game over');
+                          }
+                          return Text(
+                              '${time.days ?? 0} : ${time.hours ?? 0} :  ${time.min ?? 0} : ${time.sec ?? 0}');
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      height: 10,
                     )
                   ],
                 ),
@@ -1145,47 +1086,41 @@ class flashSaleItem extends StatelessWidget {
 /// Component category item bellow FlashSale
 class CategoryItemValue extends StatelessWidget {
   String image, title;
-  GestureTapCallback tap;
 
   CategoryItemValue({
     this.image,
     this.title,
-    this.tap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: tap,
+    return Container(
+      // height: 105.0,
+      // width: 160.0,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.all(Radius.circular(3.0)),
+        image: DecorationImage(image: NetworkImage(image), fit: BoxFit.cover),
+      ),
       child: Container(
-        // height: 105.0,
-        // width: 160.0,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.all(Radius.circular(3.0)),
-          image: DecorationImage(image: NetworkImage(image), fit: BoxFit.cover),
+          color: Colors.black.withOpacity(0.25),
         ),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(3.0)),
-            color: Colors.black.withOpacity(0.25),
+        child: Center(
+            child: Text(
+          title,
+          style: TextStyle(
+            color: Colors.white,
+            fontFamily: "Berlin",
+            fontSize: 18.5,
+            letterSpacing: 0.7,
+            fontWeight: FontWeight.w800,
           ),
-          child: Center(
-              child: Text(
-                title,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontFamily: "Berlin",
-                  fontSize: 18.5,
-                  letterSpacing: 0.7,
-                  fontWeight: FontWeight.w800,
-                ),
-              )),
-        ),
+        )),
       ),
     );
   }
 }
-
 
 /// Component item Menu icon bellow a ImageSlider
 class CategoryIconValue extends StatelessWidget {
@@ -1194,17 +1129,17 @@ class CategoryIconValue extends StatelessWidget {
 
   CategoryIconValue(
       {this.icon1,
-        this.tap1,
-        this.icon2,
-        this.tap2,
-        this.icon3,
-        this.tap3,
-        this.icon4,
-        this.tap4,
-        this.title1,
-        this.title2,
-        this.title3,
-        this.title4});
+      this.tap1,
+      this.icon2,
+      this.tap2,
+      this.icon3,
+      this.tap3,
+      this.icon4,
+      this.tap4,
+      this.title1,
+      this.title2,
+      this.title3,
+      this.title4});
 
   @override
   Widget build(BuildContext context) {
@@ -1296,3 +1231,32 @@ class CategoryIconValue extends StatelessWidget {
     );
   }
 }
+
+//Stack(
+//             children: [
+//               Image.asset("assets/img/baner1.png"),
+//               Positioned.fill(
+//                   child: Align(
+//                 alignment: Alignment.center,
+//                 child: Column(
+//                   mainAxisAlignment: MainAxisAlignment.center,
+//                   children: [
+//                     Text(
+//                       "Caption One",
+//                       style: TextStyle(
+//                           color: Colors.white,
+//                           fontSize: 18,
+//                           fontWeight: FontWeight.w500),
+//                     ),
+//                     Text(
+//                       "Caption One",
+//                       style: TextStyle(
+//                           color: Colors.white,
+//                           fontSize: 14,
+//                           fontWeight: FontWeight.w400),
+//                     ),
+//                   ],
+//                 ),
+//               )),
+//             ],
+//           ),

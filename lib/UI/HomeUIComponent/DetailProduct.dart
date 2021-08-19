@@ -1,16 +1,18 @@
 import 'package:treva_shop_flutter/API/provider_class.dart';
+import 'package:treva_shop_flutter/Components/fav_widget.dart';
 import 'package:treva_shop_flutter/Library/carousel_pro/carousel_pro.dart';
 import 'package:flutter/material.dart';
 import 'package:treva_shop_flutter/ListItem/HomeGridItemRecomended.dart';
 import 'package:treva_shop_flutter/UI/CartUIComponent/CartLayout.dart';
-import 'package:treva_shop_flutter/UI/HomeUIComponent/ChatItem.dart';
 import 'package:treva_shop_flutter/UI/CartUIComponent/Delivery.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_rating/flutter_rating.dart';
 import 'package:treva_shop_flutter/UI/HomeUIComponent/ReviewLayout.dart';
+import 'package:hexcolor/hexcolor.dart';
+
 
 class detailProduk extends StatefulWidget {
-  GridItem gridItem;
+  Map gridItem;
 
   detailProduk(this.gridItem);
 
@@ -23,12 +25,14 @@ class _detailProdukState extends State<detailProduk> {
   double rating = 3.5;
   int starCount = 5;
   /// Declaration List item HomeGridItemRe....dart Class
-  final GridItem gridItem;
+  final Map gridItem;
   _detailProdukState(this.gridItem);
 
   @override
   static BuildContext ctx;
   int valueItemChart = 0;
+  int _nu = 0;
+  int _num = 0;
   final GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
 
   /// BottomSheet for view more in specification
@@ -65,26 +69,14 @@ class _detailProdukState extends State<detailProduk> {
                             "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen.",
                             style: _detailText),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 20.0),
-                        child: Text(
-                          "Spesifications :",
-                          style: TextStyle(
-                              fontFamily: "Gotik",
-                              fontWeight: FontWeight.w600,
-                              fontSize: 15.0,
-                              color: Colors.black,
-                              letterSpacing: 0.3,
-                              wordSpacing: 0.5),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 20.0, left: 20.0),
-                        child: Text(
-                          " - Lorem ipsum is simply dummy  ",
-                          style: _detailText,
-                        ),
-                      )
+
+                      // Padding(
+                      //   padding: const EdgeInsets.only(top: 20.0, left: 20.0),
+                      //   child: Text(
+                      //     " - Lorem ipsum is simply dummy  ",
+                      //     style: _detailText,
+                      //   ),
+                      // )
                     ],
                   ),
                 ),
@@ -243,25 +235,34 @@ class _detailProdukState extends State<detailProduk> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   /// Header image slider
-                  Container(
-                    height: 300.0,
-                    child: Hero(
-                      tag: "hero-grid-${gridItem.id}",
-                      child: Material(
-                        child: new Carousel(
-                          dotColor: Colors.black26,
-                          dotIncreaseSize: 1.7,
-                          dotBgColor: Colors.transparent,
-                          autoplay: false,
-                          boxFit: BoxFit.cover,
-                          images: [
-                            AssetImage(gridItem.img),
-                            AssetImage(gridItem.img),
-                            AssetImage(gridItem.img),
-                          ],
+                  Stack(
+                    children: [
+                      Container(
+                        height: 300.0,
+                        child: Hero(
+                          tag: "hero-grid-${gridItem['id']}",
+                          child: Material(
+                            child: new Carousel(
+                              dotColor: Colors.black26,
+                              dotIncreaseSize: 1.7,
+                              dotBgColor: Colors.transparent,
+                              autoplay: false,
+                              boxFit: BoxFit.cover,
+                              images: [
+                                NetworkImage(gridItem['image']['path']),
+                                for (var img in gridItem['gallery'])
+                                NetworkImage(img['path']),
+
+                              ],
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                      Positioned(
+                          bottom: 10,
+                          right: 10,
+                          child: FavWidget())
+                    ],
                   ),
                   /// Background white title,price and ratting
                   Container(
@@ -278,12 +279,12 @@ class _detailProdukState extends State<detailProduk> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            gridItem.title,
+                            gridItem['name'],
                             style: _customTextStyle,
                           ),
                           Padding(padding: EdgeInsets.only(top: 5.0)),
-                          Text(
-                            gridItem.price,
+                          Text("GHc " +
+                            gridItem['price'].toString(),
                             style: _customTextStyle,
                           ),
                           Padding(padding: EdgeInsets.only(top: 10.0)),
@@ -314,7 +315,7 @@ class _detailProdukState extends State<detailProduk> {
                                             MainAxisAlignment.center,
                                         children: <Widget>[
                                           Text(
-                                            gridItem.rattingValue,
+                                            "4.5",
                                             style:
                                                 TextStyle(color: Colors.white),
                                           ),
@@ -334,10 +335,10 @@ class _detailProdukState extends State<detailProduk> {
                                 Padding(
                                   padding: const EdgeInsets.only(right: 15.0),
                                   child: Text(
-                                    gridItem.itemSale,
+                                    "654 Sales",
                                     style: TextStyle(
                                         color: Colors.black54,
-                                        fontSize: 13.0,
+                                        fontSize: 15.0,
                                         fontWeight: FontWeight.w500),
                                   ),
                                 ),
@@ -352,8 +353,8 @@ class _detailProdukState extends State<detailProduk> {
                   Padding(
                     padding: const EdgeInsets.only(top: 10.0),
                     child: Container(
-                      height: 220.0,
-                      width: 600.0,
+
+
                       decoration:
                           BoxDecoration(color: Colors.white, boxShadow: [
                         BoxShadow(
@@ -363,29 +364,30 @@ class _detailProdukState extends State<detailProduk> {
                         )
                       ]),
                       child: Padding(
-                        padding: const EdgeInsets.only(top: 20.0, left: 20.0),
+                        padding: const EdgeInsets.only(top: 20.0, left: 20.0, bottom: 20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             Text("Size", style: _subHeaderCustomStyle),
-                            Row(
-                              children: <Widget>[
-                                RadioButtonCustom(
-                                  txt: "S",
-                                ),
-                                Padding(padding: EdgeInsets.only(left: 15.0)),
-                                RadioButtonCustom(
-                                  txt: "M",
-                                ),
-                                Padding(padding: EdgeInsets.only(left: 15.0)),
-                                RadioButtonCustom(
-                                  txt: "L",
-                                ),
-                                Padding(padding: EdgeInsets.only(left: 15.0)),
-                                RadioButtonCustom(
-                                  txt: "XL",
-                                ),
-                              ],
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: <Widget>[
+                                  for(var size in gridItem['sizes'])
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 15.0, top: 20),
+                                    child: InkWell(
+                                        onTap: (){
+                                          setState(() {
+                                            print(gridItem['sizes'].indexOf(size));
+                                            _nu=gridItem['sizes'].indexOf(size);
+                                          });
+                                        },
+                                        child: SizeWidget(text: "${size['name']}", index: gridItem['sizes'].indexOf(size),nu: _nu,))
+                                  ),
+
+                                ],
+                              ),
                             ),
                             Padding(padding: EdgeInsets.only(top: 15.0)),
                             Divider(
@@ -397,14 +399,24 @@ class _detailProdukState extends State<detailProduk> {
                               "Color",
                               style: _subHeaderCustomStyle,
                             ),
-                            Row(
-                              children: <Widget>[
-                                RadioButtonColor(Colors.black),
-                                Padding(padding: EdgeInsets.only(left: 15.0)),
-                                RadioButtonColor(Colors.white),
-                                Padding(padding: EdgeInsets.only(left: 15.0)),
-                                RadioButtonColor(Colors.blue),
-                              ],
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: <Widget>[
+                                  for(var color in gridItem['colors'])
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 20.0, top: 20),
+                                    child: InkWell(
+                                        onTap: (){
+                                          setState(() {
+                                            _num=gridItem['colors'].indexOf(color);
+                                          });
+                                        },
+                                        child: ColorWidget(color: HexColor(color['code']), index: gridItem['colors'].indexOf(color), nu: _num,)),
+                                  ),
+
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -416,7 +428,7 @@ class _detailProdukState extends State<detailProduk> {
                   Padding(
                     padding: const EdgeInsets.only(top: 10.0),
                     child: Container(
-                      height: 205.0,
+                      padding: EdgeInsets.only(bottom: 10),
                       width: 600.0,
                       decoration:
                           BoxDecoration(color: Colors.white, boxShadow: [
@@ -444,7 +456,7 @@ class _detailProdukState extends State<detailProduk> {
                                   right: 20.0,
                                   bottom: 10.0,
                                   left: 20.0),
-                              child: Text(gridItem.description,
+                              child: Text(gridItem['description'] + "dsdj sjdksdj bdhvbs hdbvv h dhvbsv hvsbkj dkvbds vkvv hvkdbskv v dvbdv vjnskvn vksnv nvksvn vn vnksjvn jkvns vnvjksd nvdknvs dvnskvn nvjkdjsv nvjsdkvn vnjksvnd",
                                   style: _detailText),
                             ),
                             Center(
@@ -574,7 +586,7 @@ class _detailProdukState extends State<detailProduk> {
                     ),
                   ),
 
-                  _suggestedItem
+                  // _suggestedItem
                 ],
               ),
             ),
@@ -587,26 +599,21 @@ class _detailProdukState extends State<detailProduk> {
             onTap: () {
               _pro.addToCart(
                   {
-                    "title":gridItemArray[0].title,
-                    "image":"https://www.cnet.com/a/img/YQlXeeHCk-e--zjAOA19Cc-ISPs=/940x0/2020/10/18/bdb7ea97-cb99-48d8-a69c-38d26109f33b/05-iphone-12-pro-2020.jpg",
-                    "price":gridItemArray[0].price.toString().split("\$ ")[1],
+                    "title":gridItem['name'],
+                    "image":gridItem['image']['path'],
+                    "price": gridItem['price'].toString(),
                     "quantity":"1"
-                  }
+                  },
+                _key
               );
-              var snackbar = SnackBar(
-                content: Text("Item Added"),
-              );
-              setState(() {
-                valueItemChart++;
-              });
-              _key.currentState.showSnackBar(snackbar);
+
             },
             child: Padding(
               padding: const EdgeInsets.only(bottom: 5.0),
               child: Container(
                 color: Colors.white,
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Container(
                       height: 40.0,
@@ -623,23 +630,23 @@ class _detailProdukState extends State<detailProduk> {
                     ),
 
                     /// Chat Icon
-                    InkWell(
-                      onTap: () {
-                        Navigator.of(context).push(PageRouteBuilder(
-                            pageBuilder: (_, ___, ____) => new chatItem()));
-                      },
-                      child: Container(
-                        height: 40.0,
-                        width: 60.0,
-                        decoration: BoxDecoration(
-                            color: Colors.white12.withOpacity(0.1),
-                            border: Border.all(color: Colors.black12)),
-                        child: Center(
-                          child: Image.asset("assets/icon/message.png",
-                              height: 20.0),
-                        ),
-                      ),
-                    ),
+                    // InkWell(
+                    //   onTap: () {
+                    //     Navigator.of(context).push(PageRouteBuilder(
+                    //         pageBuilder: (_, ___, ____) => new chatItem()));
+                    //   },
+                    //   child: Container(
+                    //     height: 40.0,
+                    //     width: 60.0,
+                    //     decoration: BoxDecoration(
+                    //         color: Colors.white12.withOpacity(0.1),
+                    //         border: Border.all(color: Colors.black12)),
+                    //     child: Center(
+                    //       child: Image.asset("assets/icon/message.png",
+                    //           height: 20.0),
+                    //     ),
+                    //   ),
+                    // ),
 
                     /// Button Pay
                     InkWell(
@@ -704,110 +711,59 @@ class _detailProdukState extends State<detailProduk> {
   }
 }
 
+class SizeWidget extends StatelessWidget {
+  final String text;
+  final index;
+  final nu;
 
-
-/// RadioButton for item choose in size
-class RadioButtonCustom extends StatefulWidget {
-  String txt;
-
-  RadioButtonCustom({this.txt});
-
-  @override
-  _RadioButtonCustomState createState() => _RadioButtonCustomState(this.txt);
-}
-
-class _RadioButtonCustomState extends State<RadioButtonCustom> {
-  _RadioButtonCustomState(this.txt);
-
-  String txt;
-  bool itemSelected = true;
+  SizeWidget({this.text, this.index, this.nu});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 10.0),
-      child: InkWell(
-        onTap: () {
-        setState(() {
-              if (itemSelected == false) {
-                setState(() {
-                  itemSelected = true;
-                });
-              } else if (itemSelected == true) {
-                setState(() {
-                  itemSelected = false;
-                });
-              }
-            });
-        },
-        child: Container(
-          height: 37.0,
-          width: 37.0,
-          decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(
-                  color: itemSelected ? Colors.black54 : Colors.indigoAccent),
-              shape: BoxShape.circle),
-          child: Center(
-            child: Text(
-              txt,
-              style: TextStyle(
-                  color: itemSelected ? Colors.black54 : Colors.indigoAccent),
-            ),
-          ),
+    return Container(
+      height: index != nu ? 37.0 : 50,
+      width: index != nu ? 37.0 : 50,
+      decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(
+              color: index != nu ? Colors.black54 : Colors.indigoAccent),
+          shape: BoxShape.circle),
+      child: Center(
+        child: Text(
+          text,
+          style: TextStyle(
+              color: index != nu ? Colors.black54 : Colors.indigoAccent),
         ),
       ),
     );
   }
 }
 
-/// RadioButton for item choose in color
-class RadioButtonColor extends StatefulWidget {
-  Color clr;
 
-  RadioButtonColor(this.clr);
 
-  @override
-  _RadioButtonColorState createState() => _RadioButtonColorState(this.clr);
-}
+class ColorWidget extends StatelessWidget {
+  final color;
+  final index;
+  final nu;
 
-class _RadioButtonColorState extends State<RadioButtonColor> {
-  bool itemSelected = true;
-  Color clr;
-
-  _RadioButtonColorState(this.clr);
+  ColorWidget({this.color, this.index, this.nu});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 10.0),
-      child: InkWell(
-        onTap: () {
-          if (itemSelected == false) {
-            setState(() {
-              itemSelected = true;
-            });
-          } else if (itemSelected == true) {
-            setState(() {
+    return Container(
+      height: index != nu ? 37.0 : 50,
+      width: index != nu ? 37.0 : 50,
+      decoration: BoxDecoration(
+          color: color,
+          border: Border.all(
+              color: index != nu ? Colors.black54 : Colors.indigoAccent),
+          shape: BoxShape.circle),
 
-              itemSelected = false;
-            });
-          }
-        },
-        child: Container(
-          height: 37.0,
-          width: 37.0,
-          decoration: BoxDecoration(
-              color: clr,
-              border: Border.all(
-                  color: itemSelected ? Colors.black26 : Colors.indigoAccent,
-                  width: 2.0),
-              shape: BoxShape.circle),
-        ),
-      ),
     );
   }
 }
+
+
 
 /// Class for card product in "Top Rated Products"
 class FavoriteItem extends StatelessWidget {

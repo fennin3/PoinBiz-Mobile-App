@@ -23,17 +23,22 @@ class promoDetail extends StatefulWidget {
 class _promoDetailState extends State<promoDetail> {
 
 
-  var imageNetwork = NetworkImage("https://firebasestorage.googleapis.com/v0/b/beauty-look.appspot.com/o/Screenshot_20181005-213931.png?alt=media&token=e6287f67-5bc0-4225-8e96-1623dc9dc42f");
+  // var imageNetwork = NetworkImage("https://firebasestorage.googleapis.com/v0/b/beauty-look.appspot.com/o/Screenshot_20181005-213931.png?alt=media&token=e6287f67-5bc0-4225-8e96-1623dc9dc42f");
+
+
+
 
   bool imageLoad = true;
+
+
 
   @override
   void initState() {
      Timer(Duration(seconds: 3),(){
-setState(() {
-  imageLoad=false;
-});
- });
+      setState(() {
+        imageLoad=false;
+      });
+     });
     // TODO: implement initState
     super.initState();
   }
@@ -78,20 +83,21 @@ setState(() {
             ///
             ///
             imageLoad? _imageLoading(context):
-            GridView.count(
-              shrinkWrap: true,
-              padding: EdgeInsets.symmetric(horizontal: 7.0, vertical: 10.0),
-              crossAxisSpacing: 10.0,
-              mainAxisSpacing: 15.0,
-              childAspectRatio: 0.6,
-              crossAxisCount: 2,
-              primary: false,
-              children:List.generate(
-                /// Get data in flashSaleItem.dart (ListItem folder)
-                promotionItem.length,
-                    (index) => ItemGridMain(gridItemArray[index]),
-              ),
-            )
+                Container()
+            // GridView.count(
+            //   shrinkWrap: true,
+            //   padding: EdgeInsets.symmetric(horizontal: 7.0, vertical: 10.0),
+            //   crossAxisSpacing: 10.0,
+            //   mainAxisSpacing: 15.0,
+            //   childAspectRatio: 0.6,
+            //   crossAxisCount: 2,
+            //   primary: false,
+            //   children:List.generate(
+            //     /// Get data in flashSaleItem.dart (ListItem folder)
+            //     promotionItem.length,
+            //         (index) => ItemGridMain(gridItemArray[index]),
+            //   ),
+            // )
           ],
         ),
       ),
@@ -132,8 +138,9 @@ setState(() {
 /// ItemGrid class
 class ItemGrid extends StatelessWidget {
   @override
-  promotionData item;
-  ItemGrid(this.item);
+  Map item;
+  final word;
+  ItemGrid(this.item, this.word);
   Widget build(BuildContext context) {
     MediaQueryData mediaQueryData = MediaQuery.of(context);
     return Container(
@@ -165,7 +172,7 @@ class ItemGrid extends StatelessWidget {
                             topLeft: Radius.circular(7.0),
                             topRight: Radius.circular(7.0)),
                         image: DecorationImage(
-                            image: AssetImage(item.image), fit: BoxFit.cover)),
+                            image: NetworkImage(item['image']['path']), fit: BoxFit.cover)),
                   ),
                   Container(
                     height: 25.5,
@@ -176,8 +183,8 @@ class ItemGrid extends StatelessWidget {
                             bottomRight: Radius.circular(20.0),
                             topLeft: Radius.circular(5.0))),
                     child: Center(
-                        child: Text(
-                      "10%",
+                        child: Text( item['discount_type'] == "percentage"?
+                      "${item['discount']}%" : "GHc ${item['discount']}",
                       style: TextStyle(
                           color: Colors.white, fontWeight: FontWeight.w600),
                     )),
@@ -188,7 +195,7 @@ class ItemGrid extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(left: 15.0, right: 15.0),
                 child: Text(
-                  item.title,
+                  item['name'],
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                       letterSpacing: 0.5,
@@ -201,8 +208,8 @@ class ItemGrid extends StatelessWidget {
               Padding(padding: EdgeInsets.only(top: 1.0)),
               Padding(
                 padding: const EdgeInsets.only(left: 15.0, right: 15.0),
-                child: Text(
-                  item.salary,
+                child: Text("GHc " +
+                  item['price'].toString(),
                   style: TextStyle(
                       fontFamily: "Sans",
                       fontWeight: FontWeight.w500,
@@ -219,7 +226,7 @@ class ItemGrid extends StatelessWidget {
                     Row(
                       children: <Widget>[
                         Text(
-                          item.rating,
+                          "rating",
                           style: TextStyle(
                               fontFamily: "Sans",
                               color: Colors.black26,
@@ -234,7 +241,7 @@ class ItemGrid extends StatelessWidget {
                       ],
                     ),
                     Text(
-                      item.sale,
+                      "Sale",
                       style: TextStyle(
                           fontFamily: "Sans",
                           color: Colors.black26,

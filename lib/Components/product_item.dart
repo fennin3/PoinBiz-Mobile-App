@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:treva_shop_flutter/ListItem/HomeGridItemRecomended.dart';
+import 'package:treva_shop_flutter/API/provider_class.dart';
 import 'package:treva_shop_flutter/UI/HomeUIComponent/DetailProduct.dart';
+import 'package:provider/provider.dart';
 
 class ItemGridMain extends StatelessWidget {
   /// Get data from HomeGridItem.....dart class
-  GridItem gridItem;
-  ItemGridMain(this.gridItem);
+  Map gridItem;
+  final String word;
+  ItemGridMain(this.gridItem, this.word);
 
   @override
   Widget build(BuildContext context) {
+    final _pro = Provider.of<PoinBizProvider>(context, listen: false);
     MediaQueryData mediaQueryData = MediaQuery.of(context);
     return InkWell(
       onTap: () {
+        if(word.isNotEmpty){
+          _pro.saveWord(word);
+        }
         Navigator.of(context).push(PageRouteBuilder(
             pageBuilder: (_, __, ___) => new detailProduk(gridItem),
             transitionDuration: Duration(milliseconds: 900),
@@ -47,7 +53,7 @@ class ItemGridMain extends StatelessWidget {
 
                 /// Set Animation image to detailProduk layout
                 Hero(
-                  tag: "hero-grid-${gridItem.id}",
+                  tag: "hero-grid-${gridItem['id']}",
                   child: Material(
                     child: InkWell(
                       onTap: () {
@@ -60,9 +66,9 @@ class ItemGridMain extends StatelessWidget {
                                   padding: EdgeInsets.all(30.0),
                                   child: InkWell(
                                     child: Hero(
-                                        tag: "hero-grid-${gridItem.id}",
-                                        child: Image.asset(
-                                          gridItem.img,
+                                        tag: "hero-grid-${gridItem['id']}",
+                                        child: Image.network(
+                                          gridItem['image']['path'],
                                           width: 300.0,
                                           height: 300.0,
                                           alignment: Alignment.center,
@@ -85,7 +91,7 @@ class ItemGridMain extends StatelessWidget {
                                 topLeft: Radius.circular(7.0),
                                 topRight: Radius.circular(7.0)),
                             image: DecorationImage(
-                                image: AssetImage(gridItem.img),
+                                image: NetworkImage(gridItem['image']['path']),
                                 fit: BoxFit.cover)),
                       ),
                     ),
@@ -95,7 +101,7 @@ class ItemGridMain extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(left: 15.0, right: 15.0),
                   child: Text(
-                    gridItem.title,
+                    gridItem['name'],
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                         letterSpacing: 0.5,
@@ -109,7 +115,7 @@ class ItemGridMain extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(left: 15.0, right: 15.0),
                   child: Text(
-                    gridItem.price,
+                    gridItem['price'].toString(),
                     style: TextStyle(
                         fontFamily: "Sans",
                         fontWeight: FontWeight.w500,
@@ -126,7 +132,7 @@ class ItemGridMain extends StatelessWidget {
                       Row(
                         children: <Widget>[
                           Text(
-                            gridItem.rattingValue,
+                            "4.5",
                             style: TextStyle(
                                 fontFamily: "Sans",
                                 color: Colors.black26,
@@ -141,7 +147,7 @@ class ItemGridMain extends StatelessWidget {
                         ],
                       ),
                       Text(
-                        gridItem.itemSale,
+                        "564",
                         style: TextStyle(
                             fontFamily: "Sans",
                             color: Colors.black26,

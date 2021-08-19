@@ -1,16 +1,52 @@
 import 'package:flutter/material.dart';
-import 'package:treva_shop_flutter/ListItem/PromotionData.dart';
-import 'package:treva_shop_flutter/UI/HomeUIComponent/PromotionDetail.dart';
-
+import 'package:treva_shop_flutter/API/provider_class.dart';
+import 'package:treva_shop_flutter/Components/product_item.dart';
+import 'package:provider/provider.dart';
+import 'package:treva_shop_flutter/constant.dart';
 class searchAppbar extends StatefulWidget {
+  final Map data;
+
+  searchAppbar({this.data});
   @override
   _searchAppbarState createState() => _searchAppbarState();
 }
 
 class _searchAppbarState extends State<searchAppbar> {
+
+
+  List _products = [];
+  final TextEditingController _searchText = TextEditingController();
+  void setData(){
+    setState(() {
+      _products = widget.data['products'];
+    });
+  }
+
+
+  void _searchFun(String text){
+    _products = widget.data['products'];
+    setState(() {
+      _products = _products.where((element) => element['name'].toString().toLowerCase().contains("${text.toLowerCase()}")).toList();
+    });
+  }
+
+
   @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _searchText.dispose();
+  }
 
-
+  @override
+  void initState() {
+    // TODO: implement initState
+    final _pro = Provider.of<PoinBizProvider>(context, listen: false);
+    _pro.getSearchwords();
+    super.initState();
+    setData();
+  }
+  @override
   static var _customTextStyleBlack = TextStyle(
       fontFamily: "Gotik",
       color: Colors.black,
@@ -25,107 +61,195 @@ class _searchAppbarState extends State<searchAppbar> {
       style: TextStyle(
           letterSpacing: 0.1,
           fontWeight: FontWeight.w600,
-          fontSize: 27.0,
+          fontSize: 16.0,
           color: Colors.black54,
           fontFamily: "Gotik"),
     ),
   );
 
-  /// Item TextFromField Search
-  var _search = Padding(
-    padding: const EdgeInsets.only(top: 35.0, right: 20.0, left: 20.0),
-    child: Container(
-      height: 50.0,
-      decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.all(Radius.circular(5.0)),
-          boxShadow: [
-            BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 15.0,
-                spreadRadius: 0.0)
-          ]),
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.only(left: 20.0, right: 10.0),
-          child: Theme(
-            data: ThemeData(hintColor: Colors.transparent),
-            child: TextFormField(
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                  icon: Icon(
-                    Icons.search,
-                    color: Color(0xFF6991C7),
-                    size: 28.0,
-                  ),
-                  hintText: "Find you want",
-                  hintStyle: TextStyle(
-                      color: Colors.black54,
-                      fontFamily: "Gotik",
-                      fontWeight: FontWeight.w400)),
+
+  /// Popular Keyword Item
+
+
+
+  Widget build(BuildContext context) {
+    final _pro = Provider.of<PoinBizProvider>(context, listen: true);
+    var _search = Padding(
+      padding: const EdgeInsets.only(top: 35.0, right: 20.0, left: 20.0),
+      child: Container(
+        height: 50.0,
+        decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(5.0)),
+            boxShadow: [
+              BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 15.0,
+                  spreadRadius: 0.0)
+            ]),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.only(left: 20.0, right: 10.0),
+            child: Theme(
+              data: ThemeData(hintColor: Colors.transparent),
+              child: TextFormField(
+                controller: _searchText,
+                decoration: InputDecoration(
+                    border: InputBorder.none,
+                    icon: Icon(
+                      Icons.search,
+                      color: Color(0xFF6991C7),
+                      size: 28.0,
+                    ),
+                    hintText: "Find you want",
+                    hintStyle: TextStyle(
+                        color: Colors.black54,
+                        fontFamily: "Gotik",
+                        fontWeight: FontWeight.w400)),
+                onChanged: (e){
+                  _searchFun(_searchText.text);
+                },
+              ),
             ),
           ),
         ),
       ),
-    ),
-  );
-
-  /// Item Favorite Item with Card item
-
-
-
-  /// Popular Keyword Item
-  var _sugestedText = Container(
-    height: 145.0,
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(left: 20.0,top: 20.0),
-          child: Text(
-            "Populer Keyword",
-            style: TextStyle(fontFamily: "Gotik", color: Colors.black26),
+    );
+    // var _searchResults2 = Container(
+    //   child: Column(
+    //     children: <Widget>[
+    //       Padding(
+    //         padding: const EdgeInsets.only(right: 20.0, left: 20.0, top: 30.0),
+    //         child: Row(
+    //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //           children: <Widget>[
+    //             Text(
+    //               "Search results",
+    //               style: _customTextStyleBlack,
+    //             ),
+    //
+    //           ],
+    //         ),
+    //       ),
+    //       _products.length <1 ? Container(
+    //
+    //         child: Column(
+    //           children: [
+    //             SizedBox(height: MediaQuery.of(context).size.height * 0.15,),
+    //             Text("No Products Found", style: TextStyle(fontSize: 25),)
+    //           ],
+    //         ),
+    //       ):
+    //       Container(
+    //         margin: EdgeInsets.only(right: 5.0, left: 5.0),
+    //
+    //         ///
+    //         ///
+    //         /// check the condition if image data from server firebase loaded or no
+    //         /// if image true (image still downloading from server)
+    //         /// Card to set card loading animation
+    //         ///
+    //         ///
+    //         child:
+    //
+    //         Container(
+    //           color: Colors.white,
+    //           child: Column(
+    //             crossAxisAlignment: CrossAxisAlignment.center,
+    //             children: <Widget>[
+    //
+    //
+    //               GridView.count(
+    //                 shrinkWrap: true,
+    //                 padding: EdgeInsets.symmetric(horizontal: 7.0, vertical: 10.0),
+    //                 crossAxisSpacing: 10.0,
+    //                 mainAxisSpacing: 15.0,
+    //                 childAspectRatio: 0.55,
+    //                 crossAxisCount: 2,
+    //                 primary: false,
+    //                 children:List.generate(
+    //                   /// Get data in flashSaleItem.dart (ListItem folder)
+    //                   _products.length,
+    //                       (index) => ItemGrid(_products[index]),
+    //                 ),
+    //               )
+    //             ],
+    //           ),
+    //         ),
+    //
+    //       ),
+    //
+    //     ],
+    //   ),
+    // );
+    var _sugestedText = Container(
+      height: 160,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(left: 20.0,top: 20.0),
+            child: Text(
+              "Search History",
+              style: TextStyle(fontFamily: "Gotik", color: Colors.black26),
+            ),
           ),
-        ),
-        Padding(padding: EdgeInsets.only(top: 20.0)),
-        Expanded(
-            child: ListView(
-          scrollDirection: Axis.horizontal,
-          children: <Widget>[
-            Padding(padding: EdgeInsets.only(left: 20.0)),
-            KeywordItem(
-              title: "Iphone X",
-              title2: "Mackbook",
-            ),
-            KeywordItem(
-              title: "Samsung",
-              title2: "Apple",
-            ),
-            KeywordItem(
-              title: "Note 9",
-              title2: "Nevada",
-            ),
-            KeywordItem(
-              title: "Watch",
-              title2: "PC",
-            ),
-          ],
-        ))
-      ],
-    ),
-  );
+          Padding(padding: EdgeInsets.only(top: 5.0)),
+          // Expanded(
+          //     child: ListView(
+          //       scrollDirection: Axis.horizontal,
+          //       children: <Widget>[
+          //         Padding(padding: EdgeInsets.only(left: 20.0)),
+          //         for(var word in _pro.searchedWords)
+          //           KeywordItem(
+          //             title: "Iphone X",
+          //             title2: "Mackbook",
+          //           ),
+          //
+          //       ],
+          //     ))
 
-  Widget build(BuildContext context) {
+          Padding(
+            padding: const EdgeInsets.only(top: 5, left: 15),
+            child: Container(
+              height: 70,
+              child: GridView.count(
+                scrollDirection: Axis.horizontal,
+                childAspectRatio: (2 / 4),
+                crossAxisSpacing: 5,
+                mainAxisSpacing: 5,
+
+                children: [
+                  for (var cat in _pro.searchedWords)
+                    InkWell(
+                      onTap: (){
+                        setState(() {
+
+                        });
+                      },
+                      child: Card(
+                        elevation: 3,
+                        child: Center(child: Text(cat.text)),
+                      ),
+                    ),
+                ],
+                shrinkWrap: true, crossAxisCount: 2,
+              ),
+            ),
+          )
+        ],
+      ),
+    );
     var _searchResults = Container(
       child: Column(
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.only(right: 20.0, left: 20.0, top: 30.0),
+            padding: const EdgeInsets.only(right: 20.0, left: 20.0, bottom: 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text(
-                  "Search results",
+                  "Products",
                   style: _customTextStyleBlack,
                 ),
                 // InkWell(
@@ -141,19 +265,8 @@ class _searchAppbarState extends State<searchAppbar> {
           Container(
             margin: EdgeInsets.only(right: 5.0, left: 5.0),
 
-            ///
-            ///
-            /// check the condition if image data from server firebase loaded or no
-            /// if image true (image still downloading from server)
-            /// Card to set card loading animation
-            ///
-            ///
             child:
-            // ListView.builder(
-            //   scrollDirection: Axis.horizontal,
-            //   itemBuilder: (BuildContext context, int index)=>discountItem(itemDiscount[index]),
-            //   itemCount: itemDiscount.length,
-            // ),
+
             Container(
               color: Colors.white,
               child: Column(
@@ -172,13 +285,13 @@ class _searchAppbarState extends State<searchAppbar> {
                     padding: EdgeInsets.symmetric(horizontal: 7.0, vertical: 10.0),
                     crossAxisSpacing: 10.0,
                     mainAxisSpacing: 15.0,
-                    childAspectRatio: 0.65,
+                    childAspectRatio: 0.55,
                     crossAxisCount: 2,
                     primary: false,
                     children:List.generate(
                       /// Get data in flashSaleItem.dart (ListItem folder)
-                      promotionItem.length,
-                          (index) => ItemGrid(promotionItem[index]),
+                      _products.length,
+                          (index) => ItemGridMain(_products[index],_searchText.text),
                     ),
                   )
                 ],

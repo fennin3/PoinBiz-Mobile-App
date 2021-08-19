@@ -96,15 +96,10 @@ class _VendorDetailState extends State<VendorDetail> {
     );
     return Scaffold(
       appBar: AppBar(
-        actions: <Widget>[
-          IconButton(
-            onPressed:(){
-              Navigator.of(context).push(PageRouteBuilder(
-                  pageBuilder: (_, __, ___) => new searchAppbar()));
-            },
-            icon: Icon(Icons.search, color: Color(0xFF6991C7)),
-          ),
-        ],
+        leading: TextButton(
+          onPressed: ()=>Navigator.pop(context),
+          child: Icon(Icons.arrow_back),
+        ),
         centerTitle: true,
         title: Text(
           "Vendor Name",
@@ -119,7 +114,35 @@ class _VendorDetailState extends State<VendorDetail> {
         ),
         elevation: 0.0,
       ),
-      body: _imageSlider,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _imageSlider,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Description",
+                  style: TextStyle(
+                      fontSize: 15.0,
+                      fontFamily: "Sans",
+                      fontWeight: FontWeight.w700),
+                ),
+                SizedBox(height: 10,),
+                Text("In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document or a typeface without relying on meaningful content. Lorem ipsum may be used as a placeholder before final copy is available.",
+                style: TextStyle(fontFamily: 'Sans'),
+                ),
+                SizedBox(height: 10,),
+
+              ],
+            ),
+          )
+
+
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.location_on),
       ),

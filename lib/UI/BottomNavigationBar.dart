@@ -7,9 +7,14 @@ import 'package:treva_shop_flutter/Components/add_auction_sale.dart';
 import 'package:treva_shop_flutter/UI/Auction/add_sale.dart';
 import 'package:treva_shop_flutter/UI/Auction/my_auction.dart';
 import 'package:treva_shop_flutter/UI/CartUIComponent/CartLayout.dart';
+import 'package:treva_shop_flutter/UI/Events/event_home.dart';
 import 'package:treva_shop_flutter/UI/HomeUIComponent/Home.dart';
 import 'package:provider/provider.dart';
+import 'package:treva_shop_flutter/UI/OrderRequest/add_order.dart';
+import 'package:treva_shop_flutter/UI/OrderRequest/my_orders.dart';
 import 'package:treva_shop_flutter/UI/Vendor/all_venders.dart';
+
+import 'BUS/bus_home.dart';
 
 class bottomNavigationBar extends StatefulWidget {
   @override
@@ -31,12 +36,10 @@ class _bottomNavigationBarState extends State<bottomNavigationBar> {
       //  return new brand();
       case 3:
         return new cart();
-      case 2:
-        return Menu();
       case 1:
-        return Menu(
-          scaKey: _key,
-        );
+        return BusHome(scaKey: _key,);
+      case 2:
+        return EventHome(scaKey: _key,);
         break;
       default:
         return Menu(
@@ -115,7 +118,7 @@ class _bottomNavigationBarState extends State<bottomNavigationBar> {
                           left: -12,
                           top: -7,
                           child: CircleAvatar(
-                        radius: 9,
+                        radius: 10,
                         backgroundColor: Colors.red,
                         child: Text(_pro.cart.length.toString()),
                       ))
@@ -150,14 +153,18 @@ class MyDrawer extends StatelessWidget {
           trailing: Icon(Icons.arrow_forward_ios),
           children: [
             ListTile(
+              onTap: (){
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>AddOrder()));
+              },
               leading: Icon(Icons.add_shopping_cart_sharp),
-              title: Text("Add Order"),
+              title: Text("Place Order"),
             ),
             ListTile(
+              onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>MyOrder())),
               leading: Icon(
                 Icons.inventory_outlined,
               ),
-              title: Text("Ordered Requests"),
+              title: Text("Order Requests"),
             )
           ],
         ),
@@ -182,9 +189,17 @@ class MyDrawer extends StatelessWidget {
         ),
         ListTile(
           leading: Icon(Icons.store),
-          title: Text("Vendors"),
+          title: Text("Vendors Near Me"),
           onTap: () => Navigator.push(
               context, MaterialPageRoute(builder: (context) => AllVendors())),
+        ),
+
+        ListTile(
+          leading: Icon(Icons.favorite),
+          title: Text("My Wishlist"),
+          // onTap: () => Navigator.push(
+          //     context, MaterialPageRoute(builder: (context) => AllVendors())),
+
         ),
       ],
     ));

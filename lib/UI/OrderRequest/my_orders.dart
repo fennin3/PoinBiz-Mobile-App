@@ -1,24 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:treva_shop_flutter/UI/Auction/auction_detail.dart';
 import 'package:treva_shop_flutter/constant.dart';
 
-class MyAuctionSales extends StatefulWidget {
-  const MyAuctionSales({Key key}) : super(key: key);
+
+class MyOrder extends StatefulWidget {
+  const MyOrder({Key key}) : super(key: key);
 
   @override
-  _MyAuctionSalesState createState() => _MyAuctionSalesState();
+  _MyOrderState createState() => _MyOrderState();
 }
 
-class _MyAuctionSalesState extends State<MyAuctionSales> {
+class _MyOrderState extends State<MyOrder> {
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: AppBar(
+      appBar:  AppBar(
         backgroundColor: appColor,
         centerTitle: true,
         title: Text(
-          "My Auction Sales",
+          "My order requests",
           style: auctionHeader,
         ),
         leading: TextButton(
@@ -36,7 +35,7 @@ class _MyAuctionSalesState extends State<MyAuctionSales> {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 10.0),
                 child: ListTile(
-                  onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>AuctionDetail())),
+                  // onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>AuctionDetail())),
                   title: Text("Product name"),
                   subtitle: Text("Quantity: 10"),
                   leading:
@@ -53,27 +52,27 @@ class _MyAuctionSalesState extends State<MyAuctionSales> {
                                   child: Container(
                                     padding: EdgeInsets.all(30.0),
                                     child: Stack(
-                                        children: [
-                                          Hero(
-                                              tag: "hero-grid-$index",
-                                              child: Image.asset(
-                                                "assets/img/man.png",
+                                      children: [
+                                        Hero(
+                                            tag: "hero-grid-$index",
+                                            child: Image.asset(
+                                              "assets/img/man.png",
 
-                                                alignment: Alignment.center,
-                                                fit: BoxFit.cover,
-                                              )),
-                                          Positioned(
-                                              right: 10,
-                                              top: 10,
-                                              child: TextButton(
-                                                onPressed: ()=>Navigator.pop(context),
-                                                child: Card(child: Padding(
-                                                  padding: const EdgeInsets.all(4.0),
-                                                  child: Icon(Icons.close, color: Colors.black,),
-                                                ),),
-                                              ))
-                                        ],
-                                      ),
+                                              alignment: Alignment.center,
+                                              fit: BoxFit.cover,
+                                            )),
+                                        Positioned(
+                                            right: 10,
+                                            top: 10,
+                                            child: TextButton(
+                                              onPressed: ()=>Navigator.pop(context),
+                                              child: Card(child: Padding(
+                                                padding: const EdgeInsets.all(4.0),
+                                                child: Icon(Icons.close, color: Colors.black,),
+                                              ),),
+                                            ))
+                                      ],
+                                    ),
 
                                   ),
                                 );
@@ -87,17 +86,18 @@ class _MyAuctionSalesState extends State<MyAuctionSales> {
                       ),
                     ),
                   ),
-                  trailing: Card(
-                    elevation: 10,
-                    color: appColor,
-                    child: Padding(
-                      padding: const EdgeInsets.all(2.0),
-                      child: Text("10", style: TextStyle(color: Colors.white),),
-                    ),
-                  ),
+                  trailing: index % 2 == 0? Tooltip(
+                      message: "Pending response",
+                      child: Icon(Icons.pending_actions)): Tooltip(
+                      message: "Product Found...",
+                      child: Icon(Icons.done_all_sharp, color: Colors.green,))
                 ),
               );
             }),
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: appColor,
+        child: Icon(Icons.add),
       ),
     );
   }

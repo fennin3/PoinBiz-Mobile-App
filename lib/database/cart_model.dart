@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 part 'cart_model.g.dart';
 
 
-@HiveType(typeId: 0)
+@HiveType(typeId: 1)
 class CartModel{
   @HiveField(0)
   final String title;
@@ -20,5 +20,15 @@ class CartModel{
 
   CartModel({this.quantity, this.price, this.title, this.image});
 
+
+}
+
+
+@HiveType(typeId: 0)
+class SearchedWord{
+  @HiveField(0)
+  final String text;
+
+  SearchedWord({this.text});
 
 }

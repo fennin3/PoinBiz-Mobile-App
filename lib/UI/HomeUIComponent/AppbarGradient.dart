@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:treva_shop_flutter/API/provider_class.dart';
 import 'package:treva_shop_flutter/UI/AcountUIComponent/Profile.dart';
 import 'package:treva_shop_flutter/UI/HomeUIComponent/Search.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:treva_shop_flutter/UI/LoginOrSignup/ChoseLoginOrSignup.dart';
-
+import 'package:provider/provider.dart';
 class AppbarGradient extends StatefulWidget {
   final scaKey;
   AppbarGradient({@required this.scaKey});
@@ -17,7 +18,7 @@ class _AppbarGradientState extends State<AppbarGradient> {
     /// Build Appbar in layout home
   @override
   Widget build(BuildContext context) {
-
+    final _pro = Provider.of<PoinBizProvider>(context);
     /// Create responsive height and padding
     final MediaQueryData media = MediaQuery.of(context);
     final double statusBarHeight = MediaQuery.of(context).padding.top;
@@ -45,8 +46,9 @@ class _AppbarGradientState extends State<AppbarGradient> {
           /// if user click shape white in appbar navigate to search layout
           InkWell(
             onTap: () {
+              if(_pro.allProducts != null)
               Navigator.of(context).push(PageRouteBuilder(
-                  pageBuilder: (_, __, ___) => searchAppbar(),
+                  pageBuilder: (_, __, ___) => searchAppbar(data: {"products":_pro.allProducts},),
                   /// transtation duration in animation
                   transitionDuration: Duration(milliseconds: 750),
                   /// animation route to search layout

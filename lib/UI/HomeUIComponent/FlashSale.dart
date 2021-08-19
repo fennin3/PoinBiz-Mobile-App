@@ -10,15 +10,14 @@ import 'package:treva_shop_flutter/UI/HomeUIComponent/Home.dart';
 class flashSale extends StatefulWidget {
   @override
   _flashSaleState createState() => _flashSaleState();
-
 }
 
 class _flashSaleState extends State<flashSale> {
-
   ///
   /// Get image data dummy from firebase server
   ///
-  var imageNetwork = NetworkImage("https://firebasestorage.googleapis.com/v0/b/beauty-look.appspot.com/o/Screenshot_20181005-213938.png?alt=media&token=8c1abb09-4acf-45cf-9383-2f94d93f4ec9");
+  var imageNetwork = NetworkImage(
+      "https://firebasestorage.googleapis.com/v0/b/beauty-look.appspot.com/o/Screenshot_20181005-213938.png?alt=media&token=8c1abb09-4acf-45cf-9383-2f94d93f4ec9");
 
   ///
   /// check the condition is right or wrong for image loaded or no
@@ -27,10 +26,12 @@ class _flashSaleState extends State<flashSale> {
 
   @override
   var hourssub, minutesub, secondsub;
+
   /// CountDown for timer
   CountDown hours, minutes, seconds;
   int hourstime, minute, second = 0;
   SaleItem itemSale;
+
   ///
   /// SetState after imageNetwork loaded to change list card
   /// And
@@ -68,11 +69,12 @@ class _flashSaleState extends State<flashSale> {
   /// To set duration initState auto start if FlashSale Layout open
   @override
   void initState() {
-
-  Timer(Duration(seconds: 3),(){
-setState(() {
-  loadImage=false;
-});
+    Timer(Duration(seconds: 3), () {
+      if (mounted) {
+        setState(() {
+          loadImage = false;
+        });
+      }
     });
 
     hours = new CountDown(new Duration(hours: 24));
@@ -128,6 +130,7 @@ setState(() {
                       ),
                     ),
                     Padding(padding: EdgeInsets.only(left: 20.0)),
+
                     /// Get a countDown variable
                     Text(
                       hourstime.toString() +
@@ -146,6 +149,7 @@ setState(() {
                   ],
                 ),
               ),
+
               ///
               ///
               /// check the condition if image data from server firebase loaded or no
@@ -154,7 +158,9 @@ setState(() {
               ///
               ///
               /// Create a GridView
-            loadImage?_loadingImageAnimation(context):_imageLoaded(context)
+              loadImage
+                  ? _loadingImageAnimation(context)
+                  : _imageLoaded(context)
             ],
           ),
         ),
@@ -167,6 +173,7 @@ setState(() {
 class itemGrid extends StatelessWidget {
   /// Declare FlashSaleItem.dart get a data from FlashSaleItem.dart
   SaleItem itemSale;
+
   itemGrid(this.itemSale);
 
   @override
@@ -218,7 +225,8 @@ class itemGrid extends StatelessWidget {
                                       padding: EdgeInsets.all(30.0),
                                       child: InkWell(
                                         child: Hero(
-                                            tag: "hero-flashsale-${itemSale.id}",
+                                            tag:
+                                                "hero-flashsale-${itemSale.id}",
                                             child: Image.asset(
                                               itemSale.image,
                                               width: 300.0,
@@ -376,16 +384,18 @@ class itemGrid extends StatelessWidget {
   }
 }
 
-
 /// Component Card item for loading image
 class loadingItemGrid extends StatelessWidget {
   @override
   SaleItem itemSale;
+
   loadingItemGrid(this.itemSale);
+
   final color = Colors.black38;
+
   Widget build(BuildContext context) {
     MediaQueryData mediaQueryData = MediaQuery.of(context);
-    return  Row(
+    return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Column(
@@ -425,7 +435,8 @@ class loadingItemGrid extends StatelessWidget {
                         width: mediaQueryData.size.width / 4.1,
                         color: Colors.black12,
                       ),
-                    ),   Padding(
+                    ),
+                    Padding(
                       padding: EdgeInsets.only(left: 10.0, top: 10.0),
                       child: Container(
                         height: 8.0,
@@ -475,27 +486,26 @@ class loadingItemGrid extends StatelessWidget {
                             color: Colors.black38,
                           ),
                           Padding(
-                            padding: const EdgeInsets.only(left:5.0),
+                            padding: const EdgeInsets.only(left: 5.0),
                             child: Container(
                               height: 6.0,
-                                width: mediaQueryData.size.width / 5.5,
-                                color: Colors.black12,
+                              width: mediaQueryData.size.width / 5.5,
+                              color: Colors.black12,
                             ),
                           ),
                         ],
                       ),
                     ),
-
                     Padding(
                       padding: const EdgeInsets.only(
                           top: 24.0, left: 10.0, bottom: 15.0),
                       child: Container(
                         height: 7.0,
-                        width: mediaQueryData.size.width/2.5,
+                        width: mediaQueryData.size.width / 2.5,
                         decoration: BoxDecoration(
                             color: Colors.black12,
                             borderRadius:
-                            BorderRadius.all(Radius.circular(4.0)),
+                                BorderRadius.all(Radius.circular(4.0)),
                             shape: BoxShape.rectangle),
                       ),
                     )
@@ -515,30 +525,7 @@ class loadingItemGrid extends StatelessWidget {
 /// Calling imageLoading animation for set a grid layout
 ///
 ///
-Widget _loadingImageAnimation(BuildContext context){
-  MediaQueryData mediaQueryData = MediaQuery.of(context);
- return GridView.count(
-    crossAxisCount: 2,
-    shrinkWrap: true,
-    childAspectRatio: mediaQueryData.size.height / 1300,
-    crossAxisSpacing: 0.0,
-    mainAxisSpacing: 0.0,
-    primary: false,
-    children: List.generate(
-      /// Get data in flashSaleItem.dart (ListItem folder)
-      flashData.length,
-          (index) => loadingItemGrid(flashData[index]),
-    ),
-  );
-}
-
-
-///
-///
-/// Calling ImageLoaded animation for set a grid layout
-///
-///
-Widget _imageLoaded(BuildContext context){
+Widget _loadingImageAnimation(BuildContext context) {
   MediaQueryData mediaQueryData = MediaQuery.of(context);
   return GridView.count(
     crossAxisCount: 2,
@@ -550,7 +537,29 @@ Widget _imageLoaded(BuildContext context){
     children: List.generate(
       /// Get data in flashSaleItem.dart (ListItem folder)
       flashData.length,
-          (index) => itemGrid(flashData[index]),
+      (index) => loadingItemGrid(flashData[index]),
+    ),
+  );
+}
+
+///
+///
+/// Calling ImageLoaded animation for set a grid layout
+///
+///
+Widget _imageLoaded(BuildContext context) {
+  MediaQueryData mediaQueryData = MediaQuery.of(context);
+  return GridView.count(
+    crossAxisCount: 2,
+    shrinkWrap: true,
+    childAspectRatio: mediaQueryData.size.height / 1300,
+    crossAxisSpacing: 0.0,
+    mainAxisSpacing: 0.0,
+    primary: false,
+    children: List.generate(
+      /// Get data in flashSaleItem.dart (ListItem folder)
+      flashData.length,
+      (index) => itemGrid(flashData[index]),
     ),
   );
 }
