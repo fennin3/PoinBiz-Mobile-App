@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:treva_shop_flutter/API/provider_class.dart';
+import 'package:treva_shop_flutter/Components/addreview.dart';
 import 'package:treva_shop_flutter/Components/fav_widget.dart';
 import 'package:treva_shop_flutter/Library/carousel_pro/carousel_pro.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +11,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_rating/flutter_rating.dart';
 import 'package:treva_shop_flutter/UI/HomeUIComponent/ReviewLayout.dart';
 import 'package:hexcolor/hexcolor.dart';
-
+import 'package:treva_shop_flutter/constant.dart';
 
 class detailProduk extends StatefulWidget {
   Map gridItem;
@@ -24,9 +26,55 @@ class detailProduk extends StatefulWidget {
 class _detailProdukState extends State<detailProduk> {
   double rating = 3.5;
   int starCount = 5;
+
   /// Declaration List item HomeGridItemRe....dart Class
   final Map gridItem;
+
   _detailProdukState(this.gridItem);
+
+  double rate = 0;
+
+  int calRate() {
+    if (widget.gridItem['reviews'].length > 0) {
+      for (var rev in widget.gridItem['reviews']) {
+        setState(() {
+          rate += double.parse(rev['rating']);
+        });
+      }
+    }
+
+    if (rate > 0) {
+      setState(() {
+        rate = rate / widget.gridItem['reviews'].length;
+      });
+    }
+  }
+
+  void addReview(){
+
+    showModalBottomSheet(
+        isScrollControlled: true,
+
+        enableDrag: true,
+        isDismissible: false,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(topRight: Radius.circular(20), topLeft: Radius.circular(20))
+        ),
+        context: context, builder: (context){
+      return Wrap(
+        children: [
+          AddReview()
+        ],
+      );
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    calRate();
+  }
 
   @override
   static BuildContext ctx;
@@ -36,7 +84,7 @@ class _detailProdukState extends State<detailProduk> {
   final GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
 
   /// BottomSheet for view more in specification
-  void _bottomSheet() {
+  void _bottomSheet(String text) {
     showModalBottomSheet(
         context: context,
         builder: (builder) {
@@ -46,7 +94,6 @@ class _detailProdukState extends State<detailProduk> {
               child: Padding(
                 padding: const EdgeInsets.only(top: 2.0),
                 child: Container(
-                  height: 1500.0,
                   decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.only(
@@ -65,9 +112,7 @@ class _detailProdukState extends State<detailProduk> {
                       Padding(
                         padding: const EdgeInsets.only(
                             top: 20.0, left: 20.0, right: 20.0, bottom: 20.0),
-                        child: Text(
-                            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen.",
-                            style: _detailText),
+                        child: Text("$text", style: _detailText),
                       ),
 
                       // Padding(
@@ -110,7 +155,8 @@ class _detailProdukState extends State<detailProduk> {
 
   /// Variable Component UI use in bottom layout "Top Rated Products"
   var _suggestedItem = Padding(
-    padding: const EdgeInsets.only(left: 15.0, right: 20.0, top: 30.0, bottom: 20.0),
+    padding:
+        const EdgeInsets.only(left: 15.0, right: 20.0, top: 30.0, bottom: 20.0),
     child: Container(
       height: 280.0,
       child: Column(
@@ -197,11 +243,11 @@ class _detailProdukState extends State<detailProduk> {
               alignment: AlignmentDirectional(-1.0, -0.8),
               children: <Widget>[
                 IconButton(
-                  onPressed: null,
+                    onPressed: null,
                     icon: Icon(
-                  Icons.shopping_cart,
-                  color: Colors.black26,
-                )),
+                      Icons.shopping_cart,
+                      color: Colors.black26,
+                    )),
                 CircleAvatar(
                   radius: 10.0,
                   backgroundColor: Colors.red,
@@ -251,19 +297,16 @@ class _detailProdukState extends State<detailProduk> {
                               images: [
                                 NetworkImage(gridItem['image']['path']),
                                 for (var img in gridItem['gallery'])
-                                NetworkImage(img['path']),
-
+                                  NetworkImage(img['path']),
                               ],
                             ),
                           ),
                         ),
                       ),
-                      Positioned(
-                          bottom: 10,
-                          right: 10,
-                          child: FavWidget())
+                      Positioned(bottom: 10, right: 10, child: FavWidget())
                     ],
                   ),
+
                   /// Background white title,price and ratting
                   Container(
                     decoration: BoxDecoration(color: Colors.white, boxShadow: [
@@ -283,8 +326,8 @@ class _detailProdukState extends State<detailProduk> {
                             style: _customTextStyle,
                           ),
                           Padding(padding: EdgeInsets.only(top: 5.0)),
-                          Text("GHc " +
-                            gridItem['price'].toString(),
+                          Text(
+                            "GHc " + gridItem['price'].toString(),
                             style: _customTextStyle,
                           ),
                           Padding(padding: EdgeInsets.only(top: 10.0)),
@@ -305,8 +348,8 @@ class _detailProdukState extends State<detailProduk> {
                                       width: 75.0,
                                       decoration: BoxDecoration(
                                         color: Colors.lightGreen,
-                                        borderRadius: BorderRadius
-                                            .all(Radius.circular(20.0)),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(20.0)),
                                       ),
                                       child: Row(
                                         crossAxisAlignment:
@@ -315,7 +358,7 @@ class _detailProdukState extends State<detailProduk> {
                                             MainAxisAlignment.center,
                                         children: <Widget>[
                                           Text(
-                                            "4.5",
+                                            "$rate",
                                             style:
                                                 TextStyle(color: Colors.white),
                                           ),
@@ -335,10 +378,10 @@ class _detailProdukState extends State<detailProduk> {
                                 Padding(
                                   padding: const EdgeInsets.only(right: 15.0),
                                   child: Text(
-                                    "654 Sales",
+                                    "${widget.gridItem['stock']} Available",
                                     style: TextStyle(
                                         color: Colors.black54,
-                                        fontSize: 15.0,
+                                        fontSize: 17.0,
                                         fontWeight: FontWeight.w500),
                                   ),
                                 ),
@@ -349,12 +392,11 @@ class _detailProdukState extends State<detailProduk> {
                       ),
                     ),
                   ),
+
                   /// Background white for chose Size and Color
                   Padding(
                     padding: const EdgeInsets.only(top: 10.0),
                     child: Container(
-
-
                       decoration:
                           BoxDecoration(color: Colors.white, boxShadow: [
                         BoxShadow(
@@ -364,7 +406,8 @@ class _detailProdukState extends State<detailProduk> {
                         )
                       ]),
                       child: Padding(
-                        padding: const EdgeInsets.only(top: 20.0, left: 20.0, bottom: 20),
+                        padding: const EdgeInsets.only(
+                            top: 20.0, left: 20.0, bottom: 20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
@@ -373,19 +416,25 @@ class _detailProdukState extends State<detailProduk> {
                               scrollDirection: Axis.horizontal,
                               child: Row(
                                 children: <Widget>[
-                                  for(var size in gridItem['sizes'])
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 15.0, top: 20),
-                                    child: InkWell(
-                                        onTap: (){
-                                          setState(() {
-                                            print(gridItem['sizes'].indexOf(size));
-                                            _nu=gridItem['sizes'].indexOf(size);
-                                          });
-                                        },
-                                        child: SizeWidget(text: "${size['name']}", index: gridItem['sizes'].indexOf(size),nu: _nu,))
-                                  ),
-
+                                  for (var size in gridItem['sizes'])
+                                    Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 15.0, top: 20),
+                                        child: InkWell(
+                                            onTap: () {
+                                              setState(() {
+                                                print(gridItem['sizes']
+                                                    .indexOf(size));
+                                                _nu = gridItem['sizes']
+                                                    .indexOf(size);
+                                              });
+                                            },
+                                            child: SizeWidget(
+                                              text: "${size['name']}",
+                                              index: gridItem['sizes']
+                                                  .indexOf(size),
+                                              nu: _nu,
+                                            ))),
                                 ],
                               ),
                             ),
@@ -403,18 +452,24 @@ class _detailProdukState extends State<detailProduk> {
                               scrollDirection: Axis.horizontal,
                               child: Row(
                                 children: <Widget>[
-                                  for(var color in gridItem['colors'])
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 20.0, top: 20),
-                                    child: InkWell(
-                                        onTap: (){
-                                          setState(() {
-                                            _num=gridItem['colors'].indexOf(color);
-                                          });
-                                        },
-                                        child: ColorWidget(color: HexColor(color['code']), index: gridItem['colors'].indexOf(color), nu: _num,)),
-                                  ),
-
+                                  for (var color in gridItem['colors'])
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 20.0, top: 20),
+                                      child: InkWell(
+                                          onTap: () {
+                                            setState(() {
+                                              _num = gridItem['colors']
+                                                  .indexOf(color);
+                                            });
+                                          },
+                                          child: ColorWidget(
+                                            color: HexColor(color['code']),
+                                            index: gridItem['colors']
+                                                .indexOf(color),
+                                            nu: _num,
+                                          )),
+                                    ),
                                 ],
                               ),
                             ),
@@ -456,13 +511,13 @@ class _detailProdukState extends State<detailProduk> {
                                   right: 20.0,
                                   bottom: 10.0,
                                   left: 20.0),
-                              child: Text(gridItem['description'] + "dsdj sjdksdj bdhvbs hdbvv h dhvbsv hvsbkj dkvbds vkvv hvkdbskv v dvbdv vjnskvn vksnv nvksvn vn vnksjvn jkvns vnvjksd nvdknvs dvnskvn nvjkdjsv nvjsdkvn vnjksvnd",
+                              child: Text(gridItem['description'],
                                   style: _detailText),
                             ),
                             Center(
                               child: InkWell(
                                 onTap: () {
-                                  _bottomSheet();
+                                  _bottomSheet(gridItem['description']);
                                 },
                                 child: Text(
                                   "View More",
@@ -485,10 +540,8 @@ class _detailProdukState extends State<detailProduk> {
                   Padding(
                     padding: const EdgeInsets.only(top: 10.0),
                     child: Container(
-                      height:415.0,
-                      width: 600.0,
                       decoration:
-                      BoxDecoration(color: Colors.white, boxShadow: [
+                          BoxDecoration(color: Colors.white, boxShadow: [
                         BoxShadow(
                           color: Color(0xFF656565).withOpacity(0.15),
                           blurRadius: 1.0,
@@ -496,31 +549,57 @@ class _detailProdukState extends State<detailProduk> {
                         )
                       ]),
                       child: Padding(
-                        padding: EdgeInsets.only(top: 20.0,left: 20.0),
+                        padding: EdgeInsets.only(top: 20.0, left: 20.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
-                                Text('Reviews',style: _subHeaderCustomStyle,),
+                                Text(
+                                  'Reviews',
+                                  style: _subHeaderCustomStyle,
+                                ),
                                 Padding(
-                                  padding: const EdgeInsets.only(left:20.0,top: 15.0,bottom: 15.0),
+                                  padding: const EdgeInsets.only(
+                                      left: 20.0, top: 15.0, bottom: 15.0),
                                   child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     children: <Widget>[
                                       InkWell(
                                         child: Padding(
-                                            padding:EdgeInsets.only(top:2.0,right: 3.0),
-                                            child: Text('View All',style: _subHeaderCustomStyle.copyWith(color: Colors.indigoAccent,fontSize: 14.0),)),
+                                            padding: EdgeInsets.only(
+                                                top: 2.0, right: 3.0),
+                                            child: Text(
+                                              'View All',
+                                              style: _subHeaderCustomStyle
+                                                  .copyWith(
+                                                      color:
+                                                          Colors.indigoAccent,
+                                                      fontSize: 14.0),
+                                            )),
                                         onTap: () {
-                                          Navigator.of(context).push(PageRouteBuilder(pageBuilder: (_,__,___)=>ReviewsAll()));
+                                          Navigator.of(context).push(
+                                              PageRouteBuilder(
+                                                  pageBuilder: (_, __, ___) =>
+                                                      ReviewsAll(
+                                                        rating: rate,
+                                                        reviews:
+                                                            widget.gridItem[
+                                                                'reviews'],
+                                                      )));
                                         },
                                       ),
                                       Padding(
-                                        padding: const EdgeInsets.only(right: 15.0,top: 2.0),
-                                        child: Icon(Icons.arrow_forward_ios,size: 18.0,color: Colors.black54,),
+                                        padding: const EdgeInsets.only(
+                                            right: 15.0, top: 2.0),
+                                        child: Icon(
+                                          Icons.arrow_forward_ios,
+                                          size: 18.0,
+                                          color: Colors.black54,
+                                        ),
                                       )
                                     ],
                                   ),
@@ -535,51 +614,81 @@ class _detailProdukState extends State<detailProduk> {
                                       StarRating(
                                         size: 25.0,
                                         starCount: 5,
-                                        rating: 4.0,
+                                        rating: rate,
                                         color: Colors.yellow,
                                       ),
                                       SizedBox(width: 5.0),
-                                      Text('8 Reviews')
+                                      Text(
+                                          '${widget.gridItem['reviews'].length} Reviews')
                                     ]),
                               ],
                             ),
-                            Padding(padding: EdgeInsets.only(left: 0.0,right: 20.0,top: 15.0,bottom: 7.0),
-                              child: _line(),
+                            if (widget.gridItem['reviews'].length > 4)
+                              for (var review
+                                  in widget.gridItem['reviews'].sublist(0, 3))
+                                Column(
+                                  children: [
+                                    Padding(
+                                      padding: EdgeInsets.only(
+                                          left: 0.0,
+                                          right: 20.0,
+                                          top: 15.0,
+                                          bottom: 7.0),
+                                      child: _line(),
+                                    ),
+                                    _buildRating(
+                                        '${review['created']}',
+                                        '${review['comment']}',
+                                        rate,
+                                        "${review['user']['avatar']['path']}"),
+                                  ],
+                                )
+                            else
+                              for (var review in widget.gridItem['reviews'])
+                                Column(
+                                  children: [
+                                    Padding(
+                                      padding: EdgeInsets.only(
+                                          left: 0.0,
+                                          right: 20.0,
+                                          top: 15.0,
+                                          bottom: 7.0),
+                                      child: _line(),
+                                    ),
+                                    _buildRating(
+                                        '${review['created']}',
+                                        '${review['comment']}',
+                                        rate,
+                                        "${review['user']['avatar']['path']}"),
+                                  ],
+                                ),
+                            SizedBox(
+                              height: 30,
                             ),
-                            _buildRating('18 Nov 2018',
-                                'Item delivered in good condition. I will recommend to other buyer.',
-                                    (rating) {
-                                  setState(() {
-                                    this.rating = rating;
-                                  });
-                                },
-                                "assets/avatars/avatar-1.jpg"
-                            ),
-                            Padding(padding: EdgeInsets.only(left: 0.0,right: 20.0,top: 15.0,bottom: 7.0),
-                              child: _line(),
-                            ),
-                            _buildRating('18 Nov 2018',
-                                'Item delivered in good condition. I will recommend to other buyer.',
-                                    (rating) {
-                                  setState(() {
-                                    this.rating = rating;
-                                  });
-                                },
-                                "assets/avatars/avatar-4.jpg"
-                            ),
-                            Padding(padding: EdgeInsets.only(left: 0.0,right: 20.0,top: 15.0,bottom: 7.0),
-                              child: _line(),
-                            ),
-                            _buildRating('18 Nov 2018',
-                                'Item delivered in good condition. I will recommend to other buyer.',
-                                    (rating) {
-                                  setState(() {
-                                    this.rating = rating;
-                                  });
-                                },
-                                "assets/avatars/avatar-2.jpg"
-                            ),
-                            Padding(padding: EdgeInsets.only(bottom: 20.0)),
+                            ///Add Review Button
+                            // Padding(
+                            //   padding: const EdgeInsets.only(right: 20.0),
+                            //   child: Row(
+                            //     mainAxisAlignment: MainAxisAlignment.end,
+                            //     children: [
+                            //       InkWell(
+                            //         onTap: ()=>addReview(),
+                            //         child: Container(
+                            //             color: Colors.indigoAccent,
+                            //             child: Padding(
+                            //               padding: const EdgeInsets.all(10.0),
+                            //               child: Text(
+                            //                 "Add Review",
+                            //                 style: TextStyle(
+                            //                     color: Colors.white,
+                            //                     fontSize: 16),
+                            //               ),
+                            //             )),
+                            //       ),
+                            //     ],
+                            //   ),
+                            // ),
+                            Padding(padding: EdgeInsets.only(bottom: 30.0)),
                           ],
                         ),
                       ),
@@ -597,15 +706,12 @@ class _detailProdukState extends State<detailProduk> {
           /// and Increase a valueItemChart + 1
           InkWell(
             onTap: () {
-              _pro.addToCart(
-                  {
-                    "title":gridItem['name'],
-                    "image":gridItem['image']['path'],
-                    "price": gridItem['price'].toString(),
-                    "quantity":"1"
-                  },
-                _key
-              );
+              _pro.addToCart({
+                "title": gridItem['name'],
+                "image": gridItem['image']['path'],
+                "price": gridItem['price'].toString(),
+                "quantity": "1"
+              }, _key);
 
             },
             child: Padding(
@@ -616,18 +722,27 @@ class _detailProdukState extends State<detailProduk> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Container(
-                      height: 40.0,
-                      width: 60.0,
-                      decoration: BoxDecoration(
-                          color: Colors.white12.withOpacity(0.1),
-                          border: Border.all(color: Colors.black12)),
-                      child: Center(
-                        child: Image.asset(
-                          "assets/icon/shopping-cart.png",
-                          height: 23.0,
-                        ),
-                      ),
-                    ),
+                        height: 40.0,
+                        width: 140.0,
+                        decoration: BoxDecoration(
+                            color: Colors.indigoAccent,
+                            border: Border.all(color: Colors.black12)),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Text(
+                              "Add To Cart",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                  color: Colors.white),
+                            ),
+                            Image.asset(
+                              "assets/icon/shopping-cart.png",
+                              height: 23.0,
+                            ),
+                          ],
+                        )),
 
                     /// Chat Icon
                     // InkWell(
@@ -680,25 +795,24 @@ class _detailProdukState extends State<detailProduk> {
     );
   }
 
-
-  Widget _buildRating(String date, String details, Function changeRating,String image) {
+  Widget _buildRating(String date, String details, double rate, String image) {
     return ListTile(
       leading: Container(
         height: 45.0,
         width: 45.0,
         decoration: BoxDecoration(
-            image: DecorationImage(image: AssetImage(image),fit: BoxFit.cover),
-            borderRadius: BorderRadius.all(Radius.circular(50.0))
-        ),
+            image:
+                DecorationImage(image: NetworkImage(image), fit: BoxFit.cover),
+            borderRadius: BorderRadius.all(Radius.circular(50.0))),
       ),
       title: Row(
         children: <Widget>[
           StarRating(
-              size: 20.0,
-              rating: 3.5,
-              starCount: 5,
-              color: Colors.yellow,
-              onRatingChanged: changeRating),
+            size: 20.0,
+            rating: rate,
+            starCount: 5,
+            color: Colors.yellow,
+          ),
           SizedBox(width: 8.0),
           Text(
             date,
@@ -706,7 +820,10 @@ class _detailProdukState extends State<detailProduk> {
           )
         ],
       ),
-      subtitle: Text(details,style: _detailText,),
+      subtitle: Text(
+        details,
+        style: _detailText,
+      ),
     );
   }
 }
@@ -739,8 +856,6 @@ class SizeWidget extends StatelessWidget {
   }
 }
 
-
-
 class ColorWidget extends StatelessWidget {
   final color;
   final index;
@@ -758,12 +873,9 @@ class ColorWidget extends StatelessWidget {
           border: Border.all(
               color: index != nu ? Colors.black54 : Colors.indigoAccent),
           shape: BoxShape.circle),
-
     );
   }
 }
-
-
 
 /// Class for card product in "Top Rated Products"
 class FavoriteItem extends StatelessWidget {
@@ -873,8 +985,8 @@ class FavoriteItem extends StatelessWidget {
   }
 }
 
-Widget _line(){
-  return  Container(
+Widget _line() {
+  return Container(
     height: 0.9,
     width: double.infinity,
     color: Colors.black12,

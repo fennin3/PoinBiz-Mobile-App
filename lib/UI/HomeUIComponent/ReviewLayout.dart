@@ -4,13 +4,16 @@ import 'package:treva_shop_flutter/Library/Expanded/ExpandedDetailRatting.dart';
 import 'package:treva_shop_flutter/Library/Expanded/ExpandedDetailReviews.dart';
 
 class ReviewsAll extends StatefulWidget {
+  final double rating;
+  final List reviews;
+
+  ReviewsAll({this.rating, this.reviews});
   @override
   _ReviewsAllState createState() => _ReviewsAllState();
 }
 
 class _ReviewsAllState extends State<ReviewsAll> {
   @override
-  double rating = 3.5;
   int starCount = 5;
 
   /// Custom Text for Detail title
@@ -59,264 +62,58 @@ class _ReviewsAllState extends State<ReviewsAll> {
                             StarRating(
                               size: 25.0,
                               starCount: 5,
-                              rating: rating,
+                              rating: widget.rating,
                               color: Colors.yellow,
                             ),
+
                             SizedBox(width: 5.0),
-                            Text('8 Reviews')
+                            Text('${widget.reviews.length} Reviews')
                           ]),
                     ],
                   ),
                 ),
-                Padding(padding: EdgeInsets.only(left: 20.0,right: 20.0,top: 15.0,bottom: 7.0),
-                  child: _line(),
-                ),
-                ListTile(
-                  leading: Container(
-                    height: 45.0,
-                    width: 45.0,
-                    decoration: BoxDecoration(
-                        image: DecorationImage(image: AssetImage("assets/avatars/avatar-4.jpg"),fit: BoxFit.cover),
-                        borderRadius: BorderRadius.all(Radius.circular(50.0))
-                    ),
-                  ),
-                  title: Row(
-                    children: <Widget>[
-                      StarRating(
-                        size: 20.0,
-                        rating: rating,
-                        starCount: starCount,
-                        color: Colors.yellow,
-                        onRatingChanged:   (rating) {
-                          setState(() {
-                            this.rating = rating;
-                          });
-                        },),
-                      SizedBox(width: 8.0),
-                      Text(
-                        "01 Jan 2019",
-                        style: TextStyle(fontSize: 12.0),
-                      )
-                    ],
-                  ),
-                  subtitle:  ExpansionTileReview(
-                    title:Text(
-                      'Item delivered in good condition. I will recommend to other buyer',style: _detailText,
-                    ),
-                    children:[
-                      SizedBox(height: 10.0),
-                      Text("Very Recommended item i love it very love it",style: _detailText,),
-                      SizedBox(height: 10.0),
-                      Text("Item delivered in good condition. I will recommend to other buyer.",style: _detailText,),
-                    ],
-//                              child: Text("Read More",style: _subHeaderCustomStyle.copyWith(fontSize: 13.0,color: Colors.blueAccent),
-//                              textAlign: TextAlign.end,
-//                              ),
-                  ),
-                ),
-                Padding(padding: EdgeInsets.only(left: 20.0,right: 20.0,top: 15.0,bottom: 7.0),
-                  child: _line(),
-                ),
-                _buildRating('18 Nov 2018',
-                    'Item delivered in good condition. I will recommend to other buyer.',
-                        (rating) {
-                      setState(() {
-                        this.rating = rating;
-                      });
-                    },
-                    "assets/avatars/avatar-1.jpg"
-                ),
-                Padding(padding: EdgeInsets.only(left: 20.0,right: 20.0,top: 15.0,bottom: 7.0),
-                  child: _line(),
-                ),
-                _buildRating('18 Nov 2018',
-                    'Item delivered in good condition. I will recommend to other buyer.',
-                        (rating) {
-                      setState(() {
-                        this.rating = rating;
-                      });
-                    },
-                    "assets/avatars/avatar-4.jpg"
-                ),
-                Padding(padding: EdgeInsets.only(left: 20.0,right: 20.0,top: 15.0,bottom: 7.0),
-                  child: _line(),
-                ),
-                _buildRating('18 Nov 2018',
-                    'Item delivered in good condition. I will recommend to other buyer.',
-                        (rating) {
-                      setState(() {
-                        this.rating = rating;
-                      });
-                    },
-                    "assets/avatars/avatar-2.jpg"
-                ),
-                Padding(padding: EdgeInsets.only(left: 20.0,right: 20.0,top: 15.0,bottom: 7.0),
-                  child: _line(),
-                ),
-                _buildRating('18 Nov 2018',
-                    'Item delivered in good condition. I will recommend to other buyer.',
-                        (rating) {
-                      setState(() {
-                        this.rating = rating;
-                      });
-                    },
-                    "assets/avatars/avatar-3.jpg"
-                ),
-                Padding(padding: EdgeInsets.only(left: 20.0,right: 20.0,top: 15.0,bottom: 7.0),
-                  child: _line(),
-                ),
-                _buildRating('18 Nov 2018',
-                    'Item delivered in good condition. I will recommend to other buyer.',
-                        (rating) {
-                      setState(() {
-                        this.rating = rating;
-                      });
-                    },
-                    "assets/avatars/avatar-5.jpg"
-                ),
-                SizedBox(height: 10.0,),
-                _line(),
+                for(var review in widget.reviews)
                 Column(
-                  children: <Widget>[
-                    ExpansionTileCustomRatting(
-                      title: _buildRating('18 Nov 2018',
-                          'Item delivered in good condition. I will recommend to other buyer.',
-                              (rating) {
-                            setState(() {
-                              this.rating = rating;
-                            });
-                          },
-                          "assets/avatars/avatar-6.jpg"
+                  children: [
+                    Padding(padding: EdgeInsets.only(left: 20.0,right: 20.0,top: 15.0,bottom: 7.0),
+                      child: _line(),
+                    ),
+
+                    ListTile(
+                      leading: Container(
+                        height: 45.0,
+                        width: 45.0,
+                        decoration: BoxDecoration(
+                            image: DecorationImage(image: AssetImage("assets/avatars/avatar-4.jpg"),fit: BoxFit.cover),
+                            borderRadius: BorderRadius.all(Radius.circular(50.0))
+                        ),
                       ),
-                      children:[
-                        Padding(padding: EdgeInsets.only(left: 20.0,right: 20.0,top: 15.0,bottom: 7.0),
-                          child: _line(),
-                        ),
-                        _buildRating('18 Nov 2018',
-                            'Item delivered in good condition. I will recommend to other buyer.',
-                                (rating) {
-                              setState(() {
-                                this.rating = rating;
-                              });
-                            },
-                            "assets/avatars/avatar-1.jpg"
-                        ),
-                        Padding(padding: EdgeInsets.only(left: 20.0,right: 20.0,top: 15.0,bottom: 7.0),
-                          child: _line(),
-                        ),
-                        _buildRating('18 Nov 2018',
-                            'Item delivered in good condition. I will recommend to other buyer.',
-                                (rating) {
-                              setState(() {
-                                this.rating = rating;
-                              });
-                            },
-                            "assets/avatars/avatar-3.jpg"
-                        ),
-                        Padding(padding: EdgeInsets.only(left: 20.0,right: 20.0,top: 15.0,bottom: 7.0),
-                          child: _line(),
-                        ),
-                        _buildRating('18 Nov 2018',
-                            'Item delivered in good condition. I will recommend to other buyer.',
-                                (rating) {
-                              setState(() {
-                                this.rating = rating;
-                              });
-                            },
-                            "assets/avatars/avatar-2.jpg"
-                        ),
-                        Padding(padding: EdgeInsets.only(left: 20.0,right: 20.0,top: 15.0,bottom: 7.0),
-                          child: _line(),
-                        ),
-                        _buildRating('18 Nov 2018',
-                            'Item delivered in good condition. I will recommend to other buyer.',
-                                (rating) {
-                              setState(() {
-                                this.rating = rating;
-                              });
-                            },
-                            "assets/avatars/avatar-1.jpg"
-                        ),
-                        Padding(padding: EdgeInsets.only(left: 20.0,right: 20.0,top: 15.0,bottom: 7.0),
-                          child: _line(),
-                        ),
-                        _buildRating('18 Nov 2018',
-                            'Item delivered in good condition. I will recommend to other buyer.',
-                                (rating) {
-                              setState(() {
-                                this.rating = rating;
-                              });
-                            },
-                            "assets/avatars/avatar-5.jpg"
-                        ),
-                        Padding(padding: EdgeInsets.only(left: 20.0,right: 20.0,top: 15.0,bottom: 7.0),
-                          child: _line(),
-                        ),
-                        _buildRating('18 Nov 2018',
-                            'Item delivered in good condition. I will recommend to other buyer.',
-                                (rating) {
-                              setState(() {
-                                this.rating = rating;
-                              });
-                            },
-                            "assets/avatars/avatar-5.jpg"
-                        ),
-                        Padding(padding: EdgeInsets.only(left: 20.0,right: 20.0,top: 15.0,bottom: 7.0),
-                          child: _line(),
-                        ),
-                        _buildRating('18 Nov 2018',
-                            'Item delivered in good condition. I will recommend to other buyer.',
-                                (rating) {
-                              setState(() {
-                                this.rating = rating;
-                              });
-                            },
-                            "assets/avatars/avatar-5.jpg"
-                        ),
-                        Padding(padding: EdgeInsets.only(left: 20.0,right: 20.0,top: 15.0,bottom: 7.0),
-                          child: _line(),
-                        ),
-                        _buildRating('18 Nov 2018',
-                            'Item delivered in good condition. I will recommend to other buyer.',
-                                (rating) {
-                              setState(() {
-                                this.rating = rating;
-                              });
-                            },
-                            "assets/avatars/avatar-5.jpg"
-                        ),
-                        Padding(padding: EdgeInsets.only(left: 20.0,right: 20.0,top: 15.0,bottom: 7.0),
-                          child: _line(),
-                        ),
-                        _buildRating('18 Nov 2018',
-                            'Item delivered in good condition. I will recommend to other buyer.',
-                                (rating) {
-                              setState(() {
-                                this.rating = rating;
-                              });
-                            },
-                            "assets/avatars/avatar-5.jpg"
-                        ),
-                        Padding(padding: EdgeInsets.only(left: 20.0,right: 20.0,top: 15.0,bottom: 7.0),
-                          child: _line(),
-                        ),
-                        _buildRating('18 Nov 2018',
-                            'Item delivered in good condition. I will recommend to other buyer.',
-                                (rating) {
-                              setState(() {
-                                this.rating = rating;
-                              });
-                            },
-                            "assets/avatars/avatar-5.jpg"
-                        ),
-                      ],
-//                              child: Text("Read More",style: _subHeaderCustomStyle.copyWith(fontSize: 13.0,color: Colors.blueAccent),
-//                              textAlign: TextAlign.end,
-//                              ),
+                      title: Row(
+                        children: <Widget>[
+                          StarRating(
+                            size: 20.0,
+                            rating:double.parse(review['rating']),
+                            starCount: starCount,
+                            color: Colors.yellow,
+                          ),
+                          SizedBox(width: 8.0),
+                          Text(
+                            "${review['created']}",
+                            style: TextStyle(fontSize: 12.0),
+                          )
+                        ],
+                      ),
+                      subtitle:  Text("${review['comment']}", style: _detailText,),
                     ),
                   ],
                 ),
-                Padding(padding: EdgeInsets.only(bottom: 40.0)),
+
+
+
+                SizedBox(height: 10.0,),
+
+
+
               ],
             ),
           ),
@@ -353,7 +150,7 @@ class _ReviewsAllState extends State<ReviewsAll> {
       ),
     );
   }
-  Widget _buildRating(String date, String details, Function changeRating,String image) {
+  Widget _buildRating(String date, String details, double rate, String image) {
     return ListTile(
       leading: Container(
         height: 45.0,
@@ -367,10 +164,10 @@ class _ReviewsAllState extends State<ReviewsAll> {
         children: <Widget>[
           StarRating(
               size: 20.0,
-              rating: rating,
+              rating: rate,
               starCount: starCount,
               color: Colors.yellow,
-              onRatingChanged: changeRating),
+              ),
           SizedBox(width: 8.0),
           Text(
             date,

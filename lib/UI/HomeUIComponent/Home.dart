@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_countdown_timer/current_remaining_time.dart';
+import 'package:flutter_rating/flutter_rating.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:treva_shop_flutter/API/provider_class.dart';
 import 'package:treva_shop_flutter/Library/carousel_pro/carousel_pro.dart';
@@ -35,16 +36,19 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
   var hourssub, minutesub, secondsub;
 
   /// CountDown for timer
-  CountDown hours, minutes, seconds;
-  int hourstime, minute, second = 0;
 
   void _getInitData() {
     final _pro = Provider.of<PoinBizProvider>(context, listen: false);
-    _pro.getCartItem();
+
     _pro.getallCategories();
     _pro.getBanners();
     _pro.getPromos();
     _pro.getProducts();
+    _pro.getAddresses();
+    _pro.getCartItem();
+    _pro.getEventCategories();
+    _pro.getAllEvent();
+
   }
 
   @override
@@ -58,23 +62,6 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final _pro = Provider.of<PoinBizProvider>(context, listen: true);
     MediaQueryData mediaQueryData = MediaQuery.of(context);
-    double size = mediaQueryData.size.height;
-
-    /// Navigation to MenuDetail.dart if user Click icon in category Menu like a example camera
-    var onClickMenuIcon = () {
-      Navigator.of(context).push(PageRouteBuilder(
-          pageBuilder: (_, __, ___) => new menuDetail(),
-          transitionDuration: Duration(milliseconds: 750),
-
-          /// Set animation with opacity
-          transitionsBuilder:
-              (_, Animation<double> animation, __, Widget child) {
-            return Opacity(
-              opacity: animation.value,
-              child: child,
-            );
-          }));
-    };
 
     /// Navigation to promoDetail.dart if user Click icon in Week Promotion
     var onClickWeekPromotion = () {
@@ -134,31 +121,27 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        if (banner['caption_one'].length < 1)
-                          Container(
-                              color: appColor,
-                              child: Text(
-                                "${banner['caption_one']}",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    fontSize: 35,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white),
-                              )),
+                        if (banner['caption_one'].length > 1)
+                          Text(
+                            "${banner['caption_one']}",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: 35,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white),
+                          ),
                         SizedBox(
                           height: 3,
                         ),
-                        if (banner['caption_two'].length < 1)
-                          Container(
-                              color: appColor,
-                              child: Text(
-                                "${banner['caption_two']}",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w400,
-                                    color: Colors.white),
-                              )),
+                        if (banner['caption_two'].length > 1)
+                          Text(
+                            "${banner['caption_two']}",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.white),
+                          ),
                       ],
                     ),
                     width: double.infinity,
@@ -402,23 +385,21 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
           Padding(padding: EdgeInsets.only(left: 40.0)),
 
           /// Get a component flashSaleItem class
-          for(var item in _pro.allpromos)
-          Padding(
-            padding: EdgeInsets.only(left: 10.0),
-            child: flashSaleItem(
-              image: item['image']['path'],
-              title: item['product']['name'],
-              normalprice: "Ghc ${item['product']['price']}",
-              discountprice: "\$ 1,300",
-              ratingvalue: "(56)",
-              place: "Ghana",
-              stock: item['product']['stock'].toString(),
-              colorLine: 0xFFFFA500,
-              widthLine: double.infinity,
+          for (var item in _pro.allpromos)
+            Padding(
+              padding: EdgeInsets.only(left: 10.0),
+              child: flashSaleItem(
+                  image: item['image']['path'],
+                  title: item['product']['name'],
+                  normalprice: "Ghc ${item['product']['price']}",
+                  discountprice: "\$ 1,300",
+                  reviews: item['product']['reviews'],
+                  place: "Ghana",
+                  stock: item['product']['stock'].toString(),
+                  colorLine: 0xFFFFA500,
+                  widthLine: double.infinity,
+                  duration: item['duration']),
             ),
-          ),
-
-
         ],
       ),
     );
@@ -667,21 +648,11 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
                       padding: EdgeInsets.only(
                           top: mediaQueryData.padding.top + 35.5)),
 
-                  /// Call var imageSlider
                   imageSlider,
 
-                  /// Call var categoryIcon
                   categoryIcon,
-                  // Padding(
-                  //   padding: EdgeInsets.only(top: 10.0),
-                  // ),
 
-                  /// Call var PromoHorizontalList
-
-
-                  /// Call var a FlashSell, i am sorry Typo :v
-                  if(_pro.allpromos.length > 0)
-                  FlashSell,
+                  if (_pro.allpromos.length > 0) FlashSell,
                   Padding(
                     padding: EdgeInsets.only(top: 10.0),
                   ),
@@ -709,11 +680,41 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
 }
 
 /// ItemGrid in bottom item "Recomended" item
-class ItemGrid extends StatelessWidget {
+class ItemGrid extends StatefulWidget {
   /// Get data from HomeGridItem.....dart class
   Map _data;
 
   ItemGrid(this._data);
+
+  @override
+  State<ItemGrid> createState() => _ItemGridState();
+}
+
+class _ItemGridState extends State<ItemGrid> {
+  double rate = 0;
+
+  int calRate() {
+    if (widget._data['reviews'].length > 0) {
+      for (var rev in widget._data['reviews']) {
+        setState(() {
+          rate += double.parse(rev['rating']);
+        });
+      }
+    }
+
+    if (rate > 0) {
+      setState(() {
+        rate = rate / widget._data['reviews'].length;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    calRate();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -721,8 +722,8 @@ class ItemGrid extends StatelessWidget {
     return InkWell(
       onTap: () {
         Navigator.of(context).push(PageRouteBuilder(
-            pageBuilder: (_, __, ___) => new detailProduk(_data),
-            transitionDuration: Duration(milliseconds: 900),
+            pageBuilder: (_, __, ___) => new detailProduk(widget._data),
+            transitionDuration: Duration(milliseconds: 400),
 
             /// Set animation Opacity in route to detailProduk layout
             transitionsBuilder:
@@ -754,7 +755,7 @@ class ItemGrid extends StatelessWidget {
               children: <Widget>[
                 /// Set Animation image to detailProduk layout
                 Hero(
-                  tag: "hero-grid-${_data['id']}",
+                  tag: "hero-grid-${widget._data['id']}",
                   child: Material(
                     child: InkWell(
                       onTap: () {
@@ -767,9 +768,9 @@ class ItemGrid extends StatelessWidget {
                                   padding: EdgeInsets.all(30.0),
                                   child: InkWell(
                                     child: Hero(
-                                        tag: "hero-grid-${_data['id']}",
+                                        tag: "hero-grid-${widget._data['id']}",
                                         child: Image.network(
-                                          _data['image']['path'],
+                                          widget._data['image']['path'],
                                           width: 300.0,
                                           height: 300.0,
                                           alignment: Alignment.center,
@@ -792,7 +793,8 @@ class ItemGrid extends StatelessWidget {
                                 topLeft: Radius.circular(7.0),
                                 topRight: Radius.circular(7.0)),
                             image: DecorationImage(
-                                image: NetworkImage(_data['image']['path']),
+                                image:
+                                    NetworkImage(widget._data['image']['path']),
                                 fit: BoxFit.cover)),
                       ),
                     ),
@@ -802,27 +804,29 @@ class ItemGrid extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(left: 15.0, right: 15.0),
                   child: Text(
-                    _data['name'],
+                    widget._data['name'],
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                         letterSpacing: 0.5,
                         color: Colors.black54,
                         fontFamily: "Sans",
-                        fontWeight: FontWeight.w500,
-                        fontSize: 13.0),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14.0),
                   ),
                 ),
                 Padding(padding: EdgeInsets.only(top: 1.0)),
                 Padding(
                   padding: const EdgeInsets.only(left: 15.0, right: 15.0),
                   child: Text(
-                    "GHc" + _data['price'].toString(),
+                    "GHc" + widget._data['price'].toString(),
                     style: TextStyle(
                         fontFamily: "Sans",
                         fontWeight: FontWeight.w500,
                         fontSize: 14.0),
                   ),
                 ),
+
+                ///Reviews
                 Padding(
                   padding:
                       const EdgeInsets.only(left: 15.0, right: 15.0, top: 5.0),
@@ -833,12 +837,12 @@ class ItemGrid extends StatelessWidget {
                       Row(
                         children: <Widget>[
                           Text(
-                            "4.5",
+                            "$rate",
                             style: TextStyle(
                                 fontFamily: "Sans",
-                                color: Colors.black26,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 12.0),
+                                color: Colors.black38,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13.0),
                           ),
                           Icon(
                             Icons.star,
@@ -848,7 +852,7 @@ class ItemGrid extends StatelessWidget {
                         ],
                       ),
                       Text(
-                        "4332",
+                        "",
                         style: TextStyle(
                             fontFamily: "Sans",
                             color: Colors.black26,
@@ -873,29 +877,55 @@ class flashSaleItem extends StatefulWidget {
   final String title;
   final String normalprice;
   final String discountprice;
-  final String ratingvalue;
+  final List reviews;
   final String place;
   final String stock;
   final int colorLine;
   final double widthLine;
+  final int duration;
 
   flashSaleItem(
       {this.image,
       this.title,
       this.normalprice,
       this.discountprice,
-      this.ratingvalue,
+      this.reviews,
       this.place,
       this.stock,
       this.colorLine,
-      this.widthLine});
+      this.widthLine,
+      this.duration});
 
   @override
   State<flashSaleItem> createState() => _flashSaleItemState();
 }
 
 class _flashSaleItemState extends State<flashSaleItem> {
-  int endTime = DateTime.now().millisecondsSinceEpoch + 1000 * 60000;
+  double rate = 0;
+
+  int calRate() {
+    if (widget.reviews.length > 0) {
+      for (var rev in widget.reviews) {
+        setState(() {
+          rate += double.parse(rev['rating']);
+        });
+      }
+    }
+
+    if (rate > 0) {
+      setState(() {
+        rate = rate / widget.reviews.length;
+      });
+    }
+  }
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    calRate();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -928,7 +958,7 @@ class _flashSaleItemState extends State<flashSaleItem> {
                     SizedBox(
                       height: 140.0,
                       width: 145.0,
-                      child: Image.asset(
+                      child: Image.network(
                         widget.image,
                         fit: BoxFit.cover,
                       ),
@@ -965,35 +995,17 @@ class _flashSaleItemState extends State<flashSaleItem> {
                       padding: const EdgeInsets.only(left: 10.0, top: 5.0),
                       child: Row(
                         children: <Widget>[
-                          Icon(
-                            Icons.star,
-                            size: 11.0,
+                          StarRating(
+                            size: 18.0,
+                            starCount: 5,
+                            rating: rate,
                             color: Colors.yellow,
                           ),
-                          Icon(
-                            Icons.star,
-                            size: 11.0,
-                            color: Colors.yellow,
-                          ),
-                          Icon(
-                            Icons.star,
-                            size: 11.0,
-                            color: Colors.yellow,
-                          ),
-                          Icon(
-                            Icons.star,
-                            size: 11.0,
-                            color: Colors.yellow,
-                          ),
-                          Icon(
-                            Icons.star_half,
-                            size: 11.0,
-                            color: Colors.yellow,
-                          ),
+                          SizedBox(width: 5,),
                           Text(
-                            widget.ratingvalue,
+                            "$rate",
                             style: TextStyle(
-                                fontSize: 10.0,
+                                fontSize: 13.0,
                                 fontWeight: FontWeight.w500,
                                 fontFamily: "Sans",
                                 color: Colors.black38),
@@ -1005,7 +1017,7 @@ class _flashSaleItemState extends State<flashSaleItem> {
                     Padding(
                       padding: const EdgeInsets.only(top: 10.0, left: 10.0),
                       child: Text(
-                        widget.stock,
+                        widget.stock + " Available",
                         style: TextStyle(
                             fontSize: 10.0,
                             fontWeight: FontWeight.w500,
@@ -1028,7 +1040,7 @@ class _flashSaleItemState extends State<flashSaleItem> {
                     Padding(
                       padding: const EdgeInsets.only(top: 10.0, left: 10.0),
                       child: Text(
-                        "End sale in :",
+                        "Sale ends in :",
                         style: TextStyle(
                           fontFamily: "Sans",
                           fontSize: 11.0,
@@ -1059,10 +1071,10 @@ class _flashSaleItemState extends State<flashSaleItem> {
                     Padding(
                       padding: const EdgeInsets.only(top: 4.0, left: 10.0),
                       child: CountdownTimer(
-                        endTime: endTime,
+                        endTime: widget.duration * 1000,
                         widgetBuilder: (_, CurrentRemainingTime time) {
                           if (time == null) {
-                            return Text('Game over');
+                            return Text('Sale Ended');
                           }
                           return Text(
                               '${time.days ?? 0} : ${time.hours ?? 0} :  ${time.min ?? 0} : ${time.sec ?? 0}');

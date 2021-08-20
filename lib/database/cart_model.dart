@@ -32,3 +32,31 @@ class SearchedWord{
   SearchedWord({this.text});
 
 }
+
+
+@HiveType(typeId: 2)
+class Address{
+  @HiveField(0)
+   String name;
+
+
+  @HiveField(1)
+   String address;
+
+  @HiveField(2)
+   String postal;
+
+  @HiveField(3)
+   String phone;
+
+  @HiveField(4)
+   String recipient;
+
+  @HiveField(5)
+   bool defaultt;
+
+
+
+  Address({this.name, this.address, this.postal, this.phone, this.recipient,this.defaultt});
+
+}

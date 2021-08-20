@@ -1,11 +1,14 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:treva_shop_flutter/API/provider_class.dart';
 import 'package:treva_shop_flutter/ListItem/CartItemData.dart';
 import 'package:treva_shop_flutter/UI/CartUIComponent/Delivery.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:provider/provider.dart';
+import 'package:treva_shop_flutter/UI/LoginOrSignup/Login.dart';
 import 'package:treva_shop_flutter/constant.dart';
 
 class cart extends StatefulWidget {
@@ -270,9 +273,18 @@ class _cartState extends State<cart> {
                   Positioned(
                     bottom: 10, right: 0,
                     child: InkWell(
-                      onTap: () {
-                        Navigator.of(context).push(PageRouteBuilder(
-                            pageBuilder: (_, __, ___) => delivery()));
+                      onTap: () async{
+                        SharedPreferences sharedpref = await SharedPreferences.getInstance();
+                        final loggedIn = sharedpref.getBool('loggedin');
+
+                        if(loggedIn){
+                          Navigator.of(context).push(PageRouteBuilder(
+                              pageBuilder: (_, __, ___) => delivery()));
+                        }
+                        else{
+                          EasyLoading.showInfo("You have to log in to proceed");
+                          Navigator.push(context, MaterialPageRoute(builder: (context)=>loginScreen()));
+                        }
                       },
                       child: Padding(
                         padding: const EdgeInsets.only(right: 10.0),

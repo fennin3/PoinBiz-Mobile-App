@@ -1,11 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:treva_shop_flutter/UI/LoginOrSignup/Login.dart';
 import 'package:treva_shop_flutter/UI/LoginOrSignup/LoginAnimation.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:treva_shop_flutter/UI/LoginOrSignup/verify_page.dart';
 import 'package:treva_shop_flutter/constant.dart';
 
 
@@ -49,9 +51,11 @@ class _SignupState extends State<Signup> with TickerProviderStateMixin {
 
       EasyLoading.showSuccess("${json.decode(response.body)['message']}", duration: Duration(seconds: 6));
       EasyLoading.dismiss();
+      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+      sharedPreferences.setString("phone", _phone.text);
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
-          builder: (BuildContext context) => loginScreen(),
+          builder: (BuildContext context) => VerifyPage(),
         ),
             (Route<dynamic> route) => false,
       );
@@ -535,7 +539,7 @@ class _SignupState extends State<Signup> with TickerProviderStateMixin {
                                             child: TextFormField(
                                               controller: _confirm_password,
                                               validator: (e){
-                                                if(_password.text.isEmpty){
+                                                if(_confirm_password.text.isEmpty){
                                                   return "Please enter password";
                                                 }
                                                 else if(_password.text != _confirm_password.text){
@@ -548,7 +552,7 @@ class _SignupState extends State<Signup> with TickerProviderStateMixin {
                                               obscureText: true,
                                               decoration: InputDecoration(
                                                   border: InputBorder.none,
-                                                  labelText: "Password",
+                                                  labelText: "Confirm Password",
                                                   icon: Icon(
                                                     Icons.vpn_key,
                                                     color: Colors.black38,

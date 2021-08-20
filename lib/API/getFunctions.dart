@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:treva_shop_flutter/constant.dart';
+import 'package:treva_shop_flutter/sharedPref/savedinfo.dart';
 
 
 class GetFunc{
@@ -68,6 +69,62 @@ class GetFunc{
 
     return _data;
   }
+
+
+  static getAddresses()async{
+
+    final userId = await UserData.getUserId();
+    final userToken = await UserData.getUserToken();
+    print(userId);
+    List _data;
+    http.Response response = await http.get(Uri.parse(base_url+"user/get-addresses/$userId"), headers: {
+      HttpHeaders.authorizationHeader :"Bearer $userToken"
+    });
+    if(response.statusCode < 206){
+      _data = json.decode(response.body)["data"]['data'];
+
+
+    }
+    else{
+      _data = [];
+    }
+
+    return _data;
+  }
+
+
+  static getEventCat()async{
+
+    List _data;
+    http.Response response = await http.get(Uri.parse(base_url+"general/get-event-categories"));
+    if(response.statusCode < 206){
+      _data = json.decode(response.body)["data"];
+
+
+    }
+    else{
+      _data = [];
+    }
+
+    return _data;
+  }
+
+
+  static getAllEvent()async{
+
+    List _data;
+    http.Response response = await http.get(Uri.parse(base_url+"general/get-events"));
+    if(response.statusCode < 206){
+      _data = json.decode(response.body)["data"];
+
+    }
+    else{
+      _data = [];
+    }
+
+    return _data;
+  }
+
 
 
 }

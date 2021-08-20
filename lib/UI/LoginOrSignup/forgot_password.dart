@@ -1,25 +1,15 @@
-import 'dart:async';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:treva_shop_flutter/UI/LoginOrSignup/Login.dart';
-import 'package:treva_shop_flutter/UI/LoginOrSignup/LoginAnimation.dart';
-import 'package:treva_shop_flutter/constant.dart';
-import 'dart:convert';
-import 'package:otp_text_field/otp_field.dart';
-import 'package:otp_text_field/style.dart';
-import 'package:otp_text_field/style.dart';
-import 'package:otp_text_field/otp_text_field.dart';
 
-class VerifyPage extends StatefulWidget {
-  const VerifyPage({Key key}) : super(key: key);
+
+class ForgotPassword extends StatefulWidget {
+  const ForgotPassword({Key key}) : super(key: key);
 
   @override
-  _VerifyPageState createState() => _VerifyPageState();
+  _ForgotPasswordState createState() => _ForgotPasswordState();
 }
 
-class _VerifyPageState extends State<VerifyPage> with TickerProviderStateMixin {
+class _ForgotPasswordState extends State<ForgotPassword> {
+
   AnimationController sanimationController;
 
   String _otpCode = "";
@@ -31,78 +21,12 @@ class _VerifyPageState extends State<VerifyPage> with TickerProviderStateMixin {
 
 
 
-  void _resendCode()async{
-    EasyLoading.show(status: "Resending Code");
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    final phone = sharedPreferences.getString("phone");
-
-    Map _data = {
-      "phone_number":phone,
-      "type":"user"
-    };
-    
-    
-    http.Response response = await http.post(Uri.parse(base_url +"general/resend-code"), body: _data);
-    EasyLoading.dismiss();
-    if(response.statusCode < 206){
-      EasyLoading.showInfo("${json.decode(response.body)['message']}");
-    }else{
-      EasyLoading.showError("${json.decode(response.body)['message']}");
-    }
-
-  }
-
-
-  void _verify(String code)async{
-    EasyLoading.show(status: "Verifying Account");
-    Map _data = {
-      "code":code,
-    };
-    http.Response response = await http.post(Uri.parse(base_url +"general/verify-account"), body: _data);
-    EasyLoading.dismiss();
-    if (response.statusCode< 206){
-      EasyLoading.showSuccess("${json.decode(response.body)['message']}");
-      EasyLoading.dismiss();
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (BuildContext context) => loginScreen(),
-        ),
-            (Route<dynamic> route) => false,
-      );
-    }
-    else{
-      EasyLoading.showError("${json.decode(response.body)['message']}");
-    }
-
-  }
-
-
-
-
-
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    sanimationController =
-    AnimationController(vsync: this, duration: Duration(milliseconds: 800))
-      ..addStatusListener((statuss) {
-        if (statuss == AnimationStatus.dismissed) {
-          setState(() {
-            tap = 0;
-          });
-        }
-      });
-    super.initState();
-  }
-
   Future<Null> _PlayAnimation() async {
     try {
       await sanimationController.forward();
       await sanimationController.reverse();
     } on TickerCanceled {}
   }
-
   @override
   Widget build(BuildContext context) {
     MediaQueryData mediaQueryData = MediaQuery.of(context);
@@ -134,6 +58,7 @@ class _VerifyPageState extends State<VerifyPage> with TickerProviderStateMixin {
             /// Set component layout
             child: ListView(
               children: <Widget>[
+
                 Stack(
                   alignment: AlignmentDirectional.bottomCenter,
                   children: <Widget>[
@@ -191,47 +116,13 @@ class _VerifyPageState extends State<VerifyPage> with TickerProviderStateMixin {
 
                               /// TextFromField Email
 
-                                    Padding(
-                                        padding: EdgeInsets.symmetric(vertical: 10.0)),
-                                    OTPTextField(
-                                      length: 4,
+                              Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 10.0)),
 
-                                      width: MediaQuery.of(context).size.width * 0.8,
-                                      fieldWidth: 40,
-                                      style: TextStyle(
-                                          fontSize: 20
-                                      ),
-                                      textFieldAlignment: MainAxisAlignment.spaceAround,
-                                      fieldStyle: FieldStyle.box,
-                                      keyboardType: TextInputType.text,
-                                      onCompleted: (pin) {
-                                        _verify(pin);
-                                      },
-                                    ),
 
 
                               /// Button Signup
-                              FlatButton(
-                                  padding: EdgeInsets.only(top: 20.0),
-                                  onPressed: () {
-                                    _resendCode();
-                                  },
 
-
-                                  child: RichText(
-                                    text: TextSpan(
-                                        text: "Resend Code ? ",
-                                        style: TextStyle(
-                                            color: Color(0xFF121940),
-                                            fontSize: 13.0,
-                                            fontWeight: FontWeight.w600,
-                                            fontFamily: "Sans"),
-                                        children: [
-
-                                        ]
-                                    ),
-
-                                  )),
                               Padding(
                                 padding: EdgeInsets.only(
                                     top: mediaQueryData.padding.top + 100.0,
@@ -242,25 +133,34 @@ class _VerifyPageState extends State<VerifyPage> with TickerProviderStateMixin {
                         ),
                       ],
                     ),
+                    Positioned(
+                        top: MediaQuery.of(context).size.height *0.1,
+                        right: 30,
+                        child:
+
+                    InkWell(
+                      onTap: ()=>Navigator.pop(context),
+                      child: Card(child: Padding(
+                        padding: const EdgeInsets.all(5.0),
+                        child: Icon(Icons.close),
+                      ),),
+                    )),
                     /// Set Animaion after user click buttonLogin
-                    tap == 0
-                        ? InkWell(
+                    InkWell(
                       splashColor: Colors.yellow,
                       onTap: () {
                         setState(() {
                           tap = 1;
                         });
-                        new LoginAnimation(
-                          animationController: sanimationController.view,
-                        );
-                        _PlayAnimation();
+                        // new LoginAnimation(
+                        //   animationController: sanimationController.view,
+                        // );
+                        // _PlayAnimation();
                         return tap;
                       },
                       child: buttonBlackBottom(funct: (){},),
                     )
-                        : new LoginAnimation(
-                      animationController: sanimationController.view,
-                    )
+
                   ],
                 ),
               ],
@@ -272,6 +172,7 @@ class _VerifyPageState extends State<VerifyPage> with TickerProviderStateMixin {
   }
 }
 
+
 class buttonBlackBottom extends StatelessWidget {
   final Function funct;
   buttonBlackBottom({ this.funct});
@@ -279,7 +180,7 @@ class buttonBlackBottom extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton(
       onPressed: (){
-          funct();
+        funct();
       },
       child: Padding(
         padding: EdgeInsets.all(30.0),
@@ -287,7 +188,7 @@ class buttonBlackBottom extends StatelessWidget {
           height: 55.0,
           width: 600.0,
           child: Text(
-            "Verify",
+            "",
             style: TextStyle(
                 color: Colors.white,
                 letterSpacing: 0.2,
@@ -306,3 +207,4 @@ class buttonBlackBottom extends StatelessWidget {
     );
   }
 }
+

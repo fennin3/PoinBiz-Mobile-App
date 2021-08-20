@@ -43,6 +43,7 @@ class _searchAppbarState extends State<searchAppbar> {
     // TODO: implement initState
     final _pro = Provider.of<PoinBizProvider>(context, listen: false);
     _pro.getSearchwords();
+
     super.initState();
     setData();
   }
@@ -74,6 +75,7 @@ class _searchAppbarState extends State<searchAppbar> {
 
   Widget build(BuildContext context) {
     final _pro = Provider.of<PoinBizProvider>(context, listen: true);
+
     var _search = Padding(
       padding: const EdgeInsets.only(top: 35.0, right: 20.0, left: 20.0),
       child: Container(

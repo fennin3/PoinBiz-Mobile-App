@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:treva_shop_flutter/API/provider_class.dart';
 import 'package:treva_shop_flutter/UI/BottomNavigationBar.dart';
-import 'package:treva_shop_flutter/UI/LoginOrSignup/verify_page.dart';
 import 'package:treva_shop_flutter/UI/OnBoarding.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,6 +18,7 @@ void main() async{
   Hive.initFlutter();
   Hive.registerAdapter(CartModelAdapter());
   Hive.registerAdapter(SearchedWordAdapter());
+  Hive.registerAdapter(AddressAdapter());
   runApp(
       MultiProvider(
         providers: [
@@ -72,7 +72,7 @@ class myApp extends StatelessWidget {
           primaryColor: Colors.white),
       debugShowCheckedModeBanner: false,
       builder: EasyLoading.init(),
-      home: VerifyPage(),
+      home: SplashScreen(),
 
       /// Move splash screen to ChoseLogin Layout
       /// Routes

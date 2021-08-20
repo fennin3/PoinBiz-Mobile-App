@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:treva_shop_flutter/UI/BottomNavigationBar.dart';
+import 'package:treva_shop_flutter/UI/LoginOrSignup/forgot_password.dart';
+import 'package:treva_shop_flutter/UI/LoginOrSignup/verify_page.dart';
 import 'package:treva_shop_flutter/constant.dart';
 import 'package:treva_shop_flutter/UI/LoginOrSignup/LoginAnimation.dart';
 import 'package:treva_shop_flutter/UI/LoginOrSignup/Signup.dart';
@@ -11,11 +13,11 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
-
 class loginScreen extends StatefulWidget {
   @override
   _loginScreenState createState() => _loginScreenState();
 }
+
 /// Component Widget this layout UI
 class _loginScreenState extends State<loginScreen>
     with TickerProviderStateMixin {
@@ -25,57 +27,62 @@ class _loginScreenState extends State<loginScreen>
   final TextEditingController _password = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-
   var tap = 0;
 
   bool obsecure = true;
 
-
-  void toggleObsecure(){
-    obsecure =!obsecure;
+  void toggleObsecure() {
+    obsecure = !obsecure;
   }
 
-  void signin()async{
+  void signin() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
 
     EasyLoading.show(status: "Signing In");
     final Map _data = {
-      "user_id":_email.text,
-      "password":_password.text,
-      "type":"user"
+      "user_id": _email.text,
+      "password": _password.text,
+      "type": "user"
     };
 
-    try{
-      http.Response response = await http.post(Uri.parse(base_url+"general/login"), body: _data);
-      if(response.statusCode < 206){
-        EasyLoading.dismiss();
-        EasyLoading.showSuccess("Login Successful");
-        sharedPreferences.setStringList("data", [
-          json.decode(response.body)['token'],
-          json.decode(response.body)['data']['id'],
-        ]);
-        sharedPreferences.setBool("loggedin", true);
-        EasyLoading.dismiss();
-        Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-                builder: (BuildContext context) =>
-                new bottomNavigationBar()));
-
-      }
-      else{
+    try {
+      http.Response response =
+          await http.post(Uri.parse(base_url + "general/login"), body: _data);
+      if (response.statusCode < 206) {
+        if (response.statusCode == 202) {
+          EasyLoading.dismiss();
+          EasyLoading.showError("${json.decode(response.body)['message']}");
+          Future.delayed(Duration(seconds: 2));
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => VerifyPage()));
+        } else {
+          EasyLoading.dismiss();
+          EasyLoading.showSuccess("Login Successful");
+          print(response.body);
+          print(response.statusCode);
+          sharedPreferences.setStringList("data", [
+            json.decode(response.body)['token'],
+            json.decode(response.body)['data']['id'],
+          ]);
+          sharedPreferences.setBool("loggedin", true);
+          EasyLoading.dismiss();
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+              builder: (BuildContext context) => new bottomNavigationBar()));
+        }
+      } else {
         // EasyLoading.dismiss();
-        EasyLoading.showInfo("${json.decode(response.body)['message']}", duration: Duration(seconds: 5));
+        EasyLoading.showInfo("${json.decode(response.body)['message']}",
+            duration: Duration(seconds: 5));
         EasyLoading.dismiss();
       }
-    }
-    on SocketException{
+    } on SocketException {
       EasyLoading.showInfo("No internet connection");
       EasyLoading.dismiss();
     }
-
   }
 
   @override
+
   /// set state animation controller
   void initState() {
     sanimationController =
@@ -137,6 +144,7 @@ class _loginScreenState extends State<loginScreen>
                 end: FractionalOffset.bottomCenter,
               ),
             ),
+
             /// Set component layout
             child: ListView(
               children: <Widget>[
@@ -144,16 +152,19 @@ class _loginScreenState extends State<loginScreen>
                   alignment: AlignmentDirectional.bottomCenter,
                   children: <Widget>[
                     Column(
-
                       children: <Widget>[
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             TextButton(
-                              onPressed: ()=>Navigator.pop(context),
+                              onPressed: () => Navigator.pop(context),
                               child: Padding(
                                 padding: const EdgeInsets.all(10.0),
-                                child: Card(child: Icon(Icons.close, color: Colors.black,)),
+                                child: Card(
+                                    child: Icon(
+                                  Icons.close,
+                                  color: Colors.black,
+                                )),
                               ),
                             ),
                           ],
@@ -162,7 +173,11 @@ class _loginScreenState extends State<loginScreen>
                           alignment: AlignmentDirectional.topCenter,
                           child: Column(
                             children: <Widget>[
-                              SizedBox(height: MediaQuery.of(context).size.height*0.1,),
+                              SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.1,
+                              ),
+
                               /// padding logo
 
                               Row(
@@ -173,8 +188,8 @@ class _loginScreenState extends State<loginScreen>
                                     height: 70.0,
                                   ),
                                   Padding(
-                                      padding:
-                                          EdgeInsets.symmetric(horizontal: 10.0)),
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 10.0)),
 
                                   /// Animation text treva shop accept from signup layout (Click to open code)
                                   Hero(
@@ -203,8 +218,8 @@ class _loginScreenState extends State<loginScreen>
                               // buttonCustomGoogle(),
                               /// Set Text
                               Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 10.0)),
-
+                                  padding:
+                                      EdgeInsets.symmetric(vertical: 10.0)),
 
                               /// TextFromField Email
                               Form(
@@ -212,33 +227,42 @@ class _loginScreenState extends State<loginScreen>
                                 child: Column(
                                   children: [
                                     Padding(
-                                        padding: EdgeInsets.symmetric(vertical: 10.0)),
-
+                                        padding: EdgeInsets.symmetric(
+                                            vertical: 10.0)),
 
                                     Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 30.0),
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 30.0),
                                       child: Container(
-                                         alignment: AlignmentDirectional.center,
+                                        alignment: AlignmentDirectional.center,
                                         decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(14.0),
+                                            borderRadius:
+                                                BorderRadius.circular(14.0),
                                             color: Colors.white,
-                                            boxShadow: [BoxShadow(blurRadius: 10.0, color: Colors.black12)]),
-                                        padding:
-                                        EdgeInsets.only(left: 20.0, right: 30.0, top: 0.0, bottom: 0.0),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                  blurRadius: 10.0,
+                                                  color: Colors.black12)
+                                            ]),
+                                        padding: EdgeInsets.only(
+                                            left: 20.0,
+                                            right: 30.0,
+                                            top: 0.0,
+                                            bottom: 0.0),
                                         child: Theme(
                                           data: ThemeData(
                                             hintColor: Colors.transparent,
                                           ),
                                           child: TextFormField(
                                             controller: _email,
-                                            validator: (e){
-                                              if(_email.text.isEmpty){
+                                            validator: (e) {
+                                              if (_email.text.isEmpty) {
                                                 return "Please enter email or phone";
                                               }
                                               // else if(!_email.text.contains("@") || !_email.text.contains(".com")){
                                               //   return "Please enter a valid email address";
                                               // }
-                                              else{
+                                              else {
                                                 return null;
                                               }
                                             },
@@ -255,8 +279,10 @@ class _loginScreenState extends State<loginScreen>
                                                     fontFamily: 'Sans',
                                                     letterSpacing: 0.3,
                                                     color: Colors.black38,
-                                                    fontWeight: FontWeight.w600)),
-                                            keyboardType: TextInputType.emailAddress,
+                                                    fontWeight:
+                                                        FontWeight.w600)),
+                                            keyboardType:
+                                                TextInputType.emailAddress,
                                           ),
                                         ),
                                       ),
@@ -264,30 +290,38 @@ class _loginScreenState extends State<loginScreen>
 
                                     /// TextFromField Password
                                     Padding(
-                                        padding: EdgeInsets.symmetric(vertical: 5.0)),
+                                        padding: EdgeInsets.symmetric(
+                                            vertical: 5.0)),
 
                                     Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 30.0),
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 30.0),
                                       child: Container(
                                         alignment: AlignmentDirectional.center,
                                         decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(14.0),
+                                            borderRadius:
+                                                BorderRadius.circular(14.0),
                                             color: Colors.white,
-                                            boxShadow: [BoxShadow(blurRadius: 10.0, color: Colors.black12)]),
-                                        padding:
-                                        EdgeInsets.only(left: 20.0, right: 30.0, top: 0.0, bottom: 0.0),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                  blurRadius: 10.0,
+                                                  color: Colors.black12)
+                                            ]),
+                                        padding: EdgeInsets.only(
+                                            left: 20.0,
+                                            right: 30.0,
+                                            top: 0.0,
+                                            bottom: 0.0),
                                         child: Theme(
                                             data: ThemeData(
                                               hintColor: Colors.transparent,
                                             ),
                                             child: TextFormField(
                                               controller: _password,
-                                              validator: (e){
-                                                if(_password.text.isEmpty){
+                                              validator: (e) {
+                                                if (_password.text.isEmpty) {
                                                   return "Please enter password";
-                                                }
-
-                                                else{
+                                                } else {
                                                   return null;
                                                 }
                                               },
@@ -304,16 +338,41 @@ class _loginScreenState extends State<loginScreen>
                                                       fontFamily: 'Sans',
                                                       letterSpacing: 0.3,
                                                       color: Colors.black38,
-                                                      fontWeight: FontWeight.w600)),
+                                                      fontWeight:
+                                                          FontWeight.w600)),
                                               keyboardType: TextInputType.text,
-                                            )
-                                        ),
+                                            )),
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-
+                              SizedBox(
+                                height: 15,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(right: 30.0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    InkWell(
+                                      onTap: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  ForgotPassword())),
+                                      child: Text(
+                                        "Forgot Password ?",
+                                        style: TextStyle(
+                                            color: Color(0xFF121940),
+                                            fontSize: 15.0,
+                                            fontWeight: FontWeight.w600,
+                                            fontFamily: "Sans"),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
 
                               /// Button Signup
                               FlatButton(
@@ -324,28 +383,23 @@ class _loginScreenState extends State<loginScreen>
                                             builder: (BuildContext context) =>
                                                 new Signup()));
                                   },
-
-
                                   child: RichText(
                                     text: TextSpan(
-                                      text: "Need an account? ",
-                                      style: TextStyle(
-                                          color: Color(0xFF121940),
-                                          fontSize: 13.0,
-                                          fontWeight: FontWeight.w600,
-                                          fontFamily: "Sans"),
-                                      children: [
-                                        TextSpan(
-                                          text: " Sign Up",
-                                          style: TextStyle(
-                                              color: Color(0xFF6E48AA),
-                                              fontSize: 15.0,
-                                              fontWeight: FontWeight.w600,
-                                              fontFamily: "Sans")
-                                        )
-                                      ]
-                                    ),
-
+                                        text: "Need an account? ",
+                                        style: TextStyle(
+                                            color: Color(0xFF121940),
+                                            fontSize: 13.0,
+                                            fontWeight: FontWeight.w600,
+                                            fontFamily: "Sans"),
+                                        children: [
+                                          TextSpan(
+                                              text: " Sign Up",
+                                              style: TextStyle(
+                                                  color: Color(0xFF6E48AA),
+                                                  fontSize: 15.0,
+                                                  fontWeight: FontWeight.w600,
+                                                  fontFamily: "Sans"))
+                                        ]),
                                   )),
                               Padding(
                                 padding: EdgeInsets.only(
@@ -357,6 +411,7 @@ class _loginScreenState extends State<loginScreen>
                         ),
                       ],
                     ),
+
                     /// Set Animaion after user click buttonLogin
                     tap == 0
                         ? InkWell(
@@ -371,7 +426,10 @@ class _loginScreenState extends State<loginScreen>
                               _PlayAnimation();
                               return tap;
                             },
-                            child: buttonBlackBottom(formKey: _formKey,funct: signin,),
+                            child: buttonBlackBottom(
+                              formKey: _formKey,
+                              funct: signin,
+                            ),
                           )
                         : new LoginAnimation(
                             animationController: sanimationController.view,
@@ -395,7 +453,6 @@ class textFromField extends StatelessWidget {
   TextInputType inputType;
 
   textFromField({this.email, this.icon, this.inputType, this.password});
-
 
   @override
   Widget build(BuildContext context) {
@@ -439,7 +496,6 @@ class textFromField extends StatelessWidget {
 
 ///buttonCustomFacebook class
 class buttonCustomFacebook extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -518,15 +574,16 @@ class buttonCustomGoogle extends StatelessWidget {
 class buttonBlackBottom extends StatelessWidget {
   final formKey;
   final Function funct;
+
   buttonBlackBottom({this.formKey, this.funct});
+
   @override
   Widget build(BuildContext context) {
     return TextButton(
-      onPressed: (){
-        if(formKey.currentState.validate()){
+      onPressed: () {
+        if (formKey.currentState.validate()) {
           funct();
-        }
-        else{
+        } else {
           print("Not ontottnotnt");
         }
       },

@@ -3,23 +3,54 @@ import 'package:treva_shop_flutter/API/provider_class.dart';
 import 'package:treva_shop_flutter/UI/HomeUIComponent/DetailProduct.dart';
 import 'package:provider/provider.dart';
 
-class ItemGridMain extends StatelessWidget {
+class ItemGridMain extends StatefulWidget {
   /// Get data from HomeGridItem.....dart class
   Map gridItem;
   final String word;
   ItemGridMain(this.gridItem, this.word);
 
   @override
+  State<ItemGridMain> createState() => _ItemGridMainState();
+}
+
+class _ItemGridMainState extends State<ItemGridMain> {
+
+  double rate=0.0;
+
+  int calRate(){
+    if(widget.gridItem['reviews'].length > 0) {
+      for (var rev in widget.gridItem['reviews']){
+        setState(() {
+          rate += double.parse(rev['rating']);
+        });
+      }
+
+    }
+
+    if(rate > 0){
+      setState(() {
+        rate = rate / widget.gridItem['reviews'].length;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    calRate();
+  }
+  @override
   Widget build(BuildContext context) {
     final _pro = Provider.of<PoinBizProvider>(context, listen: false);
     MediaQueryData mediaQueryData = MediaQuery.of(context);
     return InkWell(
       onTap: () {
-        if(word.isNotEmpty){
-          _pro.saveWord(word);
+        if(widget.word.isNotEmpty){
+          _pro.saveWord(widget.word);
         }
         Navigator.of(context).push(PageRouteBuilder(
-            pageBuilder: (_, __, ___) => new detailProduk(gridItem),
+            pageBuilder: (_, __, ___) => new detailProduk(widget.gridItem),
             transitionDuration: Duration(milliseconds: 900),
 
             /// Set animation Opacity in route to detailProduk layout
@@ -53,7 +84,7 @@ class ItemGridMain extends StatelessWidget {
 
                 /// Set Animation image to detailProduk layout
                 Hero(
-                  tag: "hero-grid-${gridItem['id']}",
+                  tag: "hero-grid-${widget.gridItem['id']}",
                   child: Material(
                     child: InkWell(
                       onTap: () {
@@ -66,9 +97,9 @@ class ItemGridMain extends StatelessWidget {
                                   padding: EdgeInsets.all(30.0),
                                   child: InkWell(
                                     child: Hero(
-                                        tag: "hero-grid-${gridItem['id']}",
+                                        tag: "hero-grid-${widget.gridItem['id']}",
                                         child: Image.network(
-                                          gridItem['image']['path'],
+                                          widget.gridItem['image']['path'],
                                           width: 300.0,
                                           height: 300.0,
                                           alignment: Alignment.center,
@@ -91,7 +122,7 @@ class ItemGridMain extends StatelessWidget {
                                 topLeft: Radius.circular(7.0),
                                 topRight: Radius.circular(7.0)),
                             image: DecorationImage(
-                                image: NetworkImage(gridItem['image']['path']),
+                                image: NetworkImage(widget.gridItem['image']['path']),
                                 fit: BoxFit.cover)),
                       ),
                     ),
@@ -101,24 +132,24 @@ class ItemGridMain extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(left: 15.0, right: 15.0),
                   child: Text(
-                    gridItem['name'],
+                    widget.gridItem['name'],
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                         letterSpacing: 0.5,
                         color: Colors.black54,
                         fontFamily: "Sans",
-                        fontWeight: FontWeight.w500,
-                        fontSize: 13.0),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14.0),
                   ),
                 ),
                 Padding(padding: EdgeInsets.only(top: 1.0)),
                 Padding(
                   padding: const EdgeInsets.only(left: 15.0, right: 15.0),
                   child: Text(
-                    gridItem['price'].toString(),
+                    widget.gridItem['price'].toString(),
                     style: TextStyle(
                         fontFamily: "Sans",
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                         fontSize: 14.0),
                   ),
                 ),
@@ -132,12 +163,12 @@ class ItemGridMain extends StatelessWidget {
                       Row(
                         children: <Widget>[
                           Text(
-                            "4.5",
+                            "$rate",
                             style: TextStyle(
                                 fontFamily: "Sans",
-                                color: Colors.black26,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 12.0),
+                                color: Colors.black38,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14.0),
                           ),
                           Icon(
                             Icons.star,
