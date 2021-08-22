@@ -158,7 +158,7 @@ class _deliveryState extends State<delivery> {
         iconTheme: IconThemeData(color: Color(0xFF6991C7)),
       ),
       body: SafeArea(
-        child: _pro.addresses.isEmpty ?? _pro.shipping == null
+        child: _pro.saveAdds.isEmpty
             ? SingleChildScrollView(
                 child: Container(
                   color: Colors.white,
@@ -280,7 +280,16 @@ class _deliveryState extends State<delivery> {
                               //     PageRouteBuilder(
                               //         pageBuilder: (_, __, ___) => payment()));
                               if (_formKey.currentState.validate()) {
-                                addAddress();
+                                _pro.sendAddress({
+                                  "address": _address.text,
+                                  "name": _name.text,
+                                  "phone": _phone.text,
+                                  "postal": _postal.text,
+                                  "recipient": _recipient.text,
+                                  "defaultt": checkBoxValue
+                                }, "aa");
+                                z();
+                                setState(() {});
                               }
                             },
                             child: Container(
@@ -311,21 +320,290 @@ class _deliveryState extends State<delivery> {
                   ),
                 ),
               )
-            : SingleChildScrollView(
-                child: Column(
-                  children: [
-
-                      Padding(
-                        padding: const EdgeInsets.only(
-                            top: 10, bottom: 20, right: 10, left: 10),
-                        child: AddressWidget(
-                          fun: editShipping,
-                          data: _pro.shipping,
-                        ),
+            : _pro.shipping == null
+                ? Container(
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: appColor,
+                        backgroundColor: Colors.white,
                       ),
-                  ],
-                ),
-              ),
+                    ),
+                  )
+                : SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        Padding(
+                            padding: const EdgeInsets.only(
+                                top: 10, bottom: 10, right: 10, left: 10),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                CheckoutTitle(
+                                  text: "ADDRESS DETAILS",
+                                ),
+                                AddressWidget(
+                                  fun: editShipping,
+                                  data: _pro.shipping,
+                                ),
+                                SizedBox(
+                                  height: 17,
+                                ),
+                                CheckoutTitle(
+                                  text: "SELECT A DELIVERY METHOD",
+                                ),
+                                Card(
+                                  elevation: 1,
+                                  child: Container(
+                                    padding: EdgeInsets.all(20),
+                                    width: double.infinity,
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            CircleAvatar(
+                                              radius: 9,
+                                              backgroundColor: appColor,
+                                              child: CircleAvatar(
+                                                radius: 7,
+                                                backgroundColor: Colors.white,
+                                                child: CircleAvatar(
+                                                  radius: 5,
+                                                  backgroundColor: appColor,
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width: 20,
+                                            ),
+                                            Expanded(
+                                                child: Text(
+                                                    "Collect at any of our Pickup Stations(Cheaper Fees)",
+                                                    style: TextStyle(
+                                                        fontSize: 14)))
+                                          ],
+                                        ),
+                                        Divider(),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 5.0),
+                                          child: Text(
+                                            "SELECT A PICKUP STATION",
+                                            style: TextStyle(color: appColor),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Card(
+                                  elevation: 1,
+                                  child: Container(
+                                    padding: EdgeInsets.all(20),
+                                    width: double.infinity,
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            CircleAvatar(
+                                              radius: 9,
+                                              backgroundColor: Colors.grey[400],
+                                              child: CircleAvatar(
+                                                radius: 7,
+                                                backgroundColor: Colors.white,
+                                                child: CircleAvatar(
+                                                  radius: 5,
+                                                  backgroundColor: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width: 20,
+                                            ),
+                                            Expanded(
+                                                child: Text(
+                                                    "Home and Office Delivery",
+                                                    style: TextStyle(
+                                                        fontSize: 14)))
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 20,
+                                ),
+                              ],
+                            )),
+                        Card(
+                          elevation: 1,
+                          child: Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.symmetric(
+                                vertical: 20, horizontal: 10),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text("Subtotal"),
+                                    Text("GHc 1699.00")
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Delivery",
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                    Text(
+                                      "GHc 0.00",
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          color: appColor,
+                                          fontWeight: FontWeight.w600),
+                                    )
+                                  ],
+                                ),
+                                Divider(),
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Total",
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                    Text(
+                                      "GHc 1699.00",
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.green,
+                                          fontWeight: FontWeight.w600),
+                                    )
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Divider(),
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    CheckoutTitle(text: "USE POINT"),
+                                    Text("Your Points: 150000 (Ghc 25)")
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Card(
+                                      elevation: 5,
+                                      child: Container(
+                                        width: 180,
+                                        height: 45,
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 20.0),
+                                          child: TextField(),
+                                        ),
+                                      ),
+                                    ),
+                                    Card(
+                                      child: Container(
+                                          color: appColor,
+                                          height: 45,
+                                          child: Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 10.0),
+                                              child: Center(
+                                                  child: Text(
+                                                "APPLY",
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              )))),
+                                    ),
+                                    Card(
+                                      child: Container(
+                                          color: appColor,
+                                          height: 45,
+                                          child: Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 10.0),
+                                              child: Center(
+                                                  child: Text(
+                                                "APPLY ALL",
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              )))),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 20,
+                                ),
+                                Card(
+                                  elevation: 2,
+                                  child: Container(
+                                    width: double.infinity,
+                                    color: appColor,
+                                    height: 50,
+                                    child: Center(
+                                      child: Text("PROCEED TO PAYMENT",
+                                          style:
+                                              TextStyle(color: Colors.white)),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 30,
+                        ),
+                      ],
+                    ),
+                  ),
+      ),
+    );
+  }
+}
+
+class CheckoutTitle extends StatelessWidget {
+  final String text;
+
+  CheckoutTitle({this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 5.0, bottom: 5),
+      child: Text(
+        text,
+        style: TextStyle(fontSize: 13, color: Colors.black26),
       ),
     );
   }
@@ -352,8 +630,8 @@ class AddressWidget extends StatelessWidget {
               child: Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(8)),
-                    border: Border.all(color: Colors.black)),
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                ),
                 padding:
                     EdgeInsets.only(top: 20, right: 30, left: 20, bottom: 20),
                 child: Column(
@@ -362,7 +640,7 @@ class AddressWidget extends StatelessWidget {
                     Text(
                       "${data.name}",
                       style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     SizedBox(
                       height: 4,
@@ -370,7 +648,7 @@ class AddressWidget extends StatelessWidget {
                     Text(
                       "${data.address}",
                       style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
                     ),
                     SizedBox(
                       height: 4,
@@ -378,7 +656,7 @@ class AddressWidget extends StatelessWidget {
                     Text(
                       "${data.postal}",
                       style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
                     ),
                     SizedBox(
                       height: 4,
@@ -386,7 +664,7 @@ class AddressWidget extends StatelessWidget {
                     Text(
                       "${data.recipient}",
                       style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w300),
+                          TextStyle(fontSize: 14, fontWeight: FontWeight.w300),
                     ),
                     SizedBox(
                       height: 4,
@@ -394,7 +672,7 @@ class AddressWidget extends StatelessWidget {
                     Text(
                       "${data.phone}",
                       style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w300),
+                          TextStyle(fontSize: 14, fontWeight: FontWeight.w300),
                     ),
                   ],
                 ),

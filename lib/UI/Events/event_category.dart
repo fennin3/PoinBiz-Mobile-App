@@ -91,7 +91,7 @@ class _EventCategoryState extends State<EventCategory> {
                   left: 15.0, right: 15, bottom: 20),
               child: TextButton(
                 onPressed: () => Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => EventCat())),
+                    MaterialPageRoute(builder: (context) => EventCat(data: _events[index],))),
                 child: Container(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,7 +114,7 @@ class _EventCategoryState extends State<EventCategory> {
                               child: Card(
                                   elevation: 5,
                                   child: Padding(
-                                    padding: const EdgeInsets.all(2.0),
+                                    padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 10),
                                     child: Column(
                                       children: [
                                         Text(

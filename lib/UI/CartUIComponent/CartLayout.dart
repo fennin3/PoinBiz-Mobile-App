@@ -60,35 +60,35 @@ class _cartState extends State<cart> {
                   ListView.builder(
                       itemCount: _pro.cart.length,
                       itemBuilder: (context, position) {
-                    return Padding(
-                      padding: const EdgeInsets.only(
-                          top: 1.0, left: 13.0, right: 13.0, bottom: 5),
+                        return Padding(
+                          padding: const EdgeInsets.only(
+                              top: 1.0, left: 13.0, right: 13.0, bottom: 5),
 
-                      /// Background Constructor for card
-                      child: Container(
-                        height: 220.0,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black12.withOpacity(0.1),
-                              blurRadius: 3.5,
-                              spreadRadius: 0.4,
-                            )
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
+                          /// Background Constructor for card
+                          child: Container(
+                            height: 220.0,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black12.withOpacity(0.1),
+                                  blurRadius: 3.5,
+                                  spreadRadius: 0.4,
+                                )
+                              ],
+                            ),
+                            child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                Padding(
-                                    padding: EdgeInsets.all(10.0),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Padding(
+                                      padding: EdgeInsets.all(10.0),
 
-                                    /// Image item
-                                    child: Container(
+                                      /// Image item
+                                      child: Container(
                                         decoration: BoxDecoration(
                                             color:
                                                 Colors.white.withOpacity(0.1),
@@ -99,191 +99,217 @@ class _cartState extends State<cart> {
                                                   blurRadius: 0.5,
                                                   spreadRadius: 0.1)
                                             ]),
-                                        child: Image.file(
-                                          File('${_pro.cart[position].image}'),
-                                          height: 130.0,
-                                          width: 120.0,
-                                          fit: BoxFit.cover,
-                                        ))),
-                                Flexible(
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                        top: 25.0, left: 10.0, right: 5.0),
-                                    child: Column(
-                                      /// Text Information Item
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: <Widget>[
-                                        Text(
-                                          '${_pro.cart[position].title}',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w700,
-                                            fontFamily: "Sans",
-                                            color: Colors.black87,
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                        // Padding(padding: EdgeInsets.only(top: 10.0)),
-                                        // Text(
-                                        //   '${items[position].desc}',
-                                        //   style: TextStyle(
-                                        //     color: Colors.black54,
-                                        //     fontWeight: FontWeight.w500,
-                                        //     fontSize: 12.0,
-                                        //   ),
-                                        // ),
-                                        Padding(
-                                            padding:
-                                                EdgeInsets.only(top: 10.0)),
-                                        Text(
-                                            'Ghc ${_pro.cart[position].price}'),
-                                        Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.end,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          textBaseline:
-                                              TextBaseline.ideographic,
-                                          children: [
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  top: 18.0, left: 0.0),
-                                              child: Container(
-                                                width: 112.0,
-                                                decoration: BoxDecoration(
-                                                    color: Colors.white70,
-                                                    border: Border.all(
-                                                        color: Colors.black12
-                                                            .withOpacity(0.1))),
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceAround,
-                                                  children: <Widget>[
-                                                    /// Decrease of value item
-                                                    InkWell(
-                                                      onTap: () {
-                                                        _pro.updateSubItem(_pro
-                                                            .cart[position]);
-                                                      },
-                                                      child: Container(
-                                                        height: 30.0,
-                                                        width: 30.0,
-                                                        decoration: BoxDecoration(
-                                                            border: Border(
-                                                                right: BorderSide(
-                                                                    color: Colors
-                                                                        .black12
-                                                                        .withOpacity(
-                                                                            0.1)))),
-                                                        child: Center(
-                                                            child: Text("-")),
-                                                      ),
-                                                    ),
-                                                    Padding(
-                                                      padding: const EdgeInsets
-                                                              .symmetric(
-                                                          horizontal: 18.0),
-                                                      child: Text(_pro
-                                                          .cart[position]
-                                                          .quantity),
-                                                    ),
-
-                                                    /// Increasing value of item
-                                                    InkWell(
-                                                      onTap: () {
-                                                        // _pro.updateaddCartItem(_pro.cart[position]);
-                                                        _pro.updateAddItem(_pro
-                                                            .cart[position]);
-                                                      },
-                                                      child: Container(
-                                                        height: 30.0,
-                                                        width: 28.0,
-                                                        decoration: BoxDecoration(
-                                                            border: Border(
-                                                                left: BorderSide(
-                                                                    color: Colors
-                                                                        .black12
-                                                                        .withOpacity(
-                                                                            0.1)))),
-                                                        child: Center(
-                                                            child: Text("+")),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
+                                        child: _pro.cart[position].image ==
+                                                "ticket"
+                                            ? Container(
+                                                height: 130.0,
+                                                width: 120.0,
+                                                child: Image.asset(
+                                                    "assets/img/ticket2.png"),
+                                              )
+                                            : Image.network(
+                                                '${_pro.cart[position].image}',
+                                                height: 130.0,
+                                                width: 120.0,
+                                                fit: BoxFit.cover,
                                               ),
+                                      ),
+                                    ),
+                                    Flexible(
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(
+                                            top: 25.0, left: 10.0, right: 5.0),
+                                        child: Column(
+                                          /// Text Information Item
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: <Widget>[
+                                            Text(
+                                              '${_pro.cart[position].title}',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w700,
+                                                fontFamily: "Sans",
+                                                color: Colors.black87,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
                                             ),
-                                            GestureDetector(
-                                                onTap: () =>
-                                                    _pro.removeCartItem(
-                                                        _pro.cart[position]),
-                                                child: Icon(
-                                                  Icons.delete,
-                                                  size: 28,
-                                                  color: Color(0xFFA3BDED),
-                                                ))
+                                            // Padding(padding: EdgeInsets.only(top: 10.0)),
+                                            // Text(
+                                            //   '${items[position].desc}',
+                                            //   style: TextStyle(
+                                            //     color: Colors.black54,
+                                            //     fontWeight: FontWeight.w500,
+                                            //     fontSize: 12.0,
+                                            //   ),
+                                            // ),
+                                            Padding(
+                                                padding:
+                                                    EdgeInsets.only(top: 10.0)),
+                                            Text(
+                                                'Ghc ${_pro.cart[position].price}'),
+                                            Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.end,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              textBaseline:
+                                                  TextBaseline.ideographic,
+                                              children: [
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          top: 18.0, left: 0.0),
+                                                  child: Container(
+                                                    width: 112.0,
+                                                    decoration: BoxDecoration(
+                                                        color: Colors.white70,
+                                                        border: Border.all(
+                                                            color: Colors
+                                                                .black12
+                                                                .withOpacity(
+                                                                    0.1))),
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceAround,
+                                                      children: <Widget>[
+                                                        /// Decrease of value item
+                                                        InkWell(
+                                                          onTap: () {
+                                                            _pro.updateSubItem(
+                                                                _pro.cart[
+                                                                    position]);
+                                                          },
+                                                          child: Container(
+                                                            height: 30.0,
+                                                            width: 30.0,
+                                                            decoration: BoxDecoration(
+                                                                border: Border(
+                                                                    right: BorderSide(
+                                                                        color: Colors
+                                                                            .black12
+                                                                            .withOpacity(0.1)))),
+                                                            child: Center(
+                                                                child:
+                                                                    Text("-")),
+                                                          ),
+                                                        ),
+                                                        Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                      .symmetric(
+                                                                  horizontal:
+                                                                      18.0),
+                                                          child: Text(_pro
+                                                              .cart[position]
+                                                              .quantity),
+                                                        ),
+
+                                                        /// Increasing value of item
+                                                        InkWell(
+                                                          onTap: () {
+                                                            // _pro.updateaddCartItem(_pro.cart[position]);
+                                                            _pro.updateAddItem(
+                                                                _pro.cart[
+                                                                    position]);
+                                                          },
+                                                          child: Container(
+                                                            height: 30.0,
+                                                            width: 28.0,
+                                                            decoration: BoxDecoration(
+                                                                border: Border(
+                                                                    left: BorderSide(
+                                                                        color: Colors
+                                                                            .black12
+                                                                            .withOpacity(0.1)))),
+                                                            child: Center(
+                                                                child:
+                                                                    Text("+")),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                                GestureDetector(
+                                                    onTap: () =>
+                                                        _pro.removeCartItem(_pro
+                                                            .cart[position]),
+                                                    child: Icon(
+                                                      Icons.delete,
+                                                      size: 28,
+                                                      color: Color(0xFFA3BDED),
+                                                    ))
+                                              ],
+                                            ),
                                           ],
                                         ),
-                                      ],
+                                      ),
                                     ),
-                                  ),
+                                  ],
                                 ),
+                                Padding(padding: EdgeInsets.only(top: 8.0)),
+                                Divider(
+                                  height: 2.0,
+                                  color: Colors.black12,
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Row(
+                                  children: [
+                                    SizedBox(
+                                      width: 10,
+                                    ),
+                                    Text(
+                                        "Total: GHc ${int.parse(_pro.cart[position].price) * int.parse(_pro.cart[position].quantity)}")
+                                  ],
+                                )
                               ],
                             ),
-                            Padding(padding: EdgeInsets.only(top: 8.0)),
-                            Divider(
-                              height: 2.0,
-                              color: Colors.black12,
-                            ),
-                            SizedBox(height: 10,),
-                            Row(
-
-                              children: [
-                                SizedBox(width: 10,),
-                                Text("Total: GHc ${int.parse(_pro.cart[position].price) * int.parse(_pro.cart[position].quantity)}")
-                              ],
-                            )
-                          ],
-                        ),
-                      ),
-                    );
-                  }),
+                          ),
+                        );
+                      }),
                   Positioned(
-                    bottom: 8,
-                    child: Card(
-                      color: appColor,
-                      elevation: 3,
-                      child: Container(
-                        padding: EdgeInsets.all(10),
-                        child: Center(
-                          child: Text(
-                            "Total : Ghc " + _pro.getTotal().toString(),
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 15.5,
-                                fontFamily: "Sans"),
+                      bottom: 8,
+                      child: Card(
+                        color: appColor,
+                        elevation: 3,
+                        child: Container(
+                          padding: EdgeInsets.all(10),
+                          child: Center(
+                            child: Text(
+                              "Total : Ghc " + _pro.getTotal().toString(),
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 15.5,
+                                  fontFamily: "Sans"),
+                            ),
                           ),
                         ),
-                      ),
-                    )),
+                      )),
                   Positioned(
-                    bottom: 10, right: 0,
+                    bottom: 10,
+                    right: 0,
                     child: InkWell(
-                      onTap: () async{
-                        SharedPreferences sharedpref = await SharedPreferences.getInstance();
+                      onTap: () async {
+                        SharedPreferences sharedpref =
+                            await SharedPreferences.getInstance();
                         final loggedIn = sharedpref.getBool('loggedin');
-
-                        if(loggedIn){
+                        print(loggedIn);
+                        if (loggedIn != null) {
                           Navigator.of(context).push(PageRouteBuilder(
                               pageBuilder: (_, __, ___) => delivery()));
-                        }
-                        else{
+                        } else {
                           EasyLoading.showInfo("You have to log in to proceed");
-                          Navigator.push(context, MaterialPageRoute(builder: (context)=>loginScreen()));
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => loginScreen()));
                         }
                       },
                       child: Padding(
@@ -305,8 +331,8 @@ class _cartState extends State<cart> {
                           ),
                         ),
                       ),
-                    ),),
-
+                    ),
+                  ),
                 ],
               )
             : noItemCart());

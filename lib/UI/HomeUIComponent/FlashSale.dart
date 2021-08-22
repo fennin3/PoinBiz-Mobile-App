@@ -1,11 +1,17 @@
 import 'dart:async';
 
 import 'package:shimmer/shimmer.dart';
+import 'package:treva_shop_flutter/API/provider_class.dart';
 import 'package:treva_shop_flutter/Library/countdown/countdown.dart';
 import 'package:flutter/material.dart';
 import 'package:treva_shop_flutter/ListItem/FlashSaleItem.dart';
-import 'package:treva_shop_flutter/UI/HomeUIComponent/FlashSaleDetail.dart';
-import 'package:treva_shop_flutter/UI/HomeUIComponent/Home.dart';
+import 'package:provider/provider.dart';
+import 'package:treva_shop_flutter/UI/HomeUIComponent/DetailProduct.dart';
+import 'package:treva_shop_flutter/constant.dart';
+import 'package:treva_shop_flutter/database/cart_model.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'dart:convert';
 
 class flashSale extends StatefulWidget {
   @override
@@ -69,17 +75,13 @@ class _flashSaleState extends State<flashSale> {
   /// To set duration initState auto start if FlashSale Layout open
   @override
   void initState() {
-    Timer(Duration(seconds: 3), () {
+    Timer(Duration(seconds: 2), () {
       if (mounted) {
         setState(() {
           loadImage = false;
         });
       }
     });
-
-    hours = new CountDown(new Duration(hours: 24));
-    minutes = new CountDown(new Duration(hours: 1));
-    seconds = new CountDown(new Duration(minutes: 1));
 
     // onStartStopPress();
     // TODO: implement initState
@@ -88,11 +90,12 @@ class _flashSaleState extends State<flashSale> {
 
   /// Component widget in flashSale layout
   Widget build(BuildContext context) {
-    MediaQueryData mediaQueryData = MediaQuery.of(context);
+    final _pro = Provider.of<PoinBizProvider>(context, listen: true);
+    _pro.getWishList();
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Flash Sale",
+          "My WishList",
           style: TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: 17.0,
@@ -103,52 +106,52 @@ class _flashSaleState extends State<flashSale> {
         iconTheme: IconThemeData(color: Color(0xFF6991C7)),
         elevation: 0.0,
       ),
-      body: SingleChildScrollView(
+      body: _pro.wishlist.isNotEmpty ? SingleChildScrollView(
         child: Container(
           child: Column(
             children: <Widget>[
               /// Header banner
-              Image.asset(
-                "assets/img/flashsalebanner.png",
-                height: 195.0,
-                width: 1000.0,
-                fit: BoxFit.cover,
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      "End in",
-                      style: TextStyle(
-                        fontFamily: "Sans",
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black,
-                      ),
-                    ),
-                    Padding(padding: EdgeInsets.only(left: 20.0)),
-
-                    /// Get a countDown variable
-                    Text(
-                      hourstime.toString() +
-                          " : " +
-                          minute.toString() +
-                          " : " +
-                          second.toString(),
-                      style: TextStyle(
-                        fontFamily: "Gotik",
-                        fontSize: 15.0,
-                        letterSpacing: 1.0,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              // Image.asset(
+              //   "assets/img/flashsalebanner.png",
+              //   height: 195.0,
+              //   width: 1000.0,
+              //   fit: BoxFit.cover,
+              // ),
+              // Padding(
+              //   padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
+              //   child: Row(
+              //     crossAxisAlignment: CrossAxisAlignment.center,
+              //     mainAxisAlignment: MainAxisAlignment.center,
+              //     children: <Widget>[
+              //       Text(
+              //         "End in",
+              //         style: TextStyle(
+              //           fontFamily: "Sans",
+              //           fontSize: 15.0,
+              //           fontWeight: FontWeight.w600,
+              //           color: Colors.black,
+              //         ),
+              //       ),
+              //       Padding(padding: EdgeInsets.only(left: 20.0)),
+              //
+              //       /// Get a countDown variable
+              //       Text(
+              //         hourstime.toString() +
+              //             " : " +
+              //             minute.toString() +
+              //             " : " +
+              //             second.toString(),
+              //         style: TextStyle(
+              //           fontFamily: "Gotik",
+              //           fontSize: 15.0,
+              //           letterSpacing: 1.0,
+              //           fontWeight: FontWeight.w500,
+              //           color: Colors.black,
+              //         ),
+              //       ),
+              //     ],
+              //   ),
+              // ),
 
               ///
               ///
@@ -160,10 +163,12 @@ class _flashSaleState extends State<flashSale> {
               /// Create a GridView
               loadImage
                   ? _loadingImageAnimation(context)
-                  : _imageLoaded(context)
+                  : _imageLoaded(context, _pro.wishlist)
             ],
           ),
         ),
+      ): Center(
+        child: Text("No Item is Wishlist", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),),
       ),
     );
   }
@@ -172,9 +177,27 @@ class _flashSaleState extends State<flashSale> {
 /// Component Card item in gridView after done loading image
 class itemGrid extends StatelessWidget {
   /// Declare FlashSaleItem.dart get a data from FlashSaleItem.dart
-  SaleItem itemSale;
+  final WishItem itemSale;
 
   itemGrid(this.itemSale);
+
+  void getProd(context) async {
+    EasyLoading.show(status: "Loading");
+    http.Response response = await http
+        .get(Uri.parse(base_url + "general/get-product/${itemSale.prodid}"));
+    if (response.statusCode < 205) {
+      print(response.body);
+      EasyLoading.dismiss();
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  detailProduk(json.decode(response.body)['data'])));
+    } else {
+      EasyLoading.dismiss();
+      EasyLoading.showInfo("No internet connection");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -188,16 +211,17 @@ class itemGrid extends StatelessWidget {
             InkWell(
               onTap: () {
                 /// Animation Transition with opacity value in route navigate another layout
-                Navigator.of(context).push(PageRouteBuilder(
-                    pageBuilder: (_, __, ___) => new flashSaleDetail(itemSale),
-                    transitionDuration: Duration(milliseconds: 950),
-                    transitionsBuilder:
-                        (_, Animation<double> animation, __, Widget child) {
-                      return Opacity(
-                        opacity: animation.value,
-                        child: child,
-                      );
-                    }));
+                // Navigator.of(context).push(PageRouteBuilder(
+                //     pageBuilder: (_, __, ___) => new flashSaleDetail(itemSale),
+                //     transitionDuration: Duration(milliseconds: 950),
+                //     transitionsBuilder:
+                //         (_, Animation<double> animation, __, Widget child) {
+                //       return Opacity(
+                //         opacity: animation.value,
+                //         child: child,
+                //       );
+                //     }));
+                getProd(context);
               },
               child: Container(
                 decoration: BoxDecoration(color: Colors.white, boxShadow: [
@@ -212,7 +236,7 @@ class itemGrid extends StatelessWidget {
                   children: <Widget>[
                     /// Animation image header to flashSaleDetail.dart
                     Hero(
-                      tag: "hero-flashsale-${itemSale.id}",
+                      tag: "hero-flashsale-${itemSale.prodid}",
                       child: Material(
                         child: InkWell(
                           onTap: () {
@@ -226,8 +250,8 @@ class itemGrid extends StatelessWidget {
                                       child: InkWell(
                                         child: Hero(
                                             tag:
-                                                "hero-flashsale-${itemSale.id}",
-                                            child: Image.asset(
+                                                "hero-flashsale-${itemSale.prodid}",
+                                            child: Image.network(
                                               itemSale.image,
                                               width: 300.0,
                                               height: 300.0,
@@ -245,7 +269,7 @@ class itemGrid extends StatelessWidget {
                                     Duration(milliseconds: 500)));
                           },
                           child: SizedBox(
-                            child: Image.asset(
+                            child: Image.network(
                               itemSale.image,
                               fit: BoxFit.cover,
                               height: 140.0,
@@ -256,14 +280,14 @@ class itemGrid extends StatelessWidget {
                       ),
                     ),
                     Padding(
-                      padding:
-                          EdgeInsets.only(left: 8.0, right: 3.0, top: 15.0),
+                      padding: EdgeInsets.only(
+                          left: 8.0, right: 3.0, top: 15.0, bottom: 5),
                       child: Container(
                         width: mediaQueryData.size.width / 2.7,
                         child: Text(
                           itemSale.title,
                           style: TextStyle(
-                              fontSize: 10.5,
+                              fontSize: 12.5,
                               fontWeight: FontWeight.w500,
                               fontFamily: "Sans"),
                           overflow: TextOverflow.ellipsis,
@@ -271,108 +295,108 @@ class itemGrid extends StatelessWidget {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.only(left: 10.0, top: 5.0),
-                      child: Text(itemSale.normalprice,
+                      padding: EdgeInsets.only(left: 10.0, top: 5.0, bottom: 10),
+                      child: Text("GHc " + itemSale.price.toString(),
                           style: TextStyle(
-                              fontSize: 10.5,
-                              decoration: TextDecoration.lineThrough,
+                              fontSize: 12.5,
+                              // decoration: TextDecoration.,
                               color: Colors.black54,
                               fontWeight: FontWeight.w600,
                               fontFamily: "Sans")),
                     ),
-                    Padding(
-                      padding: EdgeInsets.only(left: 10.0, top: 5.0),
-                      child: Text(itemSale.discountprice,
-                          style: TextStyle(
-                              fontSize: 12.0,
-                              color: Color(0xFF7F7FD5),
-                              fontWeight: FontWeight.w800,
-                              fontFamily: "Sans")),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10.0, top: 5.0),
-                      child: Row(
-                        children: <Widget>[
-                          Icon(
-                            Icons.star,
-                            size: 11.0,
-                            color: Colors.yellow,
-                          ),
-                          Icon(
-                            Icons.star,
-                            size: 11.0,
-                            color: Colors.yellow,
-                          ),
-                          Icon(
-                            Icons.star,
-                            size: 11.0,
-                            color: Colors.yellow,
-                          ),
-                          Icon(
-                            Icons.star,
-                            size: 11.0,
-                            color: Colors.yellow,
-                          ),
-                          Icon(
-                            Icons.star_half,
-                            size: 11.0,
-                            color: Colors.yellow,
-                          ),
-                          Text(
-                            itemSale.ratingvalue,
-                            style: TextStyle(
-                                fontSize: 10.0,
-                                fontWeight: FontWeight.w500,
-                                fontFamily: "Sans",
-                                color: Colors.black38),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10.0, top: 5.0),
-                      child: Row(
-                        children: <Widget>[
-                          Icon(
-                            Icons.location_on,
-                            size: 11.0,
-                            color: Colors.black38,
-                          ),
-                          Text(
-                            itemSale.place,
-                            style: TextStyle(
-                                fontSize: 10.0,
-                                fontWeight: FontWeight.w500,
-                                fontFamily: "Sans",
-                                color: Colors.black38),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10.0, left: 10.0),
-                      child: Text(
-                        itemSale.stock,
-                        style: TextStyle(
-                            fontSize: 10.0,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: "Sans",
-                            color: Colors.black),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                          top: 4.0, left: 10.0, bottom: 15.0),
-                      child: Container(
-                        height: 5.0,
-                        width: itemSale.widthLine,
-                        decoration: BoxDecoration(
-                            color: Color(itemSale.colorLine),
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(4.0)),
-                            shape: BoxShape.rectangle),
-                      ),
-                    )
+                    // Padding(
+                    //   padding: EdgeInsets.only(left: 10.0, top: 5.0),
+                    //   child: Text(itemSale.discountprice,
+                    //       style: TextStyle(
+                    //           fontSize: 12.0,
+                    //           color: Color(0xFF7F7FD5),
+                    //           fontWeight: FontWeight.w800,
+                    //           fontFamily: "Sans")),
+                    // ),
+                    // Padding(
+                    //   padding: const EdgeInsets.only(left: 10.0, top: 5.0),
+                    //   child: Row(
+                    //     children: <Widget>[
+                    //       Icon(
+                    //         Icons.star,
+                    //         size: 11.0,
+                    //         color: Colors.yellow,
+                    //       ),
+                    //       Icon(
+                    //         Icons.star,
+                    //         size: 11.0,
+                    //         color: Colors.yellow,
+                    //       ),
+                    //       Icon(
+                    //         Icons.star,
+                    //         size: 11.0,
+                    //         color: Colors.yellow,
+                    //       ),
+                    //       Icon(
+                    //         Icons.star,
+                    //         size: 11.0,
+                    //         color: Colors.yellow,
+                    //       ),
+                    //       Icon(
+                    //         Icons.star_half,
+                    //         size: 11.0,
+                    //         color: Colors.yellow,
+                    //       ),
+                    //       Text(
+                    //         itemSale.ratingvalue,
+                    //         style: TextStyle(
+                    //             fontSize: 10.0,
+                    //             fontWeight: FontWeight.w500,
+                    //             fontFamily: "Sans",
+                    //             color: Colors.black38),
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ),
+                    // Padding(
+                    //   padding: const EdgeInsets.only(left: 10.0, top: 5.0),
+                    //   child: Row(
+                    //     children: <Widget>[
+                    //       Icon(
+                    //         Icons.location_on,
+                    //         size: 11.0,
+                    //         color: Colors.black38,
+                    //       ),
+                    //       Text(
+                    //         itemSale.place,
+                    //         style: TextStyle(
+                    //             fontSize: 10.0,
+                    //             fontWeight: FontWeight.w500,
+                    //             fontFamily: "Sans",
+                    //             color: Colors.black38),
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ),
+                    // Padding(
+                    //   padding: const EdgeInsets.only(top: 10.0, left: 10.0),
+                    //   child: Text(
+                    //     itemSale.stock,
+                    //     style: TextStyle(
+                    //         fontSize: 10.0,
+                    //         fontWeight: FontWeight.w500,
+                    //         fontFamily: "Sans",
+                    //         color: Colors.black),
+                    //   ),
+                    // ),
+                    // Padding(
+                    //   padding: const EdgeInsets.only(
+                    //       top: 4.0, left: 10.0, bottom: 15.0),
+                    //   child: Container(
+                    //     height: 5.0,
+                    //     width: itemSale.widthLine,
+                    //     decoration: BoxDecoration(
+                    //         color: Color(itemSale.colorLine),
+                    //         borderRadius:
+                    //             BorderRadius.all(Radius.circular(4.0)),
+                    //         shape: BoxShape.rectangle),
+                    //   ),
+                    // )
                   ],
                 ),
               ),
@@ -547,19 +571,19 @@ Widget _loadingImageAnimation(BuildContext context) {
 /// Calling ImageLoaded animation for set a grid layout
 ///
 ///
-Widget _imageLoaded(BuildContext context) {
+Widget _imageLoaded(BuildContext context, _data) {
   MediaQueryData mediaQueryData = MediaQuery.of(context);
-  return GridView.count(
-    crossAxisCount: 2,
+  return GridView.extent(
+    maxCrossAxisExtent: 210,
     shrinkWrap: true,
-    childAspectRatio: mediaQueryData.size.height / 1300,
+    childAspectRatio: 2 / 2,
     crossAxisSpacing: 0.0,
     mainAxisSpacing: 0.0,
     primary: false,
     children: List.generate(
       /// Get data in flashSaleItem.dart (ListItem folder)
-      flashData.length,
-      (index) => itemGrid(flashData[index]),
+      _data.length,
+      (index) => itemGrid(_data[index]),
     ),
   );
 }

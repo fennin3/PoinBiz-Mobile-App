@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_countdown_timer/current_remaining_time.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_rating/flutter_rating.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:treva_shop_flutter/API/provider_class.dart';
@@ -7,13 +8,12 @@ import 'package:treva_shop_flutter/Library/carousel_pro/carousel_pro.dart';
 import 'package:flutter/material.dart';
 import 'package:treva_shop_flutter/ListItem/HomeGridItemRecomended.dart';
 import 'package:treva_shop_flutter/UI/HomeUIComponent/AppbarGradient.dart';
-import 'package:treva_shop_flutter/Library/countdown/countdown.dart';
 import 'package:treva_shop_flutter/UI/HomeUIComponent/CategoryDetail.dart';
 import 'package:treva_shop_flutter/UI/HomeUIComponent/DetailProduct.dart';
 import 'package:treva_shop_flutter/UI/HomeUIComponent/FlashSale.dart';
-import 'package:treva_shop_flutter/UI/HomeUIComponent/MenuDetail.dart';
 import 'package:treva_shop_flutter/UI/HomeUIComponent/PromotionDetail.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'package:treva_shop_flutter/constant.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
@@ -48,7 +48,10 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
     _pro.getCartItem();
     _pro.getEventCategories();
     _pro.getAllEvent();
-
+    _pro.getAllBuses();
+    _pro.getDestinations();
+    _pro.getCartData();
+    _pro.getWishListData();
   }
 
   @override
@@ -323,7 +326,14 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
               ],
             ),
           )
-        : Container();
+        : Container(
+            child: Center(
+              child: CircularProgressIndicator(
+                color: appColor,
+                backgroundColor: Colors.white,
+              ),
+            ),
+          );
 
     /// FlashSale component
     var FlashSell = Container(
@@ -389,6 +399,7 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
             Padding(
               padding: EdgeInsets.only(left: 10.0),
               child: flashSaleItem(
+                  id: item['id'].toString(),
                   image: item['image']['path'],
                   title: item['product']['name'],
                   normalprice: "Ghc ${item['product']['price']}",
@@ -619,14 +630,15 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
             ),
 
             /// To set GridView item
-            GridView.count(
+            GridView.extent(
                 shrinkWrap: true,
                 padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
                 crossAxisSpacing: 10.0,
-                mainAxisSpacing: 17.0,
-                childAspectRatio: 0.55,
-                crossAxisCount: 2,
+                mainAxisSpacing: 10.0,
+                childAspectRatio: 0.65,
+                // crossAxisCount: 2,
                 primary: false,
+                maxCrossAxisExtent: 300,
                 children: List.generate(
                   _pro.allProducts.length,
                   (index) => ItemGrid(_pro.allProducts[index]),
@@ -786,7 +798,7 @@ class _ItemGridState extends State<ItemGrid> {
                             transitionDuration: Duration(milliseconds: 500)));
                       },
                       child: Container(
-                        height: mediaQueryData.size.height / 3.3,
+                        height: 180,
                         width: 200.0,
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.only(
@@ -818,7 +830,7 @@ class _ItemGridState extends State<ItemGrid> {
                 Padding(
                   padding: const EdgeInsets.only(left: 15.0, right: 15.0),
                   child: Text(
-                    "GHc" + widget._data['price'].toString(),
+                    "GHc " + widget._data['price'].toString(),
                     style: TextStyle(
                         fontFamily: "Sans",
                         fontWeight: FontWeight.w500,
@@ -873,6 +885,7 @@ class _ItemGridState extends State<ItemGrid> {
 
 /// Component FlashSaleItem
 class flashSaleItem extends StatefulWidget {
+  final String id;
   final String image;
   final String title;
   final String normalprice;
@@ -885,7 +898,8 @@ class flashSaleItem extends StatefulWidget {
   final int duration;
 
   flashSaleItem(
-      {this.image,
+      {this.id,
+      this.image,
       this.title,
       this.normalprice,
       this.discountprice,
@@ -919,6 +933,23 @@ class _flashSaleItemState extends State<flashSaleItem> {
     }
   }
 
+  void getProd(context) async {
+    EasyLoading.show(status: "Loading");
+    http.Response response = await http
+        .get(Uri.parse(base_url + "general/get-product/${widget.id}"));
+    if (response.statusCode < 205) {
+      print(response.body);
+      EasyLoading.dismiss();
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  detailProduk(json.decode(response.body)['data'])));
+    } else {
+      EasyLoading.dismiss();
+      EasyLoading.showInfo("No internet connection");
+    }
+  }
 
   @override
   void initState() {
@@ -937,16 +968,7 @@ class _flashSaleItemState extends State<flashSaleItem> {
           children: <Widget>[
             InkWell(
               onTap: () {
-                Navigator.of(context).push(PageRouteBuilder(
-                    pageBuilder: (_, __, ___) => new flashSale(),
-                    transitionsBuilder:
-                        (_, Animation<double> animation, __, Widget child) {
-                      return Opacity(
-                        opacity: animation.value,
-                        child: child,
-                      );
-                    },
-                    transitionDuration: Duration(milliseconds: 850)));
+                getProd(context);
               },
               child: Container(
                 width: 145.0,
@@ -1001,7 +1023,9 @@ class _flashSaleItemState extends State<flashSaleItem> {
                             rating: rate,
                             color: Colors.yellow,
                           ),
-                          SizedBox(width: 5,),
+                          SizedBox(
+                            width: 5,
+                          ),
                           Text(
                             "$rate",
                             style: TextStyle(

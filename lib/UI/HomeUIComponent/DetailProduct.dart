@@ -12,6 +12,7 @@ import 'package:flutter_rating/flutter_rating.dart';
 import 'package:treva_shop_flutter/UI/HomeUIComponent/ReviewLayout.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:treva_shop_flutter/constant.dart';
+import 'package:treva_shop_flutter/database/cart_model.dart';
 
 class detailProduk extends StatefulWidget {
   Map gridItem;
@@ -303,7 +304,17 @@ class _detailProdukState extends State<detailProduk> {
                           ),
                         ),
                       ),
-                      Positioned(bottom: 10, right: 10, child: FavWidget())
+                      Positioned(bottom: 10, right: 10, child: FavWidget(item: WishItem(
+                        image: gridItem['image']['path'],
+                        title: gridItem['name'],
+                        prodid: gridItem['id'].toString(),
+                        store_id:gridItem['store_id'].toString(),
+                        color: gridItem['colors'].isNotEmpty? gridItem['colors'][_num]['code']:"",
+                        total: gridItem['price'].toString(),
+                        price: gridItem['price'].toString(),
+                        size: gridItem['sizes'].isNotEmpty ? gridItem['sizes'][_nu]['name']:"",
+                        quantity: "1"
+                      ),))
                     ],
                   ),
 
@@ -423,8 +434,7 @@ class _detailProdukState extends State<detailProduk> {
                                         child: InkWell(
                                             onTap: () {
                                               setState(() {
-                                                print(gridItem['sizes']
-                                                    .indexOf(size));
+
                                                 _nu = gridItem['sizes']
                                                     .indexOf(size);
                                               });
@@ -710,8 +720,13 @@ class _detailProdukState extends State<detailProduk> {
                 "title": gridItem['name'],
                 "image": gridItem['image']['path'],
                 "price": gridItem['price'].toString(),
-                "quantity": "1"
-              }, _key);
+                "quantity": "1",
+                "color": gridItem['colors'].isNotEmpty? gridItem['colors'][_num]['code']:"",
+                "id": gridItem['id'],
+                "size": gridItem['sizes'].isNotEmpty? gridItem['sizes'][_nu]['name']:"",
+                "store_id": gridItem['store_id'],
+                "total": gridItem['price'].toString()
+              }, _key,'offline');
 
             },
             child: Padding(

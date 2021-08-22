@@ -2,24 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:treva_shop_flutter/API/provider_class.dart';
 import 'package:treva_shop_flutter/Components/fav_widget.dart';
+import 'package:treva_shop_flutter/UI/CartUIComponent/CartLayout.dart';
 import 'package:treva_shop_flutter/constant.dart';
 import 'package:expandable_text/expandable_text.dart';
 import 'package:provider/provider.dart';
 
 class EventCat extends StatefulWidget {
-  const EventCat({Key key}) : super(key: key);
+  final Map data;
+
+  EventCat({this.data});
 
   @override
   _EventCatState createState() => _EventCatState();
 }
 
 class _EventCatState extends State<EventCat> {
-  final GlobalKey _key = GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String _radioCon;
   int _ticketNum;
 
   @override
   Widget build(BuildContext context) {
+
     final _pro = Provider.of<PoinBizProvider>(context);
     return Scaffold(
       body: SafeArea(
@@ -33,6 +37,10 @@ class _EventCatState extends State<EventCat> {
                     height: 250,
                     width: double.infinity,
                     color: appColor,
+                    child: Image.network(
+                      widget.data['image']['path'],
+                      fit: BoxFit.cover,
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(10.0),
@@ -41,28 +49,45 @@ class _EventCatState extends State<EventCat> {
                       children: [
                         InkWell(
                             onTap: () => Navigator.pop(context),
-                            child: Icon(
-                              Icons.arrow_back,
-                              color: Colors.white,
+                            child: Card(
+                              color: appColor,
+                              child: Padding(
+                                padding: const EdgeInsets.all(4.0),
+                                child: Icon(
+                                  Icons.arrow_back,
+                                  color: Colors.white,
+                                ),
+                              ),
                             )),
                         Padding(
-                          padding: const EdgeInsets.only(right: 10.0),
-                          child: Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              Icon(
-                                Icons.shopping_cart,
-                                color: Colors.white,
-                              ),
-                              Positioned(
-                                  right: -8,
-                                  top: -7,
-                                  child: CircleAvatar(
-                                    radius: 10,
-                                    backgroundColor: Colors.red,
-                                    child: Text("${_pro.cart.length}"),
-                                  ))
-                            ],
+                          padding: const EdgeInsets.only(right: 15.0),
+                          child: InkWell(
+
+                            onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>cart(),)),
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Card(
+                                  color: appColor,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(2.0),
+                                    child: Icon(
+                                      Icons.shopping_cart,
+                                      size: 30,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                    right: -8,
+                                    top: -7,
+                                    child: CircleAvatar(
+                                      radius: 10,
+                                      backgroundColor: Colors.red,
+                                      child: Text("${_pro.cart.length}"),
+                                    ))
+                              ],
+                            ),
                           ),
                         )
                       ],
@@ -72,13 +97,12 @@ class _EventCatState extends State<EventCat> {
                 ],
               ),
               Padding(
-                padding:
-                    EdgeInsets.only(top: 10, left: 20, right: 20),
+                padding: EdgeInsets.only(top: 10, left: 20, right: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Children's Museum of Atlanta",
+                      "${widget.data['name']}",
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontFamily: "Sans",
@@ -100,7 +124,7 @@ class _EventCatState extends State<EventCat> {
                             SizedBox(
                               width: 10,
                             ),
-                            Text("22 August, 2021")
+                            Text(widget.data['date'].toString().split("at ")[0])
                           ],
                         ),
                         SizedBox(
@@ -116,7 +140,7 @@ class _EventCatState extends State<EventCat> {
                             SizedBox(
                               width: 10,
                             ),
-                            Text("8:00 PM")
+                            Text(widget.data['date'].toString().split("at ")[1])
                           ],
                         ),
                       ],
@@ -137,7 +161,7 @@ class _EventCatState extends State<EventCat> {
                             SizedBox(
                               width: 10,
                             ),
-                            Text("Tema Community 9")
+                            Text(widget.data['venue'])
                           ],
                         ),
                       ],
@@ -154,20 +178,25 @@ class _EventCatState extends State<EventCat> {
                       height: 10,
                     ),
                     ExpandableText(
-                      "ahh d ch hccd cd cdhchs dcsbccjd dhchs cbaub ccbbkcbac cbd buiab ciusc hhjbcbas ahbsj hc jsc jc ja icukbc bd hcd hsd ahsha hsa hs hsj xscjhsc dcbd bccjcbac chbasjhc",
+                      widget.data['description'],
                       expandText: "show more",
                       collapseText: "show less",
                       maxLines: 4,
                     ),
 
-                    SizedBox(height: 20,),
+                    SizedBox(
+                      height: 20,
+                    ),
+
+                    ///Work on Tickets
                     Text(
                       "Ticket Type",
                       style: auctionHeader.copyWith(
                           color: Colors.black, fontSize: 16),
                     ),
-                    SizedBox(height: 8,),
-
+                    SizedBox(
+                      height: 8,
+                    ),
                   ],
                 ),
               ),
@@ -175,27 +204,21 @@ class _EventCatState extends State<EventCat> {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: <Widget>[
-                    InkWell(
-                        onTap: (){
-                          setState(() {
-                            _ticketNum = 0;
-                          });
-                        },
-                        child: TicketWidget(text: "Standard - GHc 300", index: 0, nu: _ticketNum,)),
-                    InkWell(
-                        onTap: (){
-                          setState(() {
-                            _ticketNum = 1;
-                          });
-                        },
-                        child: TicketWidget(text: "VIP - GHc 500", index: 1, nu: _ticketNum,)),
-                    InkWell(
-                        onTap: (){
-                          setState(() {
-                            _ticketNum = 2;
-                          });
-                        },
-                        child: TicketWidget(text: "VVIP - GHc 300", index: 2, nu: _ticketNum,)),
+                    for (var ticket in widget.data['tickets'])
+                      InkWell(
+                          onTap: () {
+                            setState(() {
+                              print(ticket['id']);
+                              _ticketNum =
+                                  widget.data['tickets'].indexOf(ticket);
+                            });
+                          },
+                          child: TicketWidget(
+                            text:
+                                "${ticket['type']['name']} - GHc ${ticket['amount']}",
+                            index: widget.data['tickets'].indexOf(ticket),
+                            nu: _ticketNum,
+                          )),
                   ],
                 ),
               )
@@ -204,10 +227,23 @@ class _EventCatState extends State<EventCat> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: _ticketNum == null? Colors.grey: appColor,
-        onPressed: (){
-          if(_ticketNum == null){
+        backgroundColor: _ticketNum == null ? Colors.grey : appColor,
+        onPressed: () {
+          if (_ticketNum == null) {
             EasyLoading.showInfo("Please select ticket type");
+          } else {
+            _pro.addToCart({
+              "quantity": "1",
+              "price": widget.data['tickets'][_ticketNum]['amount'],
+              "image": widget.data['image']['path'],
+              "title": widget.data['name'],
+              "color": "",
+              "id": widget.data['id'],
+              "size": "",
+              "store_id": widget.data['store_id'],
+              "total": widget.data['amount']
+            }, _scaffoldKey,"offline");
+            // print(widget.data['tickets'][_ticketNum]['amount']);
           }
         },
         child: Icon(Icons.add_shopping_cart),
@@ -221,9 +257,7 @@ class TicketWidget extends StatelessWidget {
   final int index;
   final int nu;
 
-
   TicketWidget({this.text, this.index, this.nu});
-
 
   @override
   Widget build(BuildContext context) {
@@ -231,31 +265,26 @@ class TicketWidget extends StatelessWidget {
       padding: const EdgeInsets.only(right: 8.0, bottom: 10),
       child: Card(
         elevation: 5,
-
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10)
-
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         child: Container(
-            height: index==nu ?80: 70,
+            height: index == nu ? 80 : 70,
             decoration: BoxDecoration(
-              color: index==nu ? Colors.white:Colors.black12,
-                borderRadius: BorderRadius.circular(10)
-            ),
+                color: index == nu ? Colors.white : Colors.black12,
+                borderRadius: BorderRadius.circular(10)),
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: Row(
               children: [
-                Image.asset("assets/img/ticket2.png",
+                Image.asset(
+                  "assets/img/ticket2.png",
                   height: 30,
                 ),
-                SizedBox(width: 10,),
+                SizedBox(
+                  width: 10,
+                ),
                 Text(text)
               ],
-            )
-        ),
+            )),
       ),
     );
   }
 }
-
-

@@ -2,7 +2,7 @@ name: treva_shop_flutter
 description: A new Flutter project.
 
 
-version: 1.0.0+1
+version: 1.0.0+2
 
 environment:
   sdk: ">=2.2.2 <3.0.0"
@@ -34,6 +34,7 @@ dependencies:
   flutter_countdown_timer: ^4.1.0
   otp_text_field: ^1.1.1
   flutter_rating_bar: ^4.0.0
+
 
 
 dev_dependencies:
@@ -99,11 +100,11 @@ flutter:
     - assets/img/search2.png
     - assets/img/chat.png
     - assets/img/notifications-button.png
-    - assets/img/baner1.png
-    - assets/img/baner2.png
-    - assets/img/baner3.png
-    - assets/img/baner4.png
-    - assets/img/baner12.png
+#    - assets/img/baner1.png
+#    - assets/img/baner2.png
+#    - assets/img/baner3.png
+#    - assets/img/baner4.png
+#    - assets/img/baner12.png
     - assets/icon/book.png
     - assets/icon/camera.png
     - assets/icon/fashion.png
@@ -161,10 +162,10 @@ flutter:
     - assets/icon/aboutapp.png
     - assets/icon/shopping-cart.png
     - assets/icon/message.png
-    - assets/img/bannerMan1.png
-    - assets/img/bannerMan2.png
-    - assets/img/bannerMan3.png
-    - assets/img/bannerMan4.png
+#    - assets/img/bannerMan1.png
+#    - assets/img/bannerMan2.png
+#    - assets/img/bannerMan3.png
+#    - assets/img/bannerMan4.png
     - assets/imgCamera/CameraDigital.png
     - assets/imgCamera/CompactCamera.png
     - assets/imgCamera/ActionCamera.png
@@ -202,6 +203,8 @@ flutter:
     - assets/img/headerProfile.png
     - assets/img/ticket.png
     - assets/img/ticket2.png
+    - assets/img/offline.png
+    - assets/img/point.jpg
     - assets/img/SliderLogin2.png
     - assets/img/SliderLogin3.png
     - assets/img/SliderLogin4.png

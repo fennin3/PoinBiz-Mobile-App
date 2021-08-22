@@ -19,6 +19,7 @@ void main() async{
   Hive.registerAdapter(CartModelAdapter());
   Hive.registerAdapter(SearchedWordAdapter());
   Hive.registerAdapter(AddressAdapter());
+  Hive.registerAdapter(WishItemAdapter());
   runApp(
       MultiProvider(
         providers: [

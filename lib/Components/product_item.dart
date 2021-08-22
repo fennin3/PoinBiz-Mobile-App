@@ -115,8 +115,8 @@ class _ItemGridMainState extends State<ItemGridMain> {
                             transitionDuration: Duration(milliseconds: 500)));
                       },
                       child: Container(
-                        height: mediaQueryData.size.height / 3.3,
-                        width: 200.0,
+                        height: 180,
+
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.only(
                                 topLeft: Radius.circular(7.0),

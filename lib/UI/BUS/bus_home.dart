@@ -1,10 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
-import 'package:treva_shop_flutter/UI/AcountUIComponent/MyOrders.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:treva_shop_flutter/API/provider_class.dart';
 import 'package:treva_shop_flutter/UI/HomeUIComponent/AppbarGradient.dart';
 import 'package:treva_shop_flutter/constant.dart';
 import 'package:dropdown_search/dropdown_search.dart';
+import 'package:provider/provider.dart';
 
 class BusHome extends StatefulWidget {
   final scaKey;
@@ -23,10 +25,35 @@ class _BusHomeState extends State<BusHome> {
     fontFamily: "Gotik",
   );
 
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  List busData = [];
+
+  String _from = "";
+  String _to = "";
+
   /// Create Big Circle for Data Order Not Success
+  ///
+
+  initData() {
+    final _pro = Provider.of<PoinBizProvider>(context, listen: false);
+    setState(() {
+      busData = _pro.allbuses;
+    });
+
+    print("busdate = $busData");
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    initData();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final _pro = Provider.of<PoinBizProvider>(context, listen: true);
+
     var _bigCircleNotYet = Padding(
       padding: const EdgeInsets.only(top: 8.0),
       child: Container(
@@ -63,178 +90,309 @@ class _BusHomeState extends State<BusHome> {
 
     MediaQueryData mediaQueryData = MediaQuery.of(context);
     final size = MediaQuery.of(context).size;
-    return SafeArea(
-        child: Stack(
-      children: [
-        SingleChildScrollView(
-          child: Column(
+
+    return _pro.allbuses.isNotEmpty
+        ? SafeArea(
+            child: Stack(
             children: [
-              Padding(
-                  padding:
-                      EdgeInsets.only(top: mediaQueryData.padding.top + 38.5)),
-              Row(
-                children: [
-                  Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 15),
-                      child: Text(
-                        "Choose your journey",
-                        style: TextStyle(
-                            fontSize: 15.0,
-                            fontFamily: "Sans",
-                            fontWeight: FontWeight.w700),
-                      )),
-                ],
-              ),
-              SizedBox(height: 15,),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Column(
-                      children: <Widget>[
-                        SizedBox(height: 10,),
-                        _bigCircleNotYet,
-                        _smallCircle,
-
-
-                        _smallCircle,
-                        _smallCircle,
-                        _smallCircle,
-                        _bigCircle,
+              SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Padding(
+                        padding: EdgeInsets.only(
+                            top: mediaQueryData.padding.top + 38.5)),
+                    Row(
+                      children: [
+                        Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 15),
+                            child: Text(
+                              "Choose your journey",
+                              style: TextStyle(
+                                  fontSize: 15.0,
+                                  fontFamily: "Sans",
+                                  fontWeight: FontWeight.w700),
+                            )),
                       ],
                     ),
-                    SizedBox(width: 10,),
-                    Flexible(
-                      child: Column(
+                    SizedBox(
+                      height: 15,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                      child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          DropdownSearch<String>(
-
-                            mode: Mode.BOTTOM_SHEET,
-                            showSelectedItem: true,
-                            dropdownSearchBaseStyle: TextStyle(fontSize: 14),
-
-                            showSearchBox: true,
-
-                            isFilteredOnline: true,
-                            showClearButton: true,
-
-                            items: [
-                              "Brazil",
-                              "Italia",
-                              "Tunisia",
-                              "Canada",
-                              "Brazil",
-                              "Italia",
-                              "Tunisia",
-                              "Canada"
+                          Column(
+                            children: <Widget>[
+                              SizedBox(
+                                height: 10,
+                              ),
+                              _bigCircleNotYet,
+                              _smallCircle,
+                              _smallCircle,
+                              _smallCircle,
+                              _smallCircle,
+                              _bigCircle,
                             ],
-                            label: "From",
-                            hint: "Select where you are travelling from...",
-                            // popupItemDisabled: (String s) => s.startsWith('I'),
-                            onChanged: (e) {
-                              print(e);
-                            },
                           ),
-                          Padding(padding: EdgeInsets.only(top: 20.0)),
-                          DropdownSearch<String>(
-
-                            mode: Mode.BOTTOM_SHEET,
-                            showSelectedItem: true,
-                            dropdownSearchBaseStyle: TextStyle(fontSize: 14),
-
-                            showSearchBox: true,
-
-                            isFilteredOnline: true,
-                            showClearButton: true,
-
-                            items: [
-                              "Brazil",
-                              "Italia",
-                              "Tunisia",
-                              "Canada",
-                              "Brazil",
-                              "Italia",
-                              "Tunisia",
-                              "Canada"
-                            ],
-                            label: "To",
-                            hint: "Select where you are travelling to...",
-                            // popupItemDisabled: (String s) => s.startsWith('I'),
-                            onChanged: (e) {
-                              print(e);
-                            },
+                          SizedBox(
+                            width: 10,
                           ),
+                          Flexible(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                DropdownSearch<String>(
+                                  mode: Mode.BOTTOM_SHEET,
+                                  showSelectedItem: true,
+                                  dropdownSearchBaseStyle:
+                                      TextStyle(fontSize: 14),
 
+                                  showSearchBox: true,
+
+                                  isFilteredOnline: false,
+
+                                  items: [
+                                    'None',
+                                    for (var dest in _pro.alldestinations)
+                                      if (dest['name'] != _to) dest['name']
+                                  ],
+                                  label: "From",
+                                  hint:
+                                      "Select where you are travelling from...",
+                                  // popupItemDisabled: (String s) => s.startsWith('I'),
+                                  onChanged: (e) {
+                                    setState(() {
+                                      busData = _pro.allbuses;
+
+                                      _from = e;
+                                      if (_from != 'None')
+                                        busData = _pro.allbuses
+                                            .where((element) => element['from']
+                                                    ['name']
+                                                .toString()
+                                                .contains(_from))
+                                            .toList();
+
+                                      if (_to != 'None') {
+                                        busData = busData
+                                            .where((element) => element['to']
+                                                    ['name']
+                                                .toString()
+                                                .contains(_to))
+                                            .toList();
+                                      }
+                                    });
+                                  },
+                                ),
+                                Padding(padding: EdgeInsets.only(top: 20.0)),
+                                DropdownSearch<String>(
+                                  mode: Mode.BOTTOM_SHEET,
+                                  showSelectedItem: true,
+                                  dropdownSearchBaseStyle:
+                                      TextStyle(fontSize: 14),
+                                  showSearchBox: true,
+                                  isFilteredOnline: true,
+                                  items: [
+                                    'None',
+                                    for (var dest in _pro.alldestinations)
+                                      if (dest['name'] != _from) dest['name']
+                                  ],
+                                  label: "To",
+                                  hint: "Select where you are travelling to...",
+                                  onChanged: (e) {
+                                    setState(() {
+                                      busData = _pro.allbuses;
+
+                                      _to = e;
+
+                                      if (_to != 'None')
+                                        busData = busData
+                                            .where((element) => element['to']
+                                                    ['name']
+                                                .toString()
+                                                .contains(_to))
+                                            .toList();
+                                      if (_from != 'None') {
+                                        busData = busData
+                                            .where((element) => element['from']
+                                                    ['name']
+                                                .toString()
+                                                .contains(_from))
+                                            .toList();
+                                      }
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                     ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    for (var route in busData)
+                      Padding(
+                        padding:
+                            const EdgeInsets.only(top: 10, left: 10, right: 10),
+                        child: Card(
+                          elevation: 5,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5)),
+                          child: Container(
+                            padding: EdgeInsets.all(15),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            width: double.infinity,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      route['merchant']['name'],
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 17),
+                                    ),
+                                    Text(
+                                      "GHc ${route['amount']}",
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold),
+                                    )
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Text(
+                                    "${route['from']['name']}  -  ${route['to']['name']}"),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    InkWell(
+                                      onTap: () {
+                                        _pro.addToCart({
+                                          "quantity": "1",
+                                          "price": route['amount'].toString(),
+                                          "image": "ticket",
+                                          "title": route['merchant']['name'],
+                                          "color": "",
+                                          "id": route['id'].toString(),
+                                          "size": "",
+                                          "store_id": route['store_id'],
+                                          "total": route['amount'].toString()
+                                        }, _scaffoldKey, "offline");
+                                      },
+                                      child: Card(
+                                        color: appColor,
+                                        child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 10.0, vertical: 5),
+                                            child: Row(
+                                              children: [
+                                                Text(
+                                                  "Add to cart",
+                                                  style: TextStyle(
+                                                      fontSize: 16,
+                                                      color: Colors.white),
+                                                ),
+                                                SizedBox(
+                                                  width: 10,
+                                                ),
+                                                Icon(
+                                                  Icons.add_shopping_cart,
+                                                  color: Colors.white,
+                                                ),
+                                              ],
+                                            )),
+                                      ),
+                                    ),
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.departure_board,
+                                          color: appColor,
+                                        ),
+                                        SizedBox(
+                                          width: 10,
+                                        ),
+                                        Text("${route['departure']}")
+                                      ],
+                                    )
+                                  ],
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      )
                   ],
                 ),
               ),
-              SizedBox(height: 20,),
-              for (var i in [1,2,3,4,5,6,7,8,9])
-                Padding(
-                  padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
-                  child:
-                      Card(
-                        elevation: 5,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5)
-                        ),
-                        child: Container(
-                          padding: EdgeInsets.all(15),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(5),
-
-                          ),
-                          width: double.infinity,
-
-
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("PoinBiz Express", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),),
-                                  Text("GHc 125", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),)
-                                ],
-                              ),
-                              SizedBox(height: 10,),
-                              Text("Cape Coast  -  Accra"),
-                              SizedBox(height: 10,),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Card(
-                                    color: appColor,
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5),
-                                      child: Icon(Icons.add_shopping_cart, color: Colors.white,),
-                                    ),
-                                  ),
-                                  Row(
-                                    children: [
-                                      Icon(Icons.departure_board, color: appColor,),
-                                      SizedBox(width: 10,),
-                                      Text("7:30 PM")
-                                    ],
-                                  )
-                                ],
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-
-                )
+              AppbarGradient(scaKey: widget.scaKey)
             ],
+          ))
+        : noItemCart();
+  }
+}
+
+class noItemCart extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    MediaQueryData mediaQueryData = MediaQuery.of(context);
+    return Container(
+      width: double.infinity,
+      color: Colors.white,
+      height: double.infinity,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Padding(
+              padding: EdgeInsets.only(top: mediaQueryData.padding.top + 50.0)),
+          Image.asset(
+            "assets/imgIllustration/IlustrasiCart.png",
+            height: 300.0,
           ),
-        ),
-        AppbarGradient(scaKey: widget.scaKey)
-      ],
-    ));
+          Padding(padding: EdgeInsets.only(bottom: 10.0)),
+          Text(
+            "No Buses Available At The Moment",
+            style: TextStyle(
+                fontWeight: FontWeight.w400,
+                fontSize: 18.5,
+                color: Colors.black26.withOpacity(0.2),
+                fontFamily: "Popins"),
+          ),
+          Padding(padding: EdgeInsets.only(bottom: 10.0)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("Checking"),
+              SizedBox(
+                width: 15,
+              ),
+              Container(
+                height: 20,
+                width: 20,
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            ],
+          )
+        ],
+      ),
+    );
   }
 }

@@ -273,7 +273,7 @@ class _categoryDetailState extends State<categoryDetail> {
           Container(
             margin: EdgeInsets.only(right: 5.0, left: 5.0),
             child: Container(
-              color: Colors.white,
+              color: Colors.transparent,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
@@ -286,17 +286,21 @@ class _categoryDetailState extends State<categoryDetail> {
                   ///
                   loadImage
                       ? _imageLoading(context)
-                      : _products == null
-                          ? Container()
-                          : GridView.count(
+                      : _products == null || _products.isEmpty
+                          ? Padding(
+                    padding: EdgeInsets.only(top: 50),
+                    child: Text("No Products", style: TextStyle(fontSize: 20),),
+                  )
+                          : GridView.extent(
                               shrinkWrap: true,
                               padding: EdgeInsets.symmetric(
                                   horizontal: 7.0, vertical: 10.0),
                               crossAxisSpacing: 10.0,
                               mainAxisSpacing: 15.0,
-                              childAspectRatio: 0.55,
-                              crossAxisCount: 2,
+                              childAspectRatio: 0.62,
+
                               primary: false,
+                              maxCrossAxisExtent: 350,
                               children: List.generate(
                                 /// Get data in flashSaleItem.dart (ListItem folder)
                                 _products.length,

@@ -27,6 +27,7 @@ class _AddAuctionState extends State<AddAuction> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: appColor,
         centerTitle: true,
         title: Text(
           "Add Auction Sale",
@@ -34,7 +35,7 @@ class _AddAuctionState extends State<AddAuction> {
         ),
         leading: TextButton(
             onPressed: ()=>Navigator.pop(context),
-            child: Icon(Icons.arrow_back)),
+            child: Icon(Icons.arrow_back, color: Colors.white,)),
       ),
       body: SafeArea(
         child: AddAuctionSale(),

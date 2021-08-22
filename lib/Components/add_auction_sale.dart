@@ -8,8 +8,9 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_paystack/flutter_paystack.dart';
-
-
+import 'package:treva_shop_flutter/sharedPref/savedinfo.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class AddAuctionSale extends StatefulWidget {
   const AddAuctionSale({Key key}) : super(key: key);
@@ -26,10 +27,11 @@ class _AddAuctionSaleState extends State<AddAuctionSale> {
   PickedFile _image;
   final ImagePicker _picker = ImagePicker();
   bool checkBoxValue = false;
+  String auctiontype = "";
 
   void pickImageFromCamera() async {
     final PickedFile pickedFile =
-    await _picker.getImage(source: ImageSource.camera, imageQuality: 50);
+        await _picker.getImage(source: ImageSource.camera, imageQuality: 50);
     setState(() {
       _image = pickedFile;
     });
@@ -38,7 +40,7 @@ class _AddAuctionSaleState extends State<AddAuctionSale> {
 
   void pickImageFromGallery() async {
     final PickedFile pickedFile =
-    await _picker.getImage(source: ImageSource.gallery, imageQuality: 50);
+        await _picker.getImage(source: ImageSource.gallery, imageQuality: 50);
     setState(() {
       _image = pickedFile;
     });
@@ -137,37 +139,55 @@ class _AddAuctionSaleState extends State<AddAuctionSale> {
         });
   }
 
-
   var publicKey = 'pk_test_6b5ee5a7e01626079c5de90d976374d421f7acbc';
   final plugin = PaystackPlugin();
 
-  final _chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+  final _chars =
+      'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
   Random _rnd = Random();
 
   String getRandomString(int length) => String.fromCharCodes(Iterable.generate(
       length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
 
+  void initPayment() async {
+    final userToken = await UserData.getUserToken();
+    final userId = await UserData.getUserId();
+    final _data = {
+      "email": "enninfrancis47@gmail.com",
+      "amount": "1000",
+      "user_id": userId.toString()
+    };
+    http.Response response = await http.post(
+        Uri.parse(base_url + "user/payments"),
+        headers: {HttpHeaders.authorizationHeader: "Bearer $userToken"},
+        body: _data);
 
+    if (response.statusCode < 205) {
+      final ref = json.decode(response.body)['data']['reference'];
+      final accessCode = json.decode(response.body)['data']['access_code'];
+      makePayment(context, ref, accessCode);
+    } else {
+      // EasyLoading.showInfo(json.decode(response.body)['message']);
+      print(response.body);
+    }
+  }
 
-  makePayment(context)async{
+  makePayment(context, ref, access) async {
     Charge charge = Charge();
-      charge.amount = 10000;
-      charge.reference = getRandomString(10);
-      charge.currency="GHS";
-    // or ..accessCode = _getAccessCodeFrmInitialization()
-      charge.email = 'customer@email.com';
+    charge.amount = 10000;
+    charge.reference = ref;
+    charge.currency = "GHS";
+    charge.accessCode = access;
+    charge.email = 'customer@email.com';
     CheckoutResponse response = await plugin.checkout(
       context,
-      method: CheckoutMethod.card, // Defaults to CheckoutMethod.selectable
+      method: CheckoutMethod.selectable,
+      // Defaults to CheckoutMethod.selectable
       charge: charge,
     );
 
-
-
     return response.message;
-
   }
-
 
   @override
   void initState() {
@@ -186,11 +206,41 @@ class _AddAuctionSaleState extends State<AddAuctionSale> {
     return SingleChildScrollView(
       child: Column(
         children: [
-
           Padding(
-            padding: const EdgeInsets.only(top: 20.0, left: 10, right: 10, bottom: 30),
+            padding: const EdgeInsets.only(
+                top: 20.0, left: 10, right: 10, bottom: 30),
             child: Column(
               children: [
+                DropdownSearch<String>(
+                  mode: Mode.BOTTOM_SHEET,
+                  showSelectedItem: true,
+                  //                 searchFieldProps: TextFieldProps(
+                  // controller: TextEditingController(text: 'Mrs'),
+                  // ),
+                  maxHeight: 200,
+                  isFilteredOnline: true,
+                  showClearButton: true,
+
+                  items: [
+                    "E-commerce",
+                    "Events",
+                  ],
+                  label: "Auction type",
+                  hint: "Select auction type",
+                  // popupItemDisabled: (String s) => s.startsWith('I'),
+                  onChanged: (e) {
+                    setState(() {
+                      if(e != null) {
+                        auctiontype = e;
+                      }else{
+                        auctiontype ="";
+                      }
+                    });
+                  },
+                ),
+                SizedBox(
+                  height: 20,
+                ),
                 DropdownSearch<String>(
                   mode: Mode.BOTTOM_SHEET,
                   showSelectedItem: true,
@@ -203,17 +253,21 @@ class _AddAuctionSaleState extends State<AddAuctionSale> {
                   showClearButton: true,
 
                   items: [
-                    "Brazil",
-                    "Italia",
-                    "Tunisia",
-                    "Canada",
-                    "Brazil",
-                    "Italia",
-                    "Tunisia",
-                    "Canada"
+                    if(auctiontype == "E-commerce")
+                      for(var cat in _pro.allcategories)
+                        cat['name'],
+
+                    if(auctiontype == "Events")
+                      for(var cat in _pro.alleventCat)
+                        cat['name']
                   ],
-                  label: "Category",
-                  hint: "Select product category",
+
+                  label: auctiontype.isEmpty
+                      ? "Waiting for auction type to be selected"
+                      : "Category",
+                  hint: auctiontype.isEmpty
+                      ? "Select auction type first"
+                      : "Select product category",
                   // popupItemDisabled: (String s) => s.startsWith('I'),
                   onChanged: (e) {
                     print(e);
@@ -230,7 +284,7 @@ class _AddAuctionSaleState extends State<AddAuctionSale> {
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(4)),
                         border:
-                        Border.all(color: Colors.black.withOpacity(0.4))),
+                            Border.all(color: Colors.black.withOpacity(0.4))),
                     child: Theme(
                       data: ThemeData(
                         hintColor: Colors.transparent,
@@ -250,7 +304,9 @@ class _AddAuctionSaleState extends State<AddAuctionSale> {
                         },
                         decoration: InputDecoration(
                             border: InputBorder.none,
-                            labelText: "Product name",
+                            labelText: auctiontype.isEmpty
+                                ? "Please select auction type"
+                                : "Product name",
                             labelStyle: TextStyle(
                                 fontSize: 15.0,
                                 fontFamily: 'Sans',
@@ -273,7 +329,7 @@ class _AddAuctionSaleState extends State<AddAuctionSale> {
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(4)),
                         border:
-                        Border.all(color: Colors.black.withOpacity(0.4))),
+                            Border.all(color: Colors.black.withOpacity(0.4))),
                     child: Theme(
                       data: ThemeData(
                         hintColor: Colors.transparent,
@@ -295,7 +351,9 @@ class _AddAuctionSaleState extends State<AddAuctionSale> {
                         },
                         decoration: InputDecoration(
                             border: InputBorder.none,
-                            labelText: "Product description",
+                            labelText: auctiontype.isEmpty
+                                ? "Please select auction type"
+                                : "Product description",
                             labelStyle: TextStyle(
                                 fontSize: 15.0,
                                 fontFamily: 'Sans',
@@ -307,51 +365,52 @@ class _AddAuctionSaleState extends State<AddAuctionSale> {
                     ),
                   ),
                 ),
-                SizedBox(
-                  height: 20,
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 0.0),
-                  child: Container(
-                    alignment: AlignmentDirectional.center,
-                    padding: EdgeInsets.symmetric(horizontal: 10),
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(Radius.circular(4)),
-                        border:
-                        Border.all(color: Colors.black.withOpacity(0.4))),
-                    child: Theme(
-                      data: ThemeData(
-                        hintColor: Colors.transparent,
-                      ),
-                      child: TextFormField(
-
-                        textAlign: TextAlign.start,
-                        controller: _quantity,
-                        validator: (e) {
-                          if (_quantity.text.isEmpty) {
-                            return "Please enter product quantity";
-                          }
-                          // else if(!_email.text.contains("@") || !_email.text.contains(".com")){
-                          //   return "Please enter a valid email address";
-                          // }
-                          else {
-                            return null;
-                          }
-                        },
-                        decoration: InputDecoration(
-                            border: InputBorder.none,
-                            labelText: "Product quantity",
-                            labelStyle: TextStyle(
-                                fontSize: 15.0,
-                                fontFamily: 'Sans',
-                                letterSpacing: 0.3,
-                                color: Colors.black38,
-                                fontWeight: FontWeight.w600)),
-                        keyboardType: TextInputType.number,
+                if (!auctiontype.isEmpty && auctiontype != "Events")
+                  SizedBox(
+                    height: 20,
+                  ),
+                if (!auctiontype.isEmpty && auctiontype != "Events")
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 0.0),
+                    child: Container(
+                      alignment: AlignmentDirectional.center,
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(4)),
+                          border:
+                              Border.all(color: Colors.black.withOpacity(0.4))),
+                      child: Theme(
+                        data: ThemeData(
+                          hintColor: Colors.transparent,
+                        ),
+                        child: TextFormField(
+                          textAlign: TextAlign.start,
+                          controller: _quantity,
+                          validator: (e) {
+                            if (_quantity.text.isEmpty) {
+                              return "Please enter product quantity";
+                            }
+                            // else if(!_email.text.contains("@") || !_email.text.contains(".com")){
+                            //   return "Please enter a valid email address";
+                            // }
+                            else {
+                              return null;
+                            }
+                          },
+                          decoration: InputDecoration(
+                              border: InputBorder.none,
+                              labelText: "Product quantity",
+                              labelStyle: TextStyle(
+                                  fontSize: 15.0,
+                                  fontFamily: 'Sans',
+                                  letterSpacing: 0.3,
+                                  color: Colors.black38,
+                                  fontWeight: FontWeight.w600)),
+                          keyboardType: TextInputType.number,
+                        ),
                       ),
                     ),
                   ),
-                ),
                 SizedBox(
                   height: 20,
                 ),
@@ -362,27 +421,37 @@ class _AddAuctionSaleState extends State<AddAuctionSale> {
                       decoration: BoxDecoration(
                           color: Colors.black26,
                           borderRadius: BorderRadius.all(Radius.circular(4)),
-                          border: Border.all(color: Colors.black.withOpacity(0.4))
-                      ),
-                      child: _image == null ? Center(child: Text("Image of product"),):Container(
-                          width: double.infinity,
-                          child: Image.file(
-                            File(_image.path),
-                            fit: BoxFit.cover,
-                          )),
+                          border:
+                              Border.all(color: Colors.black.withOpacity(0.4))),
+                      child: _image == null
+                          ? Center(
+                              child: Text(auctiontype.isEmpty
+                                  ? "Please select auction type"
+                                  : auctiontype == "Events"
+                                      ? "Image of product (optional)"
+                                      : "Image of product"),
+                            )
+                          : Container(
+                              width: double.infinity,
+                              child: Image.file(
+                                File(_image.path),
+                                fit: BoxFit.cover,
+                              )),
                     ),
                     Positioned(
                         bottom: 10,
                         right: 10,
                         child: TextButton(
-                          onPressed: ()=> showImagePickerModal(),
+                          onPressed: () => showImagePickerModal(),
                           child: Card(
-
-                      child: Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: Icon(Icons.camera_alt, color: appColor,),
-                      ),
-                    ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: Icon(
+                                Icons.camera_alt,
+                                color: appColor,
+                              ),
+                            ),
+                          ),
                         ))
                   ],
                 ),
@@ -392,16 +461,20 @@ class _AddAuctionSaleState extends State<AddAuctionSale> {
                 Row(
                   textBaseline: TextBaseline.ideographic,
                   children: [
-                    Checkbox(value: checkBoxValue,
+                    Checkbox(
+                        value: checkBoxValue,
                         activeColor: appColor,
-                        onChanged:(bool newValue){
+                        onChanged: (bool newValue) {
                           setState(() {
                             checkBoxValue = newValue;
                           });
                           Text('Remember me');
                         }),
-                    Expanded(child: Text("To successfully place a request for auction sale, you are required to make a down payment.", style: TextStyle(fontSize: 12, color: Colors.blue),)),
-
+                    Expanded(
+                        child: Text(
+                      "To successfully place a request for auction sale, you are required to make a down payment.",
+                      style: TextStyle(fontSize: 12, color: Colors.blue),
+                    )),
                   ],
                 ),
                 SizedBox(
@@ -410,33 +483,36 @@ class _AddAuctionSaleState extends State<AddAuctionSale> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    TextButton(onPressed:()async{
-                      if(checkBoxValue){
-                        final res =await  makePayment(context);
+                    TextButton(
+                        onPressed: () async {
+                          if (checkBoxValue) {
+                            // final res =await  makePayment(context);
 
-                       if(res == "Success"){
-                         EasyLoading.show(status: "Sending Request");
-                         Future.delayed(Duration(seconds: 3));
-                         EasyLoading.dismiss();
-                       }
-                       else{
-                         EasyLoading.show(status: "Not Sending Request");
-                       }
-
-                      }
-                      else{
-
-                      }
-                    }, child: Card(
-                      color: checkBoxValue? appColor:Colors.grey.withOpacity(0.3),
-                      child: Padding(
-                        padding: const EdgeInsets.all(15.0),
-                        child: Text("Proceed", style: TextStyle(color: Colors.white),),
-                      ),
-                    ))
+                            // if(res == "Success"){
+                            //   EasyLoading.show(status: "Sending Request");
+                            //   Future.delayed(Duration(seconds: 3));
+                            //   EasyLoading.dismiss();
+                            // }
+                            // else{
+                            //   EasyLoading.show(status: "Not Sending Request");
+                            // }
+                            await initPayment();
+                          } else {}
+                        },
+                        child: Card(
+                          color: checkBoxValue
+                              ? appColor
+                              : Colors.grey.withOpacity(0.3),
+                          child: Padding(
+                            padding: const EdgeInsets.all(15.0),
+                            child: Text(
+                              "Proceed",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ))
                   ],
                 )
-
               ],
             ),
           ),

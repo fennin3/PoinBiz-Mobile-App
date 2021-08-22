@@ -8,6 +8,9 @@ import 'package:treva_shop_flutter/UI/Auction/add_sale.dart';
 import 'package:treva_shop_flutter/UI/Auction/my_auction.dart';
 import 'package:treva_shop_flutter/UI/CartUIComponent/CartLayout.dart';
 import 'package:treva_shop_flutter/UI/Events/event_home.dart';
+import 'package:treva_shop_flutter/UI/General/offline_payment.dart';
+import 'package:treva_shop_flutter/UI/General/point_transfer.dart';
+import 'package:treva_shop_flutter/UI/HomeUIComponent/FlashSale.dart';
 import 'package:treva_shop_flutter/UI/HomeUIComponent/Home.dart';
 import 'package:provider/provider.dart';
 import 'package:treva_shop_flutter/UI/OrderRequest/add_order.dart';
@@ -37,9 +40,13 @@ class _bottomNavigationBarState extends State<bottomNavigationBar> {
       case 3:
         return new cart();
       case 1:
-        return BusHome(scaKey: _key,);
+        return BusHome(
+          scaKey: _key,
+        );
       case 2:
-        return EventHome(scaKey: _key,);
+        return EventHome(
+          scaKey: _key,
+        );
         break;
       default:
         return Menu(
@@ -56,7 +63,7 @@ class _bottomNavigationBarState extends State<bottomNavigationBar> {
 
   @override
   Widget build(BuildContext context) {
-    final _pro = Provider.of<PoinBizProvider>(context,listen: true);
+    final _pro = Provider.of<PoinBizProvider>(context, listen: true);
     return Scaffold(
       drawer: MyDrawer(),
       key: _key,
@@ -118,10 +125,10 @@ class _bottomNavigationBarState extends State<bottomNavigationBar> {
                           left: -12,
                           top: -7,
                           child: CircleAvatar(
-                        radius: 10,
-                        backgroundColor: Colors.red,
-                        child: Text(_pro.cart.length.toString()),
-                      ))
+                            radius: 10,
+                            backgroundColor: Colors.red,
+                            child: Text(_pro.cart.length.toString()),
+                          ))
                     ],
                   ),
                   title: Text(
@@ -153,14 +160,16 @@ class MyDrawer extends StatelessWidget {
           trailing: Icon(Icons.arrow_forward_ios),
           children: [
             ListTile(
-              onTap: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context)=>AddOrder()));
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => AddOrder()));
               },
               leading: Icon(Icons.add_shopping_cart_sharp),
               title: Text("Place Order"),
             ),
             ListTile(
-              onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>MyOrder())),
+              onTap: () => Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => MyOrder())),
               leading: Icon(
                 Icons.inventory_outlined,
               ),
@@ -174,14 +183,16 @@ class MyDrawer extends StatelessWidget {
           trailing: Icon(Icons.arrow_forward_ios),
           children: [
             ListTile(
-              onTap: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context)=>AddAuction()));
-                },
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => AddAuction()));
+              },
               leading: Icon(Icons.price_change),
               title: Text("Add Auction Sale"),
             ),
             ListTile(
-              onTap: ()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>MyAuctionSales())),
+              onTap: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => MyAuctionSales())),
               leading: Icon(Icons.local_offer),
               title: Text("My Auction Sales"),
             ),
@@ -193,28 +204,52 @@ class MyDrawer extends StatelessWidget {
           onTap: () => Navigator.push(
               context, MaterialPageRoute(builder: (context) => AllVendors())),
         ),
-
         ListTile(
+          onTap:()=> Navigator.push(context,
+              MaterialPageRoute(builder: (context) => flashSale())),
           leading: Icon(Icons.favorite),
           title: Text("My Wishlist"),
           // onTap: () => Navigator.push(
           //     context, MaterialPageRoute(builder: (context) => AllVendors())),
+        ),
+        ListTile(
+          onTap: () => Navigator.push(context,
+              MaterialPageRoute(builder: (context) => OfflinePayment())),
+          leading: Icon(Icons.paid),
+          title: Text("Offline Purchase"),
+          // onTap: () => Navigator.push(
+          //     context, MaterialPageRoute(builder: (context) => AllVendors())),
+        ),
 
+        ListTile(
+          onTap: () => Navigator.push(context,
+              MaterialPageRoute(builder: (context) => PointTransfer())),
+          leading: Icon(Icons.paid),
+          title: Text("Point Transfer"),
+          // onTap: () => Navigator.push(
+          //     context, MaterialPageRoute(builder: (context) => AllVendors())),
+        ),
+        ListTile(
+
+          leading: Icon(Icons.policy),
+          title: Text("Privacy Policy"),
+          // onTap: () => Navigator.push(
+          //     context, MaterialPageRoute(builder: (context) => AllVendors())),
         ),
       ],
     ));
   }
 }
 
-
-showAddAuctionSaleModal(context){
+showAddAuctionSaleModal(context) {
   showModalBottomSheet(
-    isDismissible: false,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))
-    ),
-    isScrollControlled: true,
-      context: context, builder: (context){
-    return AddAuctionSale();
-  });
+      isDismissible: false,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20), topRight: Radius.circular(20))),
+      isScrollControlled: true,
+      context: context,
+      builder: (context) {
+        return AddAuctionSale();
+      });
 }

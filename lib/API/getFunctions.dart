@@ -75,7 +75,6 @@ class GetFunc{
 
     final userId = await UserData.getUserId();
     final userToken = await UserData.getUserToken();
-    print(userId);
     List _data;
     http.Response response = await http.get(Uri.parse(base_url+"user/get-addresses/$userId"), headers: {
       HttpHeaders.authorizationHeader :"Bearer $userToken"
@@ -83,6 +82,47 @@ class GetFunc{
     if(response.statusCode < 206){
       _data = json.decode(response.body)["data"]['data'];
 
+    }
+    else{
+      _data = [];
+    }
+
+    return _data;
+  }
+
+
+  static getCartData()async{
+
+    final userId = await UserData.getUserId();
+    final userToken = await UserData.getUserToken();
+    List _data;
+    http.Response response = await http.get(Uri.parse(base_url+"user/get-cart/$userId"), headers: {
+      HttpHeaders.authorizationHeader :"Bearer $userToken"
+    });
+    if(response.statusCode < 206){
+
+      _data = json.decode(response.body)["data"]['data'];
+
+
+    }
+    else{
+      _data = [];
+    }
+
+    return _data;
+  }
+
+
+  static getWishListData()async{
+
+    final userId = await UserData.getUserId();
+    final userToken = await UserData.getUserToken();
+    List _data;
+    http.Response response = await http.get(Uri.parse(base_url+"user/get-addresses/$userId"), headers: {
+      HttpHeaders.authorizationHeader :"Bearer $userToken"
+    });
+    if(response.statusCode < 206){
+      _data = json.decode(response.body)["data"]['data'];
 
     }
     else{
@@ -117,6 +157,34 @@ class GetFunc{
     if(response.statusCode < 206){
       _data = json.decode(response.body)["data"];
 
+    }
+    else{
+      _data = [];
+    }
+
+    return _data;
+  }
+  static getAllBuses()async{
+
+    List _data;
+    http.Response response = await http.get(Uri.parse(base_url+"general/get-routes"));
+    if(response.statusCode < 206){
+      _data = json.decode(response.body)["data"];
+
+    }
+    else{
+      _data = [];
+    }
+
+    return _data;
+  }
+
+  static getDestinations()async{
+
+    List _data;
+    http.Response response = await http.get(Uri.parse(base_url+"general/get-destinations"));
+    if(response.statusCode < 206){
+      _data = json.decode(response.body)["data"];
     }
     else{
       _data = [];
