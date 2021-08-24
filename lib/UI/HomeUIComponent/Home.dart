@@ -52,6 +52,13 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
     _pro.getDestinations();
     _pro.getCartData();
     _pro.getWishListData();
+    _pro.getConfig();
+    _pro.getOrders();
+    _pro.getUserDetail();
+    _pro.getPlacedOrders();
+    _pro.getAllBusinessTypes();
+    _pro.getAuction();
+    _pro.getRegions();
   }
 
   @override

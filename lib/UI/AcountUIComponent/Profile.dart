@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:treva_shop_flutter/API/provider_class.dart';
 import 'package:treva_shop_flutter/UI/AcountUIComponent/AboutApps.dart';
 import 'package:treva_shop_flutter/UI/AcountUIComponent/CallCenter.dart';
 import 'package:treva_shop_flutter/UI/AcountUIComponent/Message.dart';
@@ -9,8 +10,7 @@ import 'package:treva_shop_flutter/UI/AcountUIComponent/SettingAcount.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:treva_shop_flutter/UI/BottomNavigationBar.dart';
-import 'package:treva_shop_flutter/UI/LoginOrSignup/Login.dart';
-
+import 'package:provider/provider.dart';
 
 class profil extends StatefulWidget {
   @override
@@ -36,10 +36,9 @@ var _txtCategory = _txt.copyWith(
 class _profilState extends State<profil> {
   @override
   Widget build(BuildContext context) {
-    /// Declare MediaQueryData
-    MediaQueryData mediaQueryData = MediaQuery.of(context);
+    final _pro = Provider.of<PoinBizProvider>(context, listen: true);
 
-    /// To Sett PhotoProfile,Name and Edit Profile
+
     var _profile = Padding(
       padding:  EdgeInsets.only(top: 185.0, ),
       child: Row(
@@ -59,25 +58,39 @@ class _profilState extends State<profil> {
                   border: Border.all(color: Colors.white, width: 2.5),
                   shape: BoxShape.circle,
                   image: DecorationImage(
-                      image: AssetImage("assets/img/womanface.jpg"))),
+                      image: NetworkImage(_pro.userDetail['avatar']['path']))),
             ),
             Padding(
               padding: const EdgeInsets.only(top: 5.0),
               child: Text(
-                "Alisa Heart",
+                "${_pro.userDetail['name']}",
                 style: _txtName,
               ),
             ),
-            InkWell(
-              onTap: null,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 0.0),
-                child: Text(
-                  "Edit Profile",
-                  style: _txtEdit,
-                ),
+            Padding(
+              padding: const EdgeInsets.only(top: 1.0),
+              child: Text(
+                "${_pro.userDetail['email']}",
+                style: _txtName.copyWith(fontSize: 16),
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.only(top: 1.0),
+              child: Text(
+                "${_pro.userDetail['phone']}",
+                style: _txtName.copyWith(fontSize: 15),
+              ),
+            ),
+            // InkWell(
+            //   onTap: null,
+            //   child: Padding(
+            //     padding: const EdgeInsets.only(top: 10.0),
+            //     child: Text(
+            //       "Edit Profile",
+            //       style: _txtEdit,
+            //     ),
+            //   ),
+            // ),
           ],
         ),
         Container(
@@ -100,6 +113,15 @@ class _profilState extends State<profil> {
                   children: [
                     Container(
                       height: 240.0,
+                      child: Center(
+                        child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.all(Radius.circular(5))
+                            ),
+                            padding: EdgeInsets.all(5),
+                            child: Text("Your Point\n${_pro.userDetail['points']}\nGHc ${int.parse(_pro.userDetail['points']) / int.parse(_pro.config['points_per_cedi'])} ",textAlign: TextAlign.center, style: TextStyle(fontSize: 30,color: Colors.black, fontWeight: FontWeight.w800),)),
+                      ),
                       decoration: BoxDecoration(
                           image: DecorationImage(
                               image: AssetImage("assets/img/headerProfile.png"),
@@ -120,7 +142,7 @@ class _profilState extends State<profil> {
                 /// Calling _profile variable
                 _profile,
                 Padding(
-                  padding: const EdgeInsets.only(top: 360.0),
+                  padding: const EdgeInsets.only(top: 380.0),
                   child: Column(
                     /// Setting Category List
                     children: <Widget>[
@@ -142,41 +164,41 @@ class _profilState extends State<profil> {
                           height: 2.0,
                         ),
                       ),
-                      category(
-                        txt: "Payments",
-                        padding: 35.0,
-                        image: "assets/icon/creditAcount.png",
-                        tap: () {
-                          Navigator.of(context).push(PageRouteBuilder(
-                              pageBuilder: (_, __, ___) =>
-                                  new creditCardSetting()));
-                        },
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                            top: 20.0, left: 85.0, right: 30.0),
-                        child: Divider(
-                          color: Colors.black12,
-                          height: 2.0,
-                        ),
-                      ),
-                      category(
-                        txt: "Message",
-                        padding: 26.0,
-                        image: "assets/icon/chat.png",
-                        tap: () {
-                          Navigator.of(context).push(PageRouteBuilder(
-                              pageBuilder: (_, __, ___) => new chat()));
-                        },
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                            top: 20.0, left: 85.0, right: 30.0),
-                        child: Divider(
-                          color: Colors.black12,
-                          height: 2.0,
-                        ),
-                      ),
+                      // category(
+                      //   txt: "Payments",
+                      //   padding: 35.0,
+                      //   image: "assets/icon/creditAcount.png",
+                      //   tap: () {
+                      //     Navigator.of(context).push(PageRouteBuilder(
+                      //         pageBuilder: (_, __, ___) =>
+                      //             new creditCardSetting()));
+                      //   },
+                      // ),
+                      // Padding(
+                      //   padding: const EdgeInsets.only(
+                      //       top: 20.0, left: 85.0, right: 30.0),
+                      //   child: Divider(
+                      //     color: Colors.black12,
+                      //     height: 2.0,
+                      //   ),
+                      // ),
+                      // category(
+                      //   txt: "Message",
+                      //   padding: 26.0,
+                      //   image: "assets/icon/chat.png",
+                      //   tap: () {
+                      //     Navigator.of(context).push(PageRouteBuilder(
+                      //         pageBuilder: (_, __, ___) => new chat()));
+                      //   },
+                      // ),
+                      // Padding(
+                      //   padding: const EdgeInsets.only(
+                      //       top: 20.0, left: 85.0, right: 30.0),
+                      //   child: Divider(
+                      //     color: Colors.black12,
+                      //     height: 2.0,
+                      //   ),
+                      // ),
                       category(
                         txt: "My Orders",
                         padding: 23.0,
@@ -199,8 +221,8 @@ class _profilState extends State<profil> {
                         padding: 30.0,
                         image: "assets/icon/setting.png",
                         tap: () {
-                          Navigator.of(context).push(PageRouteBuilder(
-                              pageBuilder: (_, __, ___) => new settingAcount()));
+                          // Navigator.of(context).push(PageRouteBuilder(
+                          //     pageBuilder: (_, __, ___) => new settingAcount()));
                         },
                       ),
                       Padding(
@@ -216,8 +238,8 @@ class _profilState extends State<profil> {
                         padding: 30.0,
                         image: "assets/icon/callcenter.png",
                         tap: () {
-                          Navigator.of(context).push(PageRouteBuilder(
-                              pageBuilder: (_, __, ___) => new callCenter()));
+                          // Navigator.of(context).push(PageRouteBuilder(
+                          //     pageBuilder: (_, __, ___) => new callCenter()));
                         },
                       ),
                       Padding(

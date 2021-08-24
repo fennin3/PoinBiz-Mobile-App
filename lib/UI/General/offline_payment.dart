@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:treva_shop_flutter/API/provider_class.dart';
 import 'package:treva_shop_flutter/constant.dart';
+import 'package:provider/provider.dart';
 
 class OfflinePayment extends StatefulWidget {
   const OfflinePayment({Key key}) : super(key: key);
@@ -14,11 +16,15 @@ class _OfflinePaymentState extends State<OfflinePayment> {
   final TextEditingController _amount = TextEditingController();
   final TextEditingController _points = TextEditingController();
 
-  double pointsIncash = 0.01;
   int totalPoints = 200000;
   String tempPoints = "";
 
   getTotal() {
+    final _pro = Provider.of<PoinBizProvider>(context, listen: true);
+    double a = double.parse(_pro.config['points_per_cedi']);
+    a = 1 / a;
+
+    double pointsIncash = a;
     double amount;
     int points;
     if (_amount.text.isNotEmpty) {
@@ -36,6 +42,7 @@ class _OfflinePaymentState extends State<OfflinePayment> {
     double total = amount - (points * pointsIncash);
     return total > 0 ? total : 0.00;
   }
+
 
   @override
   void dispose() {

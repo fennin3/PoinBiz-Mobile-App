@@ -109,31 +109,37 @@ class AddressAdapter extends TypeAdapter<Address> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return Address(
-      name: fields[0] as String,
+      region: fields[0] as String,
       address: fields[1] as String,
-      postal: fields[2] as String,
+      city: fields[2] as String,
       phone: fields[3] as String,
       recipient: fields[4] as String,
+      recipient_number: fields[7] as String,
       defaultt: fields[5] as bool,
+      fee: fields[6] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, Address obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(8)
       ..writeByte(0)
-      ..write(obj.name)
+      ..write(obj.region)
       ..writeByte(1)
       ..write(obj.address)
       ..writeByte(2)
-      ..write(obj.postal)
+      ..write(obj.city)
       ..writeByte(3)
       ..write(obj.phone)
       ..writeByte(4)
       ..write(obj.recipient)
       ..writeByte(5)
-      ..write(obj.defaultt);
+      ..write(obj.defaultt)
+      ..writeByte(6)
+      ..write(obj.fee)
+      ..writeByte(7)
+      ..write(obj.recipient_number);
   }
 
   @override

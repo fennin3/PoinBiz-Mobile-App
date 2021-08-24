@@ -54,13 +54,13 @@ class SearchedWord {
 @HiveType(typeId: 2)
 class Address {
   @HiveField(0)
-  String name;
+  String region;
 
   @HiveField(1)
   String address;
 
   @HiveField(2)
-  String postal;
+  String city;
 
   @HiveField(3)
   String phone;
@@ -71,13 +71,22 @@ class Address {
   @HiveField(5)
   bool defaultt;
 
+  @HiveField(6)
+  String fee;
+
+  @HiveField(7)
+  String recipient_number;
+
   Address(
-      {this.name,
+      {this.region,
       this.address,
-      this.postal,
+      this.city,
       this.phone,
       this.recipient,
-      this.defaultt});
+      this.recipient_number,
+      this.defaultt,
+      this.fee
+      });
 }
 
 @HiveType(typeId: 3)

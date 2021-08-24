@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:treva_shop_flutter/API/getFunctions.dart';
+import 'package:treva_shop_flutter/API/provider_model.dart';
 import 'package:treva_shop_flutter/constant.dart';
 import 'package:treva_shop_flutter/database/cart_model.dart';
 import 'package:treva_shop_flutter/sharedPref/savedinfo.dart';
 import 'dart:math';
-import 'package:treva_shop_flutter/utils.dart';
 import 'package:hive/hive.dart';
 import 'dart:io';
-import 'package:path_provider/path_provider.dart';
 import 'dart:convert';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:http/http.dart' as http;
@@ -16,7 +15,8 @@ const _chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
 Random _rnd = Random();
 
 bool aaV(String a) {
-  return a.toLowerCase() == "true";
+  bool z = a.toLowerCase() == "true";
+  return z;
 }
 
 String getRandomString(int length) => String.fromCharCodes(Iterable.generate(
@@ -27,22 +27,29 @@ class PoinBizProvider with ChangeNotifier {
   List allbanners = [];
   List allpromos = [];
   List allProducts = [];
-
+  Map config={};
+  Map userDetail={};
   List alleventCat = [];
+  List allBusinessType = [];
   List alldestinations = [];
+  List allorders = [];
   List allbuses = [];
   List allevents = [];
   List<Address> saveAdds = [];
   bool loading;
-  Address shipping;
+  Address shipping = Address();
   List<CartModel> cart = [];
   List<SearchedWord> searchedWords = [];
   List<WishItem> wishlist = [];
   int totalPrice = 0;
+  List placedOrders=[];
+  List auctions=[];
+  Region regions;
 
   ///Cart
   addToCart(Map item, _key, how) async {
-    EasyLoading.show(status: "Updating cart");
+    if(how!='online')
+      EasyLoading.show(status: "Updating cart");
     // final imageName = getRandomString(10);
     Directory documentDirectory;
 
@@ -68,6 +75,10 @@ class PoinBizProvider with ChangeNotifier {
     for (CartModel item in cart) {
       if (_item.id == item.id && _item.title == item.title) {
         exists += 1;
+        if(item.quantity != _item.quantity){
+          item.quantity = _item.quantity;
+          box.putAt(cart.reversed.toList().indexOf(item), item);
+        }
         aa = item;
       }
     }
@@ -75,6 +86,7 @@ class PoinBizProvider with ChangeNotifier {
     if (exists < 1) {
       box.add(_item);
     } else {
+      if(how != 'online')
       updateAddItem(aa);
     }
 
@@ -141,29 +153,34 @@ class PoinBizProvider with ChangeNotifier {
   getCartItem() async {
     final box = await Hive.openBox<CartModel>('cart');
 
-    cart = box.values.toList();
+    cart = box.values.toList().reversed.toList();
 
     notifyListeners();
   }
 
-  void updateAddItem(CartModel _item) {
+  void updateAddItem(CartModel _item) async{
     final nu = int.parse(_item.quantity) + 1;
     _item.quantity = nu.toString();
     final b = int.parse(_item.quantity) * double.parse(_item.price);
     _item.total = b.toString();
+    final box = await Hive.openBox<CartModel>('cart');
+
+    box.putAt(cart.reversed.toList().indexOf(_item), _item);
     getCartItem();
     sendOrder();
   }
 
   void updateSubItem(CartModel _item) async {
+    var box = await Hive.openBox<CartModel>('cart');
     if (int.parse(_item.quantity) > 1) {
       final nu = int.parse(_item.quantity) - 1;
       _item.quantity = nu.toString();
       final b = int.parse(_item.quantity) * double.parse(_item.price);
       _item.total = b.toString();
+      box.putAt(cart.reversed.toList().indexOf(_item), _item);
     } else {
-      var box = await Hive.openBox<CartModel>('cart');
-      box.deleteAt(cart.indexOf(_item));
+
+      box.deleteAt(cart.reversed.toList().indexOf(_item));
     }
 
     getCartItem();
@@ -181,9 +198,10 @@ class PoinBizProvider with ChangeNotifier {
 
   void removeCartItem(CartModel _item) async {
     var box = await Hive.openBox<CartModel>('cart');
-    box.deleteAt(cart.indexOf(_item));
+    box.deleteAt(cart.reversed.toList().indexOf(_item));
 
     getCartItem();
+    sendOrder();
   }
 
   ///End of Cart
@@ -211,23 +229,25 @@ class PoinBizProvider with ChangeNotifier {
   ///End of Searched Words
 
   ///Shipping Addresses
-  addAddress(Map item, _key) async {
+  addAddress(Map item, _key, how) async {
     var box = await Hive.openBox<Address>('address');
     int exists = 0;
-
     final _item = Address(
         address: item['address'],
-        name: item['name'],
+        region: item['region'],
         phone: item['phone'],
-        postal: item['postal'],
+        city: item['city'],
         recipient: item['recipient'],
-        defaultt: aaV(item['default']));
+        recipient_number: item['recipient_number'],
+        defaultt: item['defaultt'],
+        fee: item['fee']
+    );
 
     saveAdds = box.values.toList().reversed.toList();
 
     for (var i in saveAdds) {
-      if (i.name.toString().toLowerCase() ==
-          _item.name.toString().toLowerCase()) {
+      if (i.address.toString().toLowerCase() ==
+          _item.address.toString().toLowerCase() && i.region.toString().toLowerCase() == _item.region.toString().toLowerCase()) {
         exists += 1;
       } else {}
     }
@@ -242,7 +262,10 @@ class PoinBizProvider with ChangeNotifier {
     if (_key != "aa") _key.currentState.showSnackBar(snackbar);
 
     getAdds();
-
+    EasyLoading.dismiss();
+    if(how != "online"){
+      EasyLoading.showInfo("Address Saved");
+    }
     notifyListeners();
   }
 
@@ -254,22 +277,20 @@ class PoinBizProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // deletefromDisk()async{
-  //   final box = await Hive.openBox<Address>('address');
-  //   // final box1 = await Hive.openBox<CartModel>('cart');
-  //   // final box2 = await Hive.openBox<SearchedWord>('searched');
-  //   box.deleteFromDisk();
-  //   // box1.deleteFromDisk();
-  //   // box2.deleteFromDisk();
-  //
-  //   print("deleted");
-  //
-  // }
+  deletefromDisk(table)async{
+    final box = await Hive.openBox<Address>(table);
+    // final box1 = await Hive.openBox<CartModel>('cart');
+    // final box2 = await Hive.openBox<SearchedWord>('searched');
+    box.deleteFromDisk();
+    // box1.deleteFromDisk();
+    // box2.deleteFromDisk();
+
+  }
 
   void sendAddress(Map item, _key) async {
     EasyLoading.show(status: "Saving Address");
 
-    addAddress(item, _key);
+    addAddress(item, _key, "offl");
     apiAddress();
   }
 
@@ -280,12 +301,14 @@ class PoinBizProvider with ChangeNotifier {
 
     for (var add in saveAdds) {
       _adds.add({
-        "name": add.name.toString(),
+        "region": add.region.toString(),
         "address": add.address.toString(),
-        "postal": add.postal.toString(),
+        "city": add.city.toString(),
         "phone": add.phone.toString(),
         "recipient": add.recipient.toString(),
-        "default": add.defaultt.toString()
+        "recipient_number": add.recipient_number.toString(),
+        "default": add.defaultt.toString(),
+        "fee":add.fee.toString()
       });
     }
 
@@ -299,8 +322,10 @@ class PoinBizProvider with ChangeNotifier {
           HttpHeaders.authorizationHeader: "Bearer $user_token",
         },
       );
-      EasyLoading.dismiss();
-      EasyLoading.showInfo("Address Saved");
+      if(response.statusCode < 205){
+        EasyLoading.dismiss();
+
+      }
     } on SocketException {
       EasyLoading.dismiss();
       EasyLoading.showInfo("No internet connection");
@@ -310,9 +335,11 @@ class PoinBizProvider with ChangeNotifier {
   void updateAddress(Address add, Map _item) async {
     add.defaultt = _item['default'];
     add.recipient = _item['recipient'];
+    add.recipient_number = _item['recipient_number'];
     add.phone = _item['phone'];
     add.address = _item['address'];
-    add.name = _item['name'];
+    add.region = _item['region'];
+    add.city = _item['city'];
 
     getAdds();
 
@@ -435,7 +462,7 @@ class PoinBizProvider with ChangeNotifier {
     List addresses = await GetFunc.getAddresses();
 
     for (var item in addresses) {
-      addAddress(item, "aa");
+      addAddress(item, "aa", 'online');
     }
 
     notifyListeners();
@@ -471,7 +498,7 @@ class PoinBizProvider with ChangeNotifier {
       Map a = {
         "quantity": item['quantity'],
         "price": item['price'],
-        "image": "ticket", //To Be modified
+        "image": item['image'], //To Be modified
         "title": item['name'],
         "color": item['variants']['color'],
         "id": item['id'].toString(),
@@ -502,6 +529,11 @@ class PoinBizProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void getAllBusinessTypes() async {
+    allBusinessType = await GetFunc.getAllBusiness();
+    notifyListeners();
+  }
+
   void getAllEvent() async {
     allevents = await GetFunc.getAllEvent();
     notifyListeners();
@@ -522,4 +554,42 @@ class PoinBizProvider with ChangeNotifier {
 
     notifyListeners();
   }
+
+
+  void getConfig()async{
+    config = await GetFunc.getConfig();
+    notifyListeners();
+  }
+
+
+  void getUserDetail()async{
+    userDetail = await GetFunc.getUserDetail();
+    notifyListeners();
+  }
+
+  void getOrders() async {
+    allorders = await GetFunc.getOrders();
+    notifyListeners();
+  }
+
+
+  void getPlacedOrders() async {
+    placedOrders = await GetFunc.getPlacedOrders();
+    notifyListeners();
+  }
+
+  void getAuction() async {
+    auctions = await GetFunc.getAuction();
+
+    notifyListeners();
+  }
+
+  void getRegions()async{
+    regions = await GetFunc.getRegions();
+
+
+
+    notifyListeners();
+  }
+
 }

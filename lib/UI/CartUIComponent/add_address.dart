@@ -1,12 +1,14 @@
 import 'dart:io';
-
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:treva_shop_flutter/API/provider_class.dart';
+import 'package:treva_shop_flutter/API/provider_model.dart';
 import 'package:treva_shop_flutter/constant.dart';
 import 'dart:convert';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:treva_shop_flutter/database/cart_model.dart';
 import 'package:treva_shop_flutter/sharedPref/savedinfo.dart';
 
 class CreateAddressPage extends StatefulWidget {
@@ -18,60 +20,35 @@ class CreateAddressPage extends StatefulWidget {
 
 class _CreateAddressPageState extends State<CreateAddressPage> {
   bool checkBoxValue = false;
-  final TextEditingController _name = TextEditingController();
+
   final TextEditingController _address = TextEditingController();
-  final TextEditingController _postal = TextEditingController();
+
   final TextEditingController _phone = TextEditingController();
   final TextEditingController _recipient = TextEditingController();
+  final TextEditingController _recipientNumber = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final _key = GlobalKey<ScaffoldState>();
   int nu = 0;
+  String regionName = "";
+  Data region;
+  String cityName = "";
+  List<Cities> _cities=[];
+  Cities city;
+  String tempPoints = "";
+  Address shipping;
+  String totalAmount ="";
 
-  void addAddress() async {
-    EasyLoading.show(status: "Saving Address");
-    final _userId = await UserData.getUserId();
-    final _userToken = await UserData.getUserToken();
-    final _data = {
-      "user_id": _userId.toString(),
-      "addresses": json.encode([
-        {
-          "name": _name.text,
-          "address": _address.text,
-          "postal": _postal.text,
-          "phone": _phone.text,
-          "recipient": _recipient.text,
-          "default": checkBoxValue
-        }
-      ])
-    };
 
-    http.Response response = await http.post(
-      Uri.parse(base_url + "user/address-process"),
-      body: _data,
-      headers: {
-        HttpHeaders.authorizationHeader: "Bearer $_userToken",
-      },
-    );
-
-    EasyLoading.dismiss();
-
-    if (response.statusCode < 206) {
-      EasyLoading.showSuccess("${json.decode(response.body)['message']}");
-    } else {
-      EasyLoading.showError("${json.decode(response.body)['message']}");
-    }
-  }
 
   @override
   void dispose() {
     // TODO: implement dispose
     super.dispose();
 
-    _name.dispose();
     _address.dispose();
-    _postal.dispose();
     _phone.dispose();
     _recipient.dispose();
+    _recipientNumber.dispose();
   }
 
   @override
@@ -101,7 +78,8 @@ class _CreateAddressPageState extends State<CreateAddressPage> {
         child: Container(
           color: Colors.white,
           child: Padding(
-            padding: const EdgeInsets.only(top: 30.0, left: 20.0, right: 20.0),
+            padding: const EdgeInsets.only(
+                top: 30.0, left: 20.0, right: 20.0),
             child: Form(
               key: _formKey,
               child: Column(
@@ -116,21 +94,67 @@ class _CreateAddressPageState extends State<CreateAddressPage> {
                         fontFamily: "Gotik"),
                   ),
                   Padding(padding: EdgeInsets.only(top: 50.0)),
-                  TextFormField(
-                    controller: _name,
-                    validator: (e) {
-                      if (_name.text.isEmpty) {
-                        return "Please enter name";
-                      } else {
-                        return null;
-                      }
+
+                  DropdownSearch<Data>(
+                    mode: Mode.BOTTOM_SHEET,
+                    label:
+                    "Region",
+                    hint:
+                    "Select Region",
+                    items: [
+                      for(var a in _pro.regions.data)
+                        a
+                    ],
+                    itemAsString: (Data u) => u.name,
+                    onChanged: (Data data){
+                      setState(() {
+                        if(data != null) {
+                          cityName="";
+                          _cities=[];
+                          regionName = data.name;
+                          region=data;
+                          _cities = data.cities;
+
+                        }else{
+                          regionName ="";
+
+                        }
+                      });
                     },
-                    style: TextStyle(fontSize: 18),
-                    decoration: InputDecoration(
-                        labelText: "Name",
-                        hintStyle: TextStyle(color: Colors.black54)),
                   ),
-                  Padding(padding: EdgeInsets.only(top: 20.0)),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  DropdownSearch<Cities>(
+                    mode: Mode.BOTTOM_SHEET,
+                    label:
+                    "City",
+                    hint:
+                    "Select City",
+                    items: [
+                      for(var a in _cities)
+                        a
+                    ],
+                    itemAsString: (Cities u) => u.name,
+                    onChanged: (Cities data){
+                      setState(() {
+                        if(data != null) {
+
+                          cityName = data.name;
+                          city=data;
+
+
+                        }else{
+                          cityName ="";
+
+                        }
+                      });
+                    },
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+
                   TextFormField(
                     controller: _address,
                     validator: (e) {
@@ -144,20 +168,7 @@ class _CreateAddressPageState extends State<CreateAddressPage> {
                         labelText: "Address",
                         hintStyle: TextStyle(color: Colors.black54)),
                   ),
-                  Padding(padding: EdgeInsets.only(top: 20.0)),
-                  TextFormField(
-                    controller: _postal,
-                    validator: (e) {
-                      if (_postal.text.isEmpty) {
-                        return "Please enter postal address";
-                      } else {
-                        return null;
-                      }
-                    },
-                    decoration: InputDecoration(
-                        labelText: "Postal Address",
-                        hintStyle: TextStyle(color: Colors.black54)),
-                  ),
+
                   Padding(padding: EdgeInsets.only(top: 20.0)),
                   TextFormField(
                     controller: _phone,
@@ -188,6 +199,14 @@ class _CreateAddressPageState extends State<CreateAddressPage> {
                         hintStyle: TextStyle(color: Colors.black54)),
                   ),
                   Padding(padding: EdgeInsets.only(top: 20.0)),
+                  TextFormField(
+                    controller: _recipientNumber,
+
+                    decoration: InputDecoration(
+                        labelText: "Recipient number",
+                        hintStyle: TextStyle(color: Colors.black54)),
+                  ),
+                  Padding(padding: EdgeInsets.only(top: 20.0)),
                   Row(
                     textBaseline: TextBaseline.ideographic,
                     children: [
@@ -204,9 +223,10 @@ class _CreateAddressPageState extends State<CreateAddressPage> {
                       ),
                       Expanded(
                           child: Text(
-                        "Make address your default address ?",
-                        style: TextStyle(fontSize: 16, color: Colors.blue),
-                      )),
+                            "Make address your default address ?",
+                            style:
+                            TextStyle(fontSize: 16, color: Colors.blue),
+                          )),
                     ],
                   ),
                   Padding(padding: EdgeInsets.only(top: 40.0)),
@@ -216,15 +236,22 @@ class _CreateAddressPageState extends State<CreateAddressPage> {
                       //     PageRouteBuilder(
                       //         pageBuilder: (_, __, ___) => payment()));
                       if (_formKey.currentState.validate()) {
-                        final a = {
-                          "name": _name.text,
+                        _pro.sendAddress({
                           "address": _address.text,
-                          "postal": _postal.text,
+                          "region": regionName,
                           "phone": _phone.text,
+                          "city": cityName,
                           "recipient": _recipient.text,
-                          "default": checkBoxValue
-                        };
-                        _pro.sendAddress(a, _key);
+                          "recipient_number": _recipientNumber.text,
+                          "defaultt": checkBoxValue,
+                          "fee":city.fee.toString()
+                        }, "aa");
+
+
+                        try{
+                          _pro.setShipping(_pro.saveAdds[0]);
+                        }
+                        catch(e){}
                       }
                     },
                     child: Container(
@@ -233,7 +260,7 @@ class _CreateAddressPageState extends State<CreateAddressPage> {
                       decoration: BoxDecoration(
                           color: Colors.indigoAccent,
                           borderRadius:
-                              BorderRadius.all(Radius.circular(40.0))),
+                          BorderRadius.all(Radius.circular(40.0))),
                       child: Center(
                         child: Text(
                           "Save",
@@ -254,7 +281,7 @@ class _CreateAddressPageState extends State<CreateAddressPage> {
             ),
           ),
         ),
-      ),
+      )
     );
   }
 }

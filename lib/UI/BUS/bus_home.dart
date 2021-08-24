@@ -271,8 +271,8 @@ class _BusHomeState extends State<BusHome> {
                                 SizedBox(
                                   height: 10,
                                 ),
-                                Text(
-                                    "${route['from']['name']}  -  ${route['to']['name']}"),
+                                Text(route['from'].isNotEmpty ?
+                                    "${route['from']['name']}  -  ${route['to']['name']}": "  -  ${route['to']['name']}"),
                                 SizedBox(
                                   height: 10,
                                 ),

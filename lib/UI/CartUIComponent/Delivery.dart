@@ -4,14 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:treva_shop_flutter/API/provider_class.dart';
 import 'package:provider/provider.dart';
+import 'package:treva_shop_flutter/API/provider_model.dart';
 import 'package:treva_shop_flutter/UI/CartUIComponent/add_address.dart';
 import 'package:treva_shop_flutter/UI/CartUIComponent/edit_shipping.dart';
+import 'package:treva_shop_flutter/UI/Payment/payment_web.dart';
 import 'package:treva_shop_flutter/constant.dart';
 import 'package:treva_shop_flutter/database/cart_model.dart';
 import 'package:treva_shop_flutter/sharedPref/savedinfo.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:provider/provider.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 
 Map toUseaddress;
 
@@ -22,13 +25,65 @@ class delivery extends StatefulWidget {
 
 class _deliveryState extends State<delivery> {
   bool checkBoxValue = false;
-  final TextEditingController _name = TextEditingController();
   final TextEditingController _address = TextEditingController();
-  final TextEditingController _postal = TextEditingController();
   final TextEditingController _phone = TextEditingController();
   final TextEditingController _recipient = TextEditingController();
+  final TextEditingController _recipientNumber = TextEditingController();
+  final TextEditingController _points = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   int nu = 0;
+  String regionName = "";
+  Data region;
+  String cityName = "";
+  List<Cities> _cities = [];
+  Cities city;
+  String tempPoints = "";
+  Address shipping;
+  String totalAmount = "";
+
+  void placeOrder(Address address, amount, points, a) async {
+    EasyLoading.show(status: "Processing");
+    final _userId = await UserData.getUserId();
+    final _userToken = await UserData.getUserToken();
+
+    final _data = {
+      "user_id": _userId.toString(),
+      "address": json.encode({
+        "region": address.region,
+        "address": address.address,
+        "city": address.city,
+        "phone": address.phone,
+        "recipient": address.recipient,
+        "recipient_number": address.recipient,
+        "default": address.defaultt,
+        "fee": address.fee
+      }),
+      "amount": getTotal(amount, points, a).toString(),
+      "points": _points.text
+    };
+
+    http.Response response = await http.post(
+        Uri.parse(base_url + "user/place-order"),
+        body: _data,
+        headers: {HttpHeaders.authorizationHeader: "Bearer ${_userToken}"});
+
+    EasyLoading.dismiss();
+
+    if (response.statusCode < 206) {
+      // EasyLoading.showSuccess("${json.decode(response.body)['message']}");
+      print(response.body);
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => PaymentWeb(
+                    initUrl: json.decode(response.body)['data']
+                        ['authorization_url'],
+                    where: "cart",
+                  )));
+    } else {
+      EasyLoading.showError("${json.decode(response.body)['message']}");
+    }
+  }
 
   void addAddress() async {
     EasyLoading.show(status: "Saving Address");
@@ -38,12 +93,14 @@ class _deliveryState extends State<delivery> {
       "user_id": _userId.toString(),
       "addresses": json.encode([
         {
-          "name": _name.text,
+          "region": regionName,
           "address": _address.text,
-          "postal": _postal.text,
+          "city": cityName,
           "phone": _phone.text,
           "recipient": _recipient.text,
-          "default": checkBoxValue
+          "recipient_number": _recipientNumber.text,
+          "default": checkBoxValue,
+          "fee": city.fee.toString()
         }
       ])
     };
@@ -79,16 +136,43 @@ class _deliveryState extends State<delivery> {
         });
   }
 
+  String cost_ship(total, shipping) {
+    final a = double.parse(total) + double.parse(shipping);
+    return a.toString();
+  }
+
+  getTotal(_amount, totalPoints, a) {
+    a = 1 / int.parse(a);
+
+    double pointsIncash = a;
+    double amount;
+    int points;
+    if (_amount.isNotEmpty) {
+      amount = double.parse(_amount);
+    } else {
+      amount = 0.0;
+    }
+
+    if (tempPoints.isNotEmpty &&
+        int.parse(tempPoints) <= int.parse(totalPoints)) {
+      points = int.parse(tempPoints);
+    } else {
+      points = 0;
+    }
+
+    double total = amount - (points * pointsIncash);
+    return total > 0 ? total.toStringAsFixed(2) : 0.00;
+  }
+
   @override
   void dispose() {
     // TODO: implement dispose
     super.dispose();
-
-    _name.dispose();
     _address.dispose();
-    _postal.dispose();
     _phone.dispose();
     _recipient.dispose();
+    _points.dispose();
+    _recipientNumber.dispose();
   }
 
   void z() {
@@ -130,12 +214,18 @@ class _deliveryState extends State<delivery> {
     super.initState();
     final _pro = Provider.of<PoinBizProvider>(context, listen: false);
     _pro.getAdds();
-    z();
+
+    Future.delayed(Duration.zero, () async {
+      z();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final _pro = Provider.of<PoinBizProvider>(context, listen: true);
+    _pro.getAdds();
+    shipping = _pro.shipping;
+    totalAmount = _pro.getTotal();
 
     return Scaffold(
       appBar: AppBar(
@@ -179,21 +269,49 @@ class _deliveryState extends State<delivery> {
                                 fontFamily: "Gotik"),
                           ),
                           Padding(padding: EdgeInsets.only(top: 50.0)),
-                          TextFormField(
-                            controller: _name,
-                            validator: (e) {
-                              if (_name.text.isEmpty) {
-                                return "Please enter name";
-                              } else {
-                                return null;
-                              }
+                          DropdownSearch<Data>(
+                            mode: Mode.BOTTOM_SHEET,
+                            label: "Region",
+                            hint: "Select Region",
+                            items: [for (var a in _pro.regions.data) a],
+                            itemAsString: (Data u) => u.name,
+                            onChanged: (Data data) {
+                              setState(() {
+                                if (data != null) {
+                                  cityName = "";
+                                  _cities = [];
+                                  regionName = data.name;
+                                  region = data;
+                                  _cities = data.cities;
+                                } else {
+                                  regionName = "";
+                                }
+                              });
                             },
-                            style: TextStyle(fontSize: 18),
-                            decoration: InputDecoration(
-                                labelText: "Name",
-                                hintStyle: TextStyle(color: Colors.black54)),
                           ),
-                          Padding(padding: EdgeInsets.only(top: 20.0)),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          DropdownSearch<Cities>(
+                            mode: Mode.BOTTOM_SHEET,
+                            label: "City",
+                            hint: "Select City",
+                            items: [for (var a in _cities) a],
+                            itemAsString: (Cities u) => u.name,
+                            onChanged: (Cities data) {
+                              setState(() {
+                                if (data != null) {
+                                  cityName = data.name;
+                                  city = data;
+                                } else {
+                                  cityName = "";
+                                }
+                              });
+                            },
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
                           TextFormField(
                             controller: _address,
                             validator: (e) {
@@ -205,20 +323,6 @@ class _deliveryState extends State<delivery> {
                             },
                             decoration: InputDecoration(
                                 labelText: "Address",
-                                hintStyle: TextStyle(color: Colors.black54)),
-                          ),
-                          Padding(padding: EdgeInsets.only(top: 20.0)),
-                          TextFormField(
-                            controller: _postal,
-                            validator: (e) {
-                              if (_postal.text.isEmpty) {
-                                return "Please enter postal address";
-                              } else {
-                                return null;
-                              }
-                            },
-                            decoration: InputDecoration(
-                                labelText: "Postal Address",
                                 hintStyle: TextStyle(color: Colors.black54)),
                           ),
                           Padding(padding: EdgeInsets.only(top: 20.0)),
@@ -248,6 +352,14 @@ class _deliveryState extends State<delivery> {
                             },
                             decoration: InputDecoration(
                                 labelText: "Recipient name",
+                                hintStyle: TextStyle(color: Colors.black54)),
+                          ),
+                          Padding(padding: EdgeInsets.only(top: 20.0)),
+                          TextFormField(
+                            controller: _recipientNumber,
+
+                            decoration: InputDecoration(
+                                labelText: "Recipient number",
                                 hintStyle: TextStyle(color: Colors.black54)),
                           ),
                           Padding(padding: EdgeInsets.only(top: 20.0)),
@@ -282,14 +394,17 @@ class _deliveryState extends State<delivery> {
                               if (_formKey.currentState.validate()) {
                                 _pro.sendAddress({
                                   "address": _address.text,
-                                  "name": _name.text,
+                                  "region": regionName,
                                   "phone": _phone.text,
-                                  "postal": _postal.text,
+                                  "city": cityName,
                                   "recipient": _recipient.text,
-                                  "defaultt": checkBoxValue
+                                  "recipient_number": _recipientNumber.text,
+                                  "defaultt": checkBoxValue,
+                                  "fee": city.fee.toString()
                                 }, "aa");
-                                z();
-                                setState(() {});
+
+                                Future.delayed(Duration(seconds: 2))
+                                    .then((value) => z());
                               }
                             },
                             child: Container(
@@ -351,6 +466,50 @@ class _deliveryState extends State<delivery> {
                                 CheckoutTitle(
                                   text: "SELECT A DELIVERY METHOD",
                                 ),
+                                // Card(
+                                //   elevation: 1,
+                                //   child: Container(
+                                //     padding: EdgeInsets.all(20),
+                                //     width: double.infinity,
+                                //     child: Column(
+                                //       children: [
+                                //         Row(
+                                //           children: [
+                                //             CircleAvatar(
+                                //               radius: 9,
+                                //               backgroundColor: appColor,
+                                //               child: CircleAvatar(
+                                //                 radius: 7,
+                                //                 backgroundColor: Colors.white,
+                                //                 child: CircleAvatar(
+                                //                   radius: 5,
+                                //                   backgroundColor: appColor,
+                                //                 ),
+                                //               ),
+                                //             ),
+                                //             SizedBox(
+                                //               width: 20,
+                                //             ),
+                                //             Expanded(
+                                //                 child: Text(
+                                //                     "Collect at any of our Pickup Stations(Cheaper Fees)",
+                                //                     style: TextStyle(
+                                //                         fontSize: 14)))
+                                //           ],
+                                //         ),
+                                //         Divider(),
+                                //         Padding(
+                                //           padding: const EdgeInsets.symmetric(
+                                //               vertical: 5.0),
+                                //           child: Text(
+                                //             "SELECT A PICKUP STATION",
+                                //             style: TextStyle(color: appColor),
+                                //           ),
+                                //         )
+                                //       ],
+                                //     ),
+                                //   ),
+                                // ),
                                 Card(
                                   elevation: 1,
                                   child: Container(
@@ -369,50 +528,6 @@ class _deliveryState extends State<delivery> {
                                                 child: CircleAvatar(
                                                   radius: 5,
                                                   backgroundColor: appColor,
-                                                ),
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              width: 20,
-                                            ),
-                                            Expanded(
-                                                child: Text(
-                                                    "Collect at any of our Pickup Stations(Cheaper Fees)",
-                                                    style: TextStyle(
-                                                        fontSize: 14)))
-                                          ],
-                                        ),
-                                        Divider(),
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 5.0),
-                                          child: Text(
-                                            "SELECT A PICKUP STATION",
-                                            style: TextStyle(color: appColor),
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Card(
-                                  elevation: 1,
-                                  child: Container(
-                                    padding: EdgeInsets.all(20),
-                                    width: double.infinity,
-                                    child: Column(
-                                      children: [
-                                        Row(
-                                          children: [
-                                            CircleAvatar(
-                                              radius: 9,
-                                              backgroundColor: Colors.grey[400],
-                                              child: CircleAvatar(
-                                                radius: 7,
-                                                backgroundColor: Colors.white,
-                                                child: CircleAvatar(
-                                                  radius: 5,
-                                                  backgroundColor: Colors.white,
                                                 ),
                                               ),
                                             ),
@@ -448,7 +563,7 @@ class _deliveryState extends State<delivery> {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text("Subtotal"),
-                                    Text("GHc 1699.00")
+                                    Text("GHc ${_pro.getTotal().toString()}")
                                   ],
                                 ),
                                 SizedBox(
@@ -465,7 +580,7 @@ class _deliveryState extends State<delivery> {
                                           fontWeight: FontWeight.w600),
                                     ),
                                     Text(
-                                      "GHc 0.00",
+                                      "GHc ${_pro.shipping.fee}",
                                       style: TextStyle(
                                           fontSize: 16,
                                           color: appColor,
@@ -488,9 +603,9 @@ class _deliveryState extends State<delivery> {
                                           fontWeight: FontWeight.w600),
                                     ),
                                     Text(
-                                      "GHc 1699.00",
+                                      "GHc ${double.parse(_pro.getTotal().toString()) + double.parse(_pro.shipping.fee ?? '0.0')}",
                                       style: TextStyle(
-                                          fontSize: 16,
+                                          fontSize: 17,
                                           color: Colors.green,
                                           fontWeight: FontWeight.w600),
                                     )
@@ -508,7 +623,12 @@ class _deliveryState extends State<delivery> {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     CheckoutTitle(text: "USE POINT"),
-                                    Text("Your Points: 150000 (Ghc 25)")
+                                    Text(
+                                      "Your Points: ${_pro.userDetail['points']} (Ghc ${int.parse(_pro.userDetail['points'].toString()) / int.parse(_pro.config['points_per_cedi'].toString())})",
+                                      style: TextStyle(
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.w500),
+                                    )
                                   ],
                                 ),
                                 SizedBox(
@@ -525,55 +645,106 @@ class _deliveryState extends State<delivery> {
                                         child: Padding(
                                           padding: const EdgeInsets.symmetric(
                                               horizontal: 20.0),
-                                          child: TextField(),
+                                          child: TextField(
+                                            controller: _points,
+                                            keyboardType: TextInputType.number,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                    Card(
-                                      child: Container(
-                                          color: appColor,
-                                          height: 45,
-                                          child: Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 10.0),
-                                              child: Center(
-                                                  child: Text(
-                                                "APPLY",
-                                                style: TextStyle(
-                                                    color: Colors.white),
-                                              )))),
+                                    InkWell(
+                                      onTap: () {
+                                        if (int.parse(_points.text) >
+                                            int.parse(
+                                                _pro.userDetail['points'])) {
+                                          EasyLoading.showError(
+                                              "Insufficient Points");
+                                        } else {
+                                          EasyLoading.show(
+                                              status: "Apply Points");
+                                          Future.delayed(Duration(seconds: 2))
+                                              .then((value) {
+                                            EasyLoading.dismiss();
+                                            setState(() {
+                                              tempPoints = _points.text;
+                                            });
+                                          });
+                                        }
+                                      },
+                                      child: Card(
+                                        child: Container(
+                                            color: appColor,
+                                            height: 45,
+                                            child: Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 10.0),
+                                                child: Center(
+                                                    child: Text(
+                                                  "APPLY",
+                                                  style: TextStyle(
+                                                      color: Colors.white),
+                                                )))),
+                                      ),
                                     ),
-                                    Card(
-                                      child: Container(
-                                          color: appColor,
-                                          height: 45,
-                                          child: Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 10.0),
-                                              child: Center(
-                                                  child: Text(
-                                                "APPLY ALL",
-                                                style: TextStyle(
-                                                    color: Colors.white),
-                                              )))),
+                                    InkWell(
+                                      onTap: () {
+                                        EasyLoading.show(
+                                            status: "Apply Points");
+                                        Future.delayed(Duration(seconds: 2))
+                                            .then((value) {
+                                          EasyLoading.dismiss();
+                                          setState(() {
+                                            tempPoints =
+                                                _pro.userDetail['points'];
+                                            _points.clear();
+                                            _points.text =
+                                                tempPoints.toString();
+                                          });
+                                        });
+                                      },
+                                      child: Card(
+                                        child: Container(
+                                            color: appColor,
+                                            height: 45,
+                                            child: Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 10.0),
+                                                child: Center(
+                                                    child: Text(
+                                                  "APPLY ALL",
+                                                  style: TextStyle(
+                                                      color: Colors.white),
+                                                )))),
+                                      ),
                                     ),
                                   ],
                                 ),
                                 SizedBox(
                                   height: 20,
                                 ),
-                                Card(
-                                  elevation: 2,
-                                  child: Container(
-                                    width: double.infinity,
-                                    color: appColor,
-                                    height: 50,
-                                    child: Center(
-                                      child: Text("PROCEED TO PAYMENT",
-                                          style:
-                                              TextStyle(color: Colors.white)),
+                                InkWell(
+                                  onTap: () => placeOrder(
+                                      shipping,
+                                      cost_ship(totalAmount,
+                                          _pro.shipping.fee ?? 0.00.toString()),
+                                      _pro.userDetail['points'],
+                                      _pro.config['points_per_cedi']),
+                                  child: Card(
+                                    elevation: 2,
+                                    child: Container(
+                                      width: double.infinity,
+                                      color: appColor,
+                                      height: 50,
+                                      child: Center(
+                                        child: Text(
+                                            "PROCEED TO PAYMENT - ( GHc ${getTotal(cost_ship(_pro.getTotal().toString(), _pro.shipping.fee != null ? _pro.shipping.fee.toString() : "0.0"), _pro.userDetail['points'], _pro.config['points_per_cedi'])} )",
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 17,
+                                                fontWeight: FontWeight.w500)),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -618,6 +789,7 @@ class AddressWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _pro = Provider.of<PoinBizProvider>(context, listen: true);
+
     return Padding(
         padding: const EdgeInsets.only(right: 15.0),
         child: Stack(
@@ -638,9 +810,17 @@ class AddressWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "${data.name}",
+                      "${data.region}",
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(
+                      height: 4,
+                    ),
+                    Text(
+                      "${data.city}",
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
                     ),
                     SizedBox(
                       height: 4,
@@ -654,9 +834,9 @@ class AddressWidget extends StatelessWidget {
                       height: 4,
                     ),
                     Text(
-                      "${data.postal}",
+                      "${data.phone}",
                       style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+                      TextStyle(fontSize: 14, fontWeight: FontWeight.w300),
                     ),
                     SizedBox(
                       height: 4,
@@ -670,10 +850,11 @@ class AddressWidget extends StatelessWidget {
                       height: 4,
                     ),
                     Text(
-                      "${data.phone}",
+                      "${data.recipient_number}",
                       style:
-                          TextStyle(fontSize: 14, fontWeight: FontWeight.w300),
+                      TextStyle(fontSize: 14, fontWeight: FontWeight.w300),
                     ),
+
                   ],
                 ),
               ),
@@ -844,12 +1025,17 @@ class _ShippingAddressesState extends State<ShippingAddresses> {
   }
 }
 
-class AddressWidget1 extends StatelessWidget {
+class AddressWidget1 extends StatefulWidget {
   final index;
   final nu;
 
   AddressWidget1({this.index, this.nu});
 
+  @override
+  State<AddressWidget1> createState() => _AddressWidget1State();
+}
+
+class _AddressWidget1State extends State<AddressWidget1> {
   @override
   Widget build(BuildContext context) {
     final _pro = Provider.of<PoinBizProvider>(context, listen: false);
@@ -862,41 +1048,43 @@ class AddressWidget1 extends StatelessWidget {
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(8)),
                   border: Border.all(
-                      color: index != nu ? Colors.black : Colors.green)),
+                      color: widget.index != widget.nu
+                          ? Colors.black
+                          : Colors.green)),
               padding: EdgeInsets.all(15),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "${_pro.saveAdds[index].name}",
+                    "${_pro.saveAdds[widget.index].region}",
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(
                     height: 4,
                   ),
                   Text(
-                    "${_pro.saveAdds[index].address}",
+                    "${_pro.saveAdds[widget.index].city}",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
                   ),
                   SizedBox(
                     height: 4,
                   ),
                   Text(
-                    "${_pro.saveAdds[index].postal}",
+                    "${_pro.saveAdds[widget.index].address}",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
                   ),
                   SizedBox(
                     height: 4,
                   ),
                   Text(
-                    "${_pro.saveAdds[index].recipient}",
+                    "${_pro.saveAdds[widget.index].recipient}",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w300),
                   ),
                   SizedBox(
                     height: 4,
                   ),
                   Text(
-                    "${_pro.saveAdds[index].phone}",
+                    "${_pro.saveAdds[widget.index].phone}",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w300),
                   ),
                 ],
@@ -912,8 +1100,9 @@ class AddressWidget1 extends StatelessWidget {
                     padding: const EdgeInsets.all(3.0),
                     child: CircleAvatar(
                       radius: 8,
-                      backgroundColor:
-                          index == nu ? Colors.green : Colors.white,
+                      backgroundColor: widget.index == widget.nu
+                          ? Colors.green
+                          : Colors.white,
                     ),
                   ),
                 )),
@@ -921,7 +1110,8 @@ class AddressWidget1 extends StatelessWidget {
                 right: 7,
                 bottom: 7,
                 child: InkWell(
-                    onTap: () => _pro.deleteAddress(_pro.saveAdds[index]),
+                    onTap: () =>
+                        _pro.deleteAddress(_pro.saveAdds[widget.index]),
                     child: Icon(
                       Icons.delete,
                       size: 30,

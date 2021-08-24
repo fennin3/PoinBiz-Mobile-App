@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:treva_shop_flutter/Components/add_auction_sale.dart';
 import 'package:treva_shop_flutter/constant.dart';
-import 'package:flutter_paystack/flutter_paystack.dart';
 
 class AddAuction extends StatefulWidget {
   const AddAuction({Key key}) : super(key: key);
@@ -30,7 +29,7 @@ class _AddAuctionState extends State<AddAuction> {
         backgroundColor: appColor,
         centerTitle: true,
         title: Text(
-          "Add Auction Sale",
+          "Add Auction Purchase",
           style: auctionHeader,
         ),
         leading: TextButton(
@@ -43,3 +42,7 @@ class _AddAuctionState extends State<AddAuction> {
     );
   }
 }
+
+
+
+

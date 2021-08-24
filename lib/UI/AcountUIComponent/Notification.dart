@@ -55,7 +55,7 @@ class _notificationState extends State<notification> {
           elevation: 0.0,
           backgroundColor: Colors.white,
         ),
-        body: items.length>0?
+        body: items.length<0?
         ListView.builder(
             itemCount: items.length,
             padding: const EdgeInsets.all(5.0),
@@ -146,7 +146,7 @@ class noItemNotifications extends StatelessWidget {
             ),
             Padding(padding: EdgeInsets.only(bottom: 30.0)),
             Text(
-              "Not Have Notification",
+              "No Notification",
               style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 18.5,

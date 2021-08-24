@@ -32,7 +32,6 @@ class _cartState extends State<cart> {
   @override
   Widget build(BuildContext context) {
     final _pro = Provider.of<PoinBizProvider>(context, listen: true);
-
     return Scaffold(
         appBar: AppBar(
           iconTheme: IconThemeData(color: Color(0xFF6991C7)),

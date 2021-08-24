@@ -16,6 +16,7 @@ import 'package:provider/provider.dart';
 import 'package:treva_shop_flutter/UI/OrderRequest/add_order.dart';
 import 'package:treva_shop_flutter/UI/OrderRequest/my_orders.dart';
 import 'package:treva_shop_flutter/UI/Vendor/all_venders.dart';
+import 'package:treva_shop_flutter/constant.dart';
 
 import 'BUS/bus_home.dart';
 
@@ -149,95 +150,103 @@ class MyDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-        child: Column(
+        child: SingleChildScrollView(
+          child: Column(
       children: [
-        DrawerHeader(
-            decoration: BoxDecoration(color: const Color(0xFF6991C7)),
-            child: Center(child: Text("App Logo"))),
-        ExpansionTile(
-          title: Text("Place Order"),
-          leading: Icon(Icons.receipt_long_rounded),
-          trailing: Icon(Icons.arrow_forward_ios),
-          children: [
-            ListTile(
-              onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => AddOrder()));
-              },
-              leading: Icon(Icons.add_shopping_cart_sharp),
-              title: Text("Place Order"),
-            ),
-            ListTile(
-              onTap: () => Navigator.push(
-                  context, MaterialPageRoute(builder: (context) => MyOrder())),
-              leading: Icon(
-                Icons.inventory_outlined,
+          DrawerHeader(
+              decoration: BoxDecoration(color: appColor,
+              image: DecorationImage(
+                image: AssetImage("assets/img/Logo.png"),
+
+
+              )
               ),
-              title: Text("Order Requests"),
-            )
-          ],
-        ),
-        ExpansionTile(
-          title: Text("Auction Sale"),
-          leading: Icon(Icons.local_offer),
-          trailing: Icon(Icons.arrow_forward_ios),
-          children: [
-            ListTile(
-              onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => AddAuction()));
-              },
-              leading: Icon(Icons.price_change),
-              title: Text("Add Auction Sale"),
-            ),
-            ListTile(
-              onTap: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => MyAuctionSales())),
-              leading: Icon(Icons.local_offer),
-              title: Text("My Auction Sales"),
-            ),
-          ],
-        ),
-        ListTile(
-          leading: Icon(Icons.store),
-          title: Text("Vendors Near Me"),
-          onTap: () => Navigator.push(
-              context, MaterialPageRoute(builder: (context) => AllVendors())),
-        ),
-        ListTile(
-          onTap:()=> Navigator.push(context,
-              MaterialPageRoute(builder: (context) => flashSale())),
-          leading: Icon(Icons.favorite),
-          title: Text("My Wishlist"),
-          // onTap: () => Navigator.push(
-          //     context, MaterialPageRoute(builder: (context) => AllVendors())),
-        ),
-        ListTile(
-          onTap: () => Navigator.push(context,
-              MaterialPageRoute(builder: (context) => OfflinePayment())),
-          leading: Icon(Icons.paid),
-          title: Text("Offline Purchase"),
-          // onTap: () => Navigator.push(
-          //     context, MaterialPageRoute(builder: (context) => AllVendors())),
-        ),
+              ),
+          ExpansionTile(
+            title: Text("Place Special Order"),
+            leading: Icon(Icons.receipt_long_rounded),
+            trailing: Icon(Icons.arrow_forward_ios),
+            children: [
+              ListTile(
+                onTap: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => AddOrder()));
+                },
+                leading: Icon(Icons.add_shopping_cart_sharp),
+                title: Text("Place Special Order"),
+              ),
+              ListTile(
+                onTap: () => Navigator.push(
+                    context, MaterialPageRoute(builder: (context) => MyOrder())),
+                leading: Icon(
+                  Icons.inventory_outlined,
+                ),
+                title: Text("Special Order Requests"),
+              )
+            ],
+          ),
+          ExpansionTile(
+            title: Text("Auction Purchases"),
+            leading: Icon(Icons.local_offer),
+            trailing: Icon(Icons.arrow_forward_ios),
+            children: [
+              ListTile(
+                onTap: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => AddAuction()));
+                },
+                leading: Icon(Icons.price_change),
+                title: Text("Add Auction Purchase"),
+              ),
+              ListTile(
+                onTap: () => Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => MyAuctionSales())),
+                leading: Icon(Icons.local_offer),
+                title: Text("My Auction Purchases"),
+              ),
+            ],
+          ),
+          ListTile(
+            leading: Icon(Icons.store),
+            title: Text("Vendors Near Me"),
+            onTap: () => Navigator.push(
+                context, MaterialPageRoute(builder: (context) => AllVendors())),
+          ),
+          ListTile(
+            onTap:()=> Navigator.push(context,
+                MaterialPageRoute(builder: (context) => flashSale())),
+            leading: Icon(Icons.favorite),
+            title: Text("My Wishlist"),
+            // onTap: () => Navigator.push(
+            //     context, MaterialPageRoute(builder: (context) => AllVendors())),
+          ),
+          ListTile(
+            onTap: () => Navigator.push(context,
+                MaterialPageRoute(builder: (context) => OfflinePayment())),
+            leading: Icon(Icons.paid),
+            title: Text("Offline Purchase"),
+            // onTap: () => Navigator.push(
+            //     context, MaterialPageRoute(builder: (context) => AllVendors())),
+          ),
 
-        ListTile(
-          onTap: () => Navigator.push(context,
-              MaterialPageRoute(builder: (context) => PointTransfer())),
-          leading: Icon(Icons.paid),
-          title: Text("Point Transfer"),
-          // onTap: () => Navigator.push(
-          //     context, MaterialPageRoute(builder: (context) => AllVendors())),
-        ),
-        ListTile(
+          ListTile(
+            onTap: () => Navigator.push(context,
+                MaterialPageRoute(builder: (context) => PointTransfer())),
+            leading: Icon(Icons.paid),
+            title: Text("Point Transfer"),
+            // onTap: () => Navigator.push(
+            //     context, MaterialPageRoute(builder: (context) => AllVendors())),
+          ),
+          ListTile(
 
-          leading: Icon(Icons.policy),
-          title: Text("Privacy Policy"),
-          // onTap: () => Navigator.push(
-          //     context, MaterialPageRoute(builder: (context) => AllVendors())),
-        ),
+            leading: Icon(Icons.policy),
+            title: Text("Privacy Policy"),
+            // onTap: () => Navigator.push(
+            //     context, MaterialPageRoute(builder: (context) => AllVendors())),
+          ),
       ],
-    ));
+    ),
+        ));
   }
 }
 

@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:treva_shop_flutter/API/provider_class.dart';
+import 'package:treva_shop_flutter/UI/Payment/payment_web.dart';
 import 'package:treva_shop_flutter/constant.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-
+import 'package:http/http.dart' as http;
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'dart:convert';
+import 'package:treva_shop_flutter/sharedPref/savedinfo.dart';
+import 'package:provider/provider.dart';
 
 class AddOrder extends StatefulWidget {
   const AddOrder({Key key}) : super(key: key);
@@ -20,11 +26,13 @@ class _AddOrderState extends State<AddOrder> {
   PickedFile _image;
   final ImagePicker _picker = ImagePicker();
   bool checkBoxValue = false;
-
+  String auctiontype = "";
+  String businessTypeId = "";
+  String catId = "";
 
   void pickImageFromCamera() async {
     final PickedFile pickedFile =
-    await _picker.getImage(source: ImageSource.camera, imageQuality: 50);
+        await _picker.getImage(source: ImageSource.camera, imageQuality: 50);
     setState(() {
       _image = pickedFile;
     });
@@ -33,7 +41,7 @@ class _AddOrderState extends State<AddOrder> {
 
   void pickImageFromGallery() async {
     final PickedFile pickedFile =
-    await _picker.getImage(source: ImageSource.gallery, imageQuality: 50);
+        await _picker.getImage(source: ImageSource.gallery, imageQuality: 50);
     setState(() {
       _image = pickedFile;
     });
@@ -132,17 +140,58 @@ class _AddOrderState extends State<AddOrder> {
         });
   }
 
+  void addorder() async {
+    EasyLoading.show(status: "Placing Request");
+    final userId = await UserData.getUserId();
+    final userToken = await UserData.getUserToken();
 
+    Map<String, String> _data = {
+      "user_id": userId,
+      "business_type": businessTypeId.toString(),
+      "category_id": catId.toString(),
+      "name": _productName.text,
+      "description": _description.text
+    };
+    final response = http.MultipartRequest(
+        'POST', Uri.parse("${base_url}user/place-request"));
+
+    if (_image != null)
+      response.files
+          .add(await http.MultipartFile.fromPath("image", _image.path));
+
+    response.fields.addAll(_data);
+
+    response.headers['authorization'] = "Bearer $userToken";
+
+    var streamedResponse = await response.send();
+    var res = await http.Response.fromStream(streamedResponse);
+    EasyLoading.dismiss();
+
+    if (res.statusCode < 206) {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => PaymentWeb(
+                where: "order",
+                initUrl: json.decode(res.body)['data']['authorization_url'],
+              )));
+    } else {
+      EasyLoading.showError("${json.decode(res.body)['message']}");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    print(_image);
+    EasyLoading.dismiss();
     final size = MediaQuery.of(context).size;
+    final _pro = Provider.of<PoinBizProvider>(context, listen: false);
     return Scaffold(
-      appBar:  AppBar(
+      appBar: AppBar(
         backgroundColor: appColor,
         centerTitle: true,
         title: Text(
-          "Place Order",
+          "Place Special Order",
           style: auctionHeader,
         ),
         leading: TextButton(
@@ -156,39 +205,71 @@ class _AddOrderState extends State<AddOrder> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-
               Padding(
-                padding: const EdgeInsets.only(top: 20.0, left: 10, right: 10, bottom: 30),
+                padding: const EdgeInsets.only(
+                    top: 20.0, left: 10, right: 10, bottom: 30),
                 child: Column(
                   children: [
-                    DropdownSearch<String>(
+                    DropdownSearch<Map>(
                       mode: Mode.BOTTOM_SHEET,
-                      showSelectedItem: true,
-                      //                 searchFieldProps: TextFieldProps(
-                      // controller: TextEditingController(text: 'Mrs'),
-                      // ),
-                      showSearchBox: true,
-
-                      isFilteredOnline: true,
-                      showClearButton: true,
-
+                      label: "Order type",
+                      hint: "Select order type",
                       items: [
-                        "Brazil",
-                        "Italia",
-                        "Tunisia",
-                        "Canada",
-                        "Brazil",
-                        "Italia",
-                        "Tunisia",
-                        "Canada"
+                        for (var a in _pro.allBusinessType)
+                          if (!a['name']
+                              .toString()
+                              .toLowerCase()
+                              .startsWith('b'))
+                            a
                       ],
-                      label: "Category",
-                      hint: "Select product category",
-                      // popupItemDisabled: (String s) => s.startsWith('I'),
-                      onChanged: (e) {
-                        print(e);
+                      itemAsString: (Map u) => u['name'],
+                      onChanged: (Map data) {
+                        setState(() {
+                          if (data != null) {
+                            auctiontype = data['name'];
+                            businessTypeId = data['id'].toString();
+                          } else {
+                            auctiontype = "";
+                            businessTypeId = "";
+                          }
+                        });
                       },
                     ),
+
+                    SizedBox(
+                      height: 20,
+                    ),
+                    DropdownSearch<Map>(
+                      mode: Mode.BOTTOM_SHEET,
+                      label: auctiontype.isEmpty
+                          ? "Waiting for order type to be selected"
+                          : "Category",
+                      hint: auctiontype.isEmpty
+                          ? "Select auction type first"
+                          : "Select product category",
+                      items: [
+                        if (auctiontype.toString() != 'null' &&
+                            auctiontype.isNotEmpty &&
+                            auctiontype.toString().toLowerCase() ==
+                                "event booking")
+                          for (var a in _pro.alleventCat) a
+                        else
+                          for (var a in _pro.allcategories) a
+                      ],
+                      itemAsString: (Map u) => u['name'],
+                      onChanged: (Map data) {
+                        setState(() {
+                          if (data != null) {
+                            auctiontype = data['name'];
+                            catId = data['id'].toString();
+                          } else {
+                            auctiontype = "";
+                            catId = "";
+                          }
+                        });
+                      },
+                    ),
+
                     SizedBox(
                       height: 20,
                     ),
@@ -199,8 +280,8 @@ class _AddOrderState extends State<AddOrder> {
                         padding: EdgeInsets.symmetric(horizontal: 10),
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.all(Radius.circular(4)),
-                            border:
-                            Border.all(color: Colors.black.withOpacity(0.4))),
+                            border: Border.all(
+                                color: Colors.black.withOpacity(0.4))),
                         child: Theme(
                           data: ThemeData(
                             hintColor: Colors.transparent,
@@ -209,7 +290,7 @@ class _AddOrderState extends State<AddOrder> {
                             controller: _productName,
                             validator: (e) {
                               if (_productName.text.isEmpty) {
-                                return "Please enter product name";
+                                return "Please enter item name";
                               }
                               // else if(!_email.text.contains("@") || !_email.text.contains(".com")){
                               //   return "Please enter a valid email address";
@@ -220,7 +301,7 @@ class _AddOrderState extends State<AddOrder> {
                             },
                             decoration: InputDecoration(
                                 border: InputBorder.none,
-                                labelText: "Product name",
+                                labelText: "Item name",
                                 labelStyle: TextStyle(
                                     fontSize: 15.0,
                                     fontFamily: 'Sans',
@@ -242,8 +323,8 @@ class _AddOrderState extends State<AddOrder> {
                         padding: EdgeInsets.symmetric(horizontal: 10),
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.all(Radius.circular(4)),
-                            border:
-                            Border.all(color: Colors.black.withOpacity(0.4))),
+                            border: Border.all(
+                                color: Colors.black.withOpacity(0.4))),
                         child: Theme(
                           data: ThemeData(
                             hintColor: Colors.transparent,
@@ -254,7 +335,7 @@ class _AddOrderState extends State<AddOrder> {
                             controller: _description,
                             validator: (e) {
                               if (_description.text.isEmpty) {
-                                return "Please enter product description";
+                                return "Please enter item description";
                               }
                               // else if(!_email.text.contains("@") || !_email.text.contains(".com")){
                               //   return "Please enter a valid email address";
@@ -265,7 +346,7 @@ class _AddOrderState extends State<AddOrder> {
                             },
                             decoration: InputDecoration(
                                 border: InputBorder.none,
-                                labelText: "Product description",
+                                labelText: "Item description",
                                 labelStyle: TextStyle(
                                     fontSize: 15.0,
                                     fontFamily: 'Sans',
@@ -277,51 +358,50 @@ class _AddOrderState extends State<AddOrder> {
                         ),
                       ),
                     ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 0.0),
-                      child: Container(
-                        alignment: AlignmentDirectional.center,
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.all(Radius.circular(4)),
-                            border:
-                            Border.all(color: Colors.black.withOpacity(0.4))),
-                        child: Theme(
-                          data: ThemeData(
-                            hintColor: Colors.transparent,
-                          ),
-                          child: TextFormField(
-
-                            textAlign: TextAlign.start,
-                            controller: _quantity,
-                            validator: (e) {
-                              if (_quantity.text.isEmpty) {
-                                return "Please enter product quantity";
-                              }
-                              // else if(!_email.text.contains("@") || !_email.text.contains(".com")){
-                              //   return "Please enter a valid email address";
-                              // }
-                              else {
-                                return null;
-                              }
-                            },
-                            decoration: InputDecoration(
-                                border: InputBorder.none,
-                                labelText: "Product quantity",
-                                labelStyle: TextStyle(
-                                    fontSize: 15.0,
-                                    fontFamily: 'Sans',
-                                    letterSpacing: 0.3,
-                                    color: Colors.black38,
-                                    fontWeight: FontWeight.w600)),
-                            keyboardType: TextInputType.number,
-                          ),
-                        ),
-                      ),
-                    ),
+                    // SizedBox(
+                    //   height: 20,
+                    // ),
+                    // Padding(
+                    //   padding: EdgeInsets.symmetric(horizontal: 0.0),
+                    //   child: Container(
+                    //     alignment: AlignmentDirectional.center,
+                    //     padding: EdgeInsets.symmetric(horizontal: 10),
+                    //     decoration: BoxDecoration(
+                    //         borderRadius: BorderRadius.all(Radius.circular(4)),
+                    //         border: Border.all(
+                    //             color: Colors.black.withOpacity(0.4))),
+                    //     child: Theme(
+                    //       data: ThemeData(
+                    //         hintColor: Colors.transparent,
+                    //       ),
+                    //       child: TextFormField(
+                    //         textAlign: TextAlign.start,
+                    //         controller: _quantity,
+                    //         validator: (e) {
+                    //           if (_quantity.text.isEmpty) {
+                    //             return "Please enter product quantity";
+                    //           }
+                    //           // else if(!_email.text.contains("@") || !_email.text.contains(".com")){
+                    //           //   return "Please enter a valid email address";
+                    //           // }
+                    //           else {
+                    //             return null;
+                    //           }
+                    //         },
+                    //         decoration: InputDecoration(
+                    //             border: InputBorder.none,
+                    //             labelText: "Product quantity",
+                    //             labelStyle: TextStyle(
+                    //                 fontSize: 15.0,
+                    //                 fontFamily: 'Sans',
+                    //                 letterSpacing: 0.3,
+                    //                 color: Colors.black38,
+                    //                 fontWeight: FontWeight.w600)),
+                    //         keyboardType: TextInputType.number,
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
                     SizedBox(
                       height: 20,
                     ),
@@ -331,26 +411,33 @@ class _AddOrderState extends State<AddOrder> {
                           height: size.height * 0.3,
                           decoration: BoxDecoration(
                               color: Colors.black26,
-                              borderRadius: BorderRadius.all(Radius.circular(4)),
-                              border: Border.all(color: Colors.black.withOpacity(0.4))
-                          ),
-                          child: _image == null ? Center(child: Text("Image of product"),):Container(
-                              width: double.infinity,
-                              child: Image.file(
-                                File(_image.path),
-                                fit: BoxFit.cover,
-                              )),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(4)),
+                              border: Border.all(
+                                  color: Colors.black.withOpacity(0.4))),
+                          child: _image == null
+                              ? Center(
+                                  child: Text("Image of product"),
+                                )
+                              : Container(
+                                  width: double.infinity,
+                                  child: Image.file(
+                                    File(_image.path),
+                                    fit: BoxFit.cover,
+                                  )),
                         ),
                         Positioned(
                             bottom: 10,
                             right: 10,
                             child: TextButton(
-                              onPressed: ()=> showImagePickerModal(),
+                              onPressed: () => showImagePickerModal(),
                               child: Card(
-
                                 child: Padding(
                                   padding: const EdgeInsets.all(4.0),
-                                  child: Icon(Icons.camera_alt, color: appColor,),
+                                  child: Icon(
+                                    Icons.camera_alt,
+                                    color: appColor,
+                                  ),
                                 ),
                               ),
                             ))
@@ -362,16 +449,26 @@ class _AddOrderState extends State<AddOrder> {
                     Row(
                       textBaseline: TextBaseline.ideographic,
                       children: [
-                        Checkbox(value: checkBoxValue,
+                        Checkbox(
+                            value: checkBoxValue,
                             activeColor: appColor,
-                            onChanged:(bool newValue){
+                            onChanged: (bool newValue) {
                               setState(() {
                                 checkBoxValue = newValue;
                               });
-                              Text('Remember me');
                             }),
-                        Expanded(child: Text("To successfully place a request for auction sale, you are required to make a down payment.", style: TextStyle(fontSize: 12, color: Colors.blue),)),
+                        Expanded(
+                          child: RichText(
+                              text: TextSpan(
+                                  text:
+                                      "To successfully place a special order, you are required to make a down payment of ",
+                                  style: TextStyle(fontSize: 12, color: Colors.blue),
+                                  children: [TextSpan(
+                                    text: "GHc 20.",
+                                    style: TextStyle(fontSize: 13, color: Colors.red, fontWeight: FontWeight.w600),
 
+                                  )])),
+                        ),
                       ],
                     ),
                     SizedBox(
@@ -380,24 +477,26 @@ class _AddOrderState extends State<AddOrder> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        TextButton(onPressed:()async{
-                          if(checkBoxValue){
-
-
-                          }
-                          else{
-
-                          }
-                        }, child: Card(
-                          color: checkBoxValue? appColor:Colors.grey.withOpacity(0.3),
-                          child: Padding(
-                            padding: const EdgeInsets.all(15.0),
-                            child: Text("Proceed", style: TextStyle(color: Colors.white),),
-                          ),
-                        ))
+                        TextButton(
+                            onPressed: () async {
+                              if (checkBoxValue) {
+                                addorder();
+                              } else {}
+                            },
+                            child: Card(
+                              color: checkBoxValue
+                                  ? appColor
+                                  : Colors.grey.withOpacity(0.3),
+                              child: Padding(
+                                padding: const EdgeInsets.all(15.0),
+                                child: Text(
+                                  "Proceed",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            ))
                       ],
                     )
-
                   ],
                 ),
               ),
