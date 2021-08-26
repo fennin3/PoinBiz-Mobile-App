@@ -213,7 +213,7 @@ class _EditShippingPageState extends State<EditShippingPage> {
                             "default":checkBoxValue,
                             "region":regionName.isNotEmpty ? regionName : widget.data.region,
                             "recipient":_recipient.isNotEmpty ? _recipient : widget.data.recipient,
-                            "recipient":_recipientnumber.isNotEmpty ? _recipientnumber : widget.data.recipient_number,
+                            "recipient_number":_recipientnumber.isNotEmpty ? _recipientnumber : widget.data.recipient_number,
                             "address": _address.isNotEmpty ? _address : widget.data.address,
                             "city": cityName.isNotEmpty ? cityName : widget.data.city,
                             "phone":_phone.isNotEmpty ? _phone : widget.data.phone
@@ -225,7 +225,7 @@ class _EditShippingPageState extends State<EditShippingPage> {
                         height: 55.0,
                         width: 300.0,
                         decoration: BoxDecoration(
-                            color: Colors.indigoAccent,
+                            color: appColor,
                             borderRadius:
                                 BorderRadius.all(Radius.circular(40.0))),
                         child: Center(

@@ -1,58 +1,59 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:http/http.dart' as http;
-import 'package:treva_shop_flutter/UI/LoginOrSignup/reset_pass.dart';
-import 'package:treva_shop_flutter/constant.dart';
+import 'package:flutter/material.dart';
 import 'dart:convert';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:otp_text_field/style.dart';
+import 'package:treva_shop_flutter/UI/LoginOrSignup/Login.dart';
+import 'package:treva_shop_flutter/constant.dart';
+import 'package:otp_text_field/otp_text_field.dart';
+import 'package:otp_text_field/otp_field_style.dart';
 
-class ForgotPassword extends StatefulWidget {
-  const ForgotPassword({Key key}) : super(key: key);
+class ResetPassword extends StatefulWidget {
+  const ResetPassword({Key key}) : super(key: key);
 
   @override
-  _ForgotPasswordState createState() => _ForgotPasswordState();
+  _ResetPasswordState createState() => _ResetPasswordState();
 }
 
-class _ForgotPasswordState extends State<ForgotPassword> {
-  AnimationController sanimationController;
-
-  final TextEditingController _phone = TextEditingController();
+class _ResetPasswordState extends State<ResetPassword> {
+  final TextEditingController _pass = TextEditingController();
+  final TextEditingController _pass2 = TextEditingController();
 
   var tap = 0;
+  String _pin = "";
 
-  void sendCode() async {
-    EasyLoading.show(status: "Requesting for code");
-    http.Response response = await http.post(
-        Uri.parse(base_url + "general/password-reset"),
-        body: {"phone_number": _phone.text, "type": 'user'});
+  Reset(pin) async {
+    EasyLoading.show(status: "Processing");
+    http.Response response = await http
+        .post(Uri.parse(base_url + "general/password-change"), body: {
+      "code": pin,
+      "password": _pass.text,
+      "confirm_password": _pass2.text
+    });
 
     EasyLoading.dismiss();
 
     if (response.statusCode < 206) {
       EasyLoading.showSuccess(json.decode(response.body)['message']);
       Navigator.push(
-          context, MaterialPageRoute(builder: (context) => ResetPassword()));
+          context, MaterialPageRoute(builder: (context) => loginScreen()));
     } else {
       EasyLoading.showError(json.decode(response.body)['message']);
     }
-  }
-
-  Future<Null> _PlayAnimation() async {
-    try {
-      await sanimationController.forward();
-      await sanimationController.reverse();
-    } on TickerCanceled {}
   }
 
   @override
   void dispose() {
     // TODO: implement dispose
     super.dispose();
-    _phone.dispose();
+    _pass.dispose();
+    _pass2.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     MediaQueryData mediaQueryData = MediaQuery.of(context);
+
     mediaQueryData.devicePixelRatio;
     mediaQueryData.size.width;
     mediaQueryData.size.height;
@@ -134,6 +135,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                               // Padding(
                               //     padding: EdgeInsets.symmetric(vertical: 7.0)),
                               // buttonCustomGoogle(),
+
                               /// Set Text
                               Padding(
                                   padding:
@@ -161,10 +163,10 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                                       hintColor: Colors.transparent,
                                     ),
                                     child: TextFormField(
-                                      controller: _phone,
+                                      controller: _pass,
                                       validator: (e) {
-                                        if (_phone.text.isEmpty) {
-                                          return "Please enter email or phone";
+                                        if (_pass.text.isEmpty) {
+                                          return "Please enter password";
                                         } else {
                                           return null;
                                         }
@@ -172,9 +174,9 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                                       obscureText: false,
                                       decoration: InputDecoration(
                                           border: InputBorder.none,
-                                          labelText: "Phone Number",
+                                          labelText: "Password",
                                           icon: Icon(
-                                            Icons.phone_android,
+                                            Icons.vpn_key,
                                             color: Colors.black38,
                                           ),
                                           labelStyle: TextStyle(
@@ -183,7 +185,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                                               letterSpacing: 0.3,
                                               color: Colors.black38,
                                               fontWeight: FontWeight.w600)),
-                                      keyboardType: TextInputType.phone,
+                                      keyboardType: TextInputType.text,
                                     ),
                                   ),
                                 ),
@@ -192,6 +194,81 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                               Padding(
                                   padding:
                                       EdgeInsets.symmetric(vertical: 10.0)),
+
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 30.0),
+                                child: Container(
+                                  alignment: AlignmentDirectional.center,
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(14.0),
+                                      color: Colors.white,
+                                      boxShadow: [
+                                        BoxShadow(
+                                            blurRadius: 10.0,
+                                            color: Colors.black12)
+                                      ]),
+                                  padding: EdgeInsets.only(
+                                      left: 20.0,
+                                      right: 30.0,
+                                      top: 0.0,
+                                      bottom: 0.0),
+                                  child: Theme(
+                                    data: ThemeData(
+                                      hintColor: Colors.transparent,
+                                    ),
+                                    child: TextFormField(
+                                      controller: _pass2,
+                                      validator: (e) {
+                                        if (_pass2.text.isEmpty) {
+                                          return "Please enter password again";
+                                        } else {
+                                          return null;
+                                        }
+                                      },
+                                      obscureText: false,
+                                      decoration: InputDecoration(
+                                          border: InputBorder.none,
+                                          labelText: "Confirm Password",
+                                          icon: Icon(
+                                            Icons.vpn_key,
+                                            color: Colors.black38,
+                                          ),
+                                          labelStyle: TextStyle(
+                                              fontSize: 15.0,
+                                              fontFamily: 'Sans',
+                                              letterSpacing: 0.3,
+                                              color: Colors.black38,
+                                              fontWeight: FontWeight.w600)),
+                                      keyboardType: TextInputType.text,
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              Padding(
+                                  padding:
+                                      EdgeInsets.symmetric(vertical: 10.0)),
+                              Text(
+                                "Enter Code",
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              OTPTextField(
+                                length: 4,
+                                width: MediaQuery.of(context).size.width * 0.8,
+                                fieldWidth: 40,
+                                style: TextStyle(fontSize: 20),
+                                textFieldAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                fieldStyle: FieldStyle.box,
+                                keyboardType: TextInputType.text,
+                                onCompleted: (pin) {
+                                  setState(() {
+                                    _pin = pin;
+                                  });
+                                },
+                              ),
 
                               /// Button Signup
 
@@ -231,8 +308,11 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                         // _PlayAnimation();
                         return tap;
                       },
-                      child: buttonBlackBottom(
-                        funct: sendCode,
+                      child: TextButton(
+                        onPressed: () => Reset(_pin),
+                        child: buttonBlackBottom(
+                          funct: Reset,
+                        ),
                       ),
                     )
                   ],
@@ -246,7 +326,6 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   }
 }
 
-
 class buttonBlackBottom extends StatelessWidget {
   final Function funct;
 
@@ -254,31 +333,26 @@ class buttonBlackBottom extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: () {
-        funct();
-      },
-      child: Padding(
-        padding: EdgeInsets.all(30.0),
-        child: Container(
-          height: 55.0,
-          width: 600.0,
-          child: Text(
-            "Send Code",
-            style: TextStyle(
-                color: Colors.white,
-                letterSpacing: 0.2,
-                fontFamily: "Sans",
-                fontSize: 18.0,
-                fontWeight: FontWeight.w800),
-          ),
-          alignment: FractionalOffset.center,
-          decoration: BoxDecoration(
-              boxShadow: [BoxShadow(color: Colors.black38, blurRadius: 15.0)],
-              borderRadius: BorderRadius.circular(30.0),
-              gradient: LinearGradient(
-                  colors: <Color>[Color(0xFF121940), Color(0xFF6E48AA)])),
+    return Padding(
+      padding: EdgeInsets.all(30.0),
+      child: Container(
+        height: 55.0,
+        width: 600.0,
+        child: Text(
+          "Reset",
+          style: TextStyle(
+              color: Colors.white,
+              letterSpacing: 0.2,
+              fontFamily: "Sans",
+              fontSize: 18.0,
+              fontWeight: FontWeight.w800),
         ),
+        alignment: FractionalOffset.center,
+        decoration: BoxDecoration(
+            boxShadow: [BoxShadow(color: Colors.black38, blurRadius: 15.0)],
+            borderRadius: BorderRadius.circular(30.0),
+            gradient: LinearGradient(
+                colors: <Color>[Color(0xFF121940), Color(0xFF6E48AA)])),
       ),
     );
   }

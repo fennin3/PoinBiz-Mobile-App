@@ -13,24 +13,20 @@ import 'package:treva_shop_flutter/database/cart_model.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 /// Run first apps open
-void main() async{
-
+void main() async {
   Hive.initFlutter();
   Hive.registerAdapter(CartModelAdapter());
   Hive.registerAdapter(SearchedWordAdapter());
   Hive.registerAdapter(AddressAdapter());
   Hive.registerAdapter(WishItemAdapter());
-  runApp(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider<PoinBizProvider>(
-            create: (_) => PoinBizProvider(),
-          ),
-        ],
-        child:
-    myApp(),
-  )
-  );
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider<PoinBizProvider>(
+        create: (_) => PoinBizProvider(),
+      ),
+    ],
+    child: myApp(),
+  ));
 }
 
 // void configLoading() {
@@ -75,11 +71,7 @@ class myApp extends StatelessWidget {
       builder: EasyLoading.init(),
       home: SplashScreen(),
 
-      /// Move splash screen to ChoseLogin Layout
-      /// Routes
-      routes: <String, WidgetBuilder>{
-        "login": (BuildContext context) => new onBoarding()
-      },
+
     );
   }
 }
@@ -105,20 +97,18 @@ class _SplashScreenState extends State<SplashScreen> {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
 
     if (sharedPreferences.getBool("installed") == null) {
-
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
           builder: (BuildContext context) => onBoarding(),
         ),
-            (Route<dynamic> route) => false,
+        (Route<dynamic> route) => false,
       );
     } else {
-
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
           builder: (BuildContext context) => bottomNavigationBar(),
         ),
-            (Route<dynamic> route) => false,
+        (Route<dynamic> route) => false,
       );
     }
   }
@@ -132,64 +122,16 @@ class _SplashScreenState extends State<SplashScreen> {
 
   /// Code Create UI Splash Screen
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color.fromRGBO(2, 72, 0, 1),
       body: Container(
+
         /// Set Background image in splash screen layout (Click to open code)
         decoration: BoxDecoration(
+
             image: DecorationImage(
-                image: AssetImage('assets/img/man.png'), fit: BoxFit.cover)),
-        child: Container(
-          /// Set gradient black in image splash screen (Click to open code)
-          decoration: BoxDecoration(
-              gradient: LinearGradient(
-                  colors: [
-                Color.fromRGBO(0, 0, 0, 0.3),
-                Color.fromRGBO(0, 0, 0, 0.4)
-              ],
-                  begin: FractionalOffset.topCenter,
-                  end: FractionalOffset.bottomCenter)),
-          child: Center(
-            child: SingleChildScrollView(
-              child: Container(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.only(top: 30.0),
-                    ),
-
-                    /// Text header "Welcome To" (Click to open code)
-                    Text(
-                      "Welcome to",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w200,
-                        fontFamily: "Sans",
-                        fontSize: 19.0,
-                      ),
-                    ),
-
-                    /// Animation text Treva Shop to choose Login with Hero Animation (Click to open code)
-                    Hero(
-                      tag: "Treva",
-                      child: Text(
-                        "PoinBiz",
-                        style: TextStyle(
-                          fontFamily: 'Sans',
-                          fontWeight: FontWeight.w900,
-                          fontSize: 35.0,
-                          letterSpacing: 0.4,
-                          color: Colors.white,
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
+                image: AssetImage('assets/img/spl.jpg'), fit: BoxFit.contain)),
       ),
     );
   }

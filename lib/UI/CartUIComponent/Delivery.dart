@@ -71,7 +71,6 @@ class _deliveryState extends State<delivery> {
 
     if (response.statusCode < 206) {
       // EasyLoading.showSuccess("${json.decode(response.body)['message']}");
-      print(response.body);
       Navigator.push(
           context,
           MaterialPageRoute(
@@ -224,8 +223,31 @@ class _deliveryState extends State<delivery> {
   Widget build(BuildContext context) {
     final _pro = Provider.of<PoinBizProvider>(context, listen: true);
     _pro.getAdds();
+
+    bool noCharge = false;
+    if(_pro.cart.length < 2 && _pro.cart.isNotEmpty && _pro.cart[0].type != 'product'){
+      noCharge = true;
+    }else{
+      for (var i in _pro.cart){
+        if (i.type != 'product'){
+          noCharge = true;
+        }
+        else{
+          noCharge = false;
+        }
+      }
+
+    }
+
     shipping = _pro.shipping;
     totalAmount = _pro.getTotal();
+    String allTotal = getTotal(
+        cost_ship(_pro.getTotal().toString(),
+         noCharge ? '0.0':   _pro.shipping.fee != null ? _pro.shipping.fee.toString() : "0.0"),
+        _pro.userDetail['points'],
+        _pro.config['points_per_cedi']);
+
+
 
     return Scaffold(
       appBar: AppBar(
@@ -357,7 +379,6 @@ class _deliveryState extends State<delivery> {
                           Padding(padding: EdgeInsets.only(top: 20.0)),
                           TextFormField(
                             controller: _recipientNumber,
-
                             decoration: InputDecoration(
                                 labelText: "Recipient number",
                                 hintStyle: TextStyle(color: Colors.black54)),
@@ -411,7 +432,7 @@ class _deliveryState extends State<delivery> {
                               height: 55.0,
                               width: 300.0,
                               decoration: BoxDecoration(
-                                  color: Colors.indigoAccent,
+                                  color: appColor,
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(40.0))),
                               child: Center(
@@ -580,7 +601,7 @@ class _deliveryState extends State<delivery> {
                                           fontWeight: FontWeight.w600),
                                     ),
                                     Text(
-                                      "GHc ${_pro.shipping.fee}",
+                                      "GHc ${noCharge ? 0 : _pro.shipping.fee}",
                                       style: TextStyle(
                                           fontSize: 16,
                                           color: appColor,
@@ -603,7 +624,7 @@ class _deliveryState extends State<delivery> {
                                           fontWeight: FontWeight.w600),
                                     ),
                                     Text(
-                                      "GHc ${double.parse(_pro.getTotal().toString()) + double.parse(_pro.shipping.fee ?? '0.0')}",
+                                      "GHc ${double.parse(_pro.getTotal().toString()) + double.parse(noCharge ? '0.0': _pro.shipping.fee ?? '0.0')}",
                                       style: TextStyle(
                                           fontSize: 17,
                                           color: Colors.green,
@@ -695,28 +716,43 @@ class _deliveryState extends State<delivery> {
                                             .then((value) {
                                           EasyLoading.dismiss();
                                           setState(() {
-                                            tempPoints =
-                                                _pro.userDetail['points'];
-                                            _points.clear();
-                                            _points.text =
-                                                tempPoints.toString();
+                                            final allPointCash = int.parse(_pro
+                                                    .userDetail['points']
+                                                    .toString()) /
+                                                int.parse(_pro
+                                                    .config['points_per_cedi']);
+                                            if (allPointCash <=
+                                                double.parse(allTotal)) {
+                                              tempPoints = _pro
+                                                  .userDetail['points']
+                                                  .toString();
+                                              _points.text = tempPoints;
+                                            } else {
+                                              final a = (allPointCash -
+                                                      double.parse(allTotal)) *
+                                                  int.parse(_pro.config[
+                                                      'points_per_cedi']);
+                                              tempPoints = a.toString();
+                                            }
                                           });
                                         });
                                       },
                                       child: Card(
                                         child: Container(
-                                            color: appColor,
-                                            height: 45,
-                                            child: Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 10.0),
-                                                child: Center(
-                                                    child: Text(
-                                                  "APPLY ALL",
-                                                  style: TextStyle(
-                                                      color: Colors.white),
-                                                )))),
+                                          color: appColor,
+                                          height: 45,
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 10.0),
+                                            child: Center(
+                                              child: Text(
+                                                "APPLY ALL",
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -728,7 +764,7 @@ class _deliveryState extends State<delivery> {
                                   onTap: () => placeOrder(
                                       shipping,
                                       cost_ship(totalAmount,
-                                          _pro.shipping.fee ?? 0.00.toString()),
+                                         noCharge ? '0.0' : _pro.shipping.fee ?? 0.00.toString()),
                                       _pro.userDetail['points'],
                                       _pro.config['points_per_cedi']),
                                   child: Card(
@@ -739,7 +775,7 @@ class _deliveryState extends State<delivery> {
                                       height: 50,
                                       child: Center(
                                         child: Text(
-                                            "PROCEED TO PAYMENT - ( GHc ${getTotal(cost_ship(_pro.getTotal().toString(), _pro.shipping.fee != null ? _pro.shipping.fee.toString() : "0.0"), _pro.userDetail['points'], _pro.config['points_per_cedi'])} )",
+                                            "PROCEED TO PAYMENT - ( GHc ${allTotal} )",
                                             style: TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 17,
@@ -789,7 +825,6 @@ class AddressWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final _pro = Provider.of<PoinBizProvider>(context, listen: true);
-
     return Padding(
         padding: const EdgeInsets.only(right: 15.0),
         child: Stack(
@@ -836,7 +871,7 @@ class AddressWidget extends StatelessWidget {
                     Text(
                       "${data.phone}",
                       style:
-                      TextStyle(fontSize: 14, fontWeight: FontWeight.w300),
+                          TextStyle(fontSize: 14, fontWeight: FontWeight.w300),
                     ),
                     SizedBox(
                       height: 4,
@@ -852,9 +887,8 @@ class AddressWidget extends StatelessWidget {
                     Text(
                       "${data.recipient_number}",
                       style:
-                      TextStyle(fontSize: 14, fontWeight: FontWeight.w300),
+                          TextStyle(fontSize: 14, fontWeight: FontWeight.w300),
                     ),
-
                   ],
                 ),
               ),

@@ -240,7 +240,7 @@ class _cartState extends State<cart> {
                                                     child: Icon(
                                                       Icons.delete,
                                                       size: 28,
-                                                      color: Color(0xFFA3BDED),
+                                                      color: appColor,
                                                     ))
                                               ],
                                             ),
@@ -317,7 +317,7 @@ class _cartState extends State<cart> {
                           height: 40.0,
                           width: 120.0,
                           decoration: BoxDecoration(
-                            color: Color(0xFFA3BDED),
+                            color: appColor,
                           ),
                           child: Center(
                             child: Text(

@@ -233,6 +233,7 @@ class _BusHomeState extends State<BusHome> {
                     SizedBox(
                       height: 20,
                     ),
+                    if(busData.length >0)
                     for (var route in busData)
                       Padding(
                         padding:
@@ -291,7 +292,12 @@ class _BusHomeState extends State<BusHome> {
                                           "id": route['id'].toString(),
                                           "size": "",
                                           "store_id": route['store_id'],
-                                          "total": route['amount'].toString()
+                                          "total": route['amount'].toString(),
+                                          "url": "",
+                                          "current_stock": "",
+                                          "shipping_cost": "",
+                                          "shipping_type": "",
+                                          'type':"bus"
                                         }, _scaffoldKey, "offline");
                                       },
                                       child: Card(
@@ -336,6 +342,11 @@ class _BusHomeState extends State<BusHome> {
                             ),
                           ),
                         ),
+                      )
+                    else
+                      Container(
+                        padding: EdgeInsets.only(top: 50),
+                        child: Text("No bus Available for this route", style: TextStyle(fontSize: 20),),
                       )
                   ],
                 ),

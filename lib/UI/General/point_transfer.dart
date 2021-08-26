@@ -2,10 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:treva_shop_flutter/API/provider_class.dart';
 import 'package:treva_shop_flutter/constant.dart';
 import 'package:treva_shop_flutter/sharedPref/savedinfo.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:provider/provider.dart';
 
 class PointTransfer extends StatefulWidget {
   const PointTransfer({Key key}) : super(key: key);
@@ -52,7 +54,8 @@ class _PointTransferState extends State<PointTransfer> {
 
   @override
   Widget build(BuildContext context) {
-
+    final _pro = Provider.of<PoinBizProvider>(context, listen: true);
+    _pro.getUserDetail();
     final size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
@@ -78,7 +81,7 @@ class _PointTransferState extends State<PointTransfer> {
                 width: double.infinity,
                 child: Center(
                   child: Text(
-                    "You Have \n10000 Points \n(GHc 120)",
+                    "You Have \n${_pro.userDetail['points']} Points \n(GHc ${int.parse(_pro.userDetail['points'].toString()) / int.parse(_pro.config['points_per_cedi'])})",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                         color: Colors.white,

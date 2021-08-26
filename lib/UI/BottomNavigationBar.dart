@@ -77,7 +77,7 @@ class _bottomNavigationBarState extends State<bottomNavigationBar> {
           child: BottomNavigationBar(
             type: BottomNavigationBarType.fixed,
             currentIndex: currentIndex,
-            fixedColor: Color(0xFF6991C7),
+            fixedColor: appColor,
             onTap: (value) {
               currentIndex = value;
               setState(() {});

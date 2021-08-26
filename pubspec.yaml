@@ -168,13 +168,13 @@ flutter:
 #    - assets/img/bannerMan2.png
 #    - assets/img/bannerMan3.png
 #    - assets/img/bannerMan4.png
-    - assets/imgCamera/CameraDigital.png
-    - assets/imgCamera/CompactCamera.png
-    - assets/imgCamera/ActionCamera.png
-    - assets/imgCamera/cameraItem1.png
-    - assets/imgCamera/cameraItem2.png
-    - assets/imgCamera/cameraItem3.png
-    - assets/imgCamera/cameraItem4.png
+#    - assets/imgCamera/CameraDigital.png
+#    - assets/imgCamera/CompactCamera.png
+#    - assets/imgCamera/ActionCamera.png
+#    - assets/imgCamera/cameraItem1.png
+#    - assets/imgCamera/cameraItem2.png
+#    - assets/imgCamera/cameraItem3.png
+#    - assets/imgCamera/cameraItem4.png
     - assets/imgPromo/imgPromo1.jpg
     - assets/imgPromo/imgPromo2.jpg
     - assets/imgPromo/imgPromo3.jpg
@@ -207,6 +207,8 @@ flutter:
     - assets/img/ticket2.png
     - assets/img/offline.png
     - assets/img/point.jpg
+    - assets/img/wc.jpg
+    - assets/img/spl.jpg
     - assets/img/medal.png
     - assets/img/SliderLogin2.png
     - assets/img/SliderLogin3.png

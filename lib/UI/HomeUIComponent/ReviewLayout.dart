@@ -92,7 +92,7 @@ class _ReviewsAllState extends State<ReviewsAll> {
                         children: <Widget>[
                           StarRating(
                             size: 20.0,
-                            rating:double.parse(review['rating']),
+                            rating:double.parse(review['rating'].toString()),
                             starCount: starCount,
                             color: Colors.yellow,
                           ),

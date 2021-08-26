@@ -4,6 +4,7 @@ import 'package:treva_shop_flutter/ListItem/FlashSaleItem.dart';
 import 'package:treva_shop_flutter/UI/CartUIComponent/CartLayout.dart';
 import 'package:treva_shop_flutter/UI/HomeUIComponent/ChatItem.dart';
 import 'package:treva_shop_flutter/UI/CartUIComponent/Delivery.dart';
+import 'package:treva_shop_flutter/constant.dart';
 
 class flashSaleDetail extends StatefulWidget {
   @override
@@ -108,7 +109,7 @@ class _flashSaleDetailState extends State<flashSaleDetail> {
                 child: Text(
                   "See All",
                   style: TextStyle(
-                      color: Colors.indigoAccent.withOpacity(0.8),
+                      color: appColor.withOpacity(0.8),
                       fontFamily: "Gotik",
                       fontWeight: FontWeight.w700),
                 ),
@@ -443,7 +444,7 @@ class _flashSaleDetailState extends State<flashSaleDetail> {
                                 child: Text(
                                   "View More",
                                   style: TextStyle(
-                                    color: Colors.indigoAccent,
+                                    color: appColor,
                                     fontSize: 15.0,
                                     fontFamily: "Gotik",
                                     fontWeight: FontWeight.w700,
@@ -528,7 +529,7 @@ class _flashSaleDetailState extends State<flashSaleDetail> {
                         height: 45.0,
                         width: 200.0,
                         decoration: BoxDecoration(
-                          color: Colors.indigoAccent,
+                          color: appColor,
                         ),
                         child: Center(
                           child: Text(

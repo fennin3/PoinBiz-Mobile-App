@@ -43,10 +43,15 @@ class _PaymentWebState extends State<PaymentWeb> {
       } else if (widget.where == 'auction') {
         Navigator.pop(context);
         Navigator.pop(context);
-
         Navigator.push(
             context, MaterialPageRoute(builder: (context) => MyAuctionSales()));
-      } else {
+      }
+      else if(widget.where == "offline"){
+        Navigator.pop(context);
+        Navigator.pop(context);
+        EasyLoading.showSuccess("Payment Successful");
+      }
+      else {
         Navigator.pop(context);
         Navigator.pop(context);
         Navigator.push(

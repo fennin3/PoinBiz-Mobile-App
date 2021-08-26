@@ -7,6 +7,7 @@ class ItemGridMain extends StatefulWidget {
   /// Get data from HomeGridItem.....dart class
   Map gridItem;
   final String word;
+
   ItemGridMain(this.gridItem, this.word);
 
   @override
@@ -14,20 +15,18 @@ class ItemGridMain extends StatefulWidget {
 }
 
 class _ItemGridMainState extends State<ItemGridMain> {
+  double rate = 0.0;
 
-  double rate=0.0;
-
-  int calRate(){
-    if(widget.gridItem['reviews'].length > 0) {
-      for (var rev in widget.gridItem['reviews']){
+  int calRate() {
+    if (widget.gridItem['reviews'].length > 0) {
+      for (var rev in widget.gridItem['reviews']) {
         setState(() {
-          rate += double.parse(rev['rating']);
+          rate += double.parse(rev['rating'].toString());
         });
       }
-
     }
 
-    if(rate > 0){
+    if (rate > 0) {
       setState(() {
         rate = rate / widget.gridItem['reviews'].length;
       });
@@ -40,13 +39,15 @@ class _ItemGridMainState extends State<ItemGridMain> {
     super.initState();
     calRate();
   }
+
   @override
   Widget build(BuildContext context) {
     final _pro = Provider.of<PoinBizProvider>(context, listen: false);
     MediaQueryData mediaQueryData = MediaQuery.of(context);
+
     return InkWell(
       onTap: () {
-        if(widget.word.isNotEmpty){
+        if (widget.word.isNotEmpty) {
           _pro.saveWord(widget.word);
         }
         Navigator.of(context).push(PageRouteBuilder(
@@ -81,7 +82,6 @@ class _ItemGridMainState extends State<ItemGridMain> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-
                 /// Set Animation image to detailProduk layout
                 Hero(
                   tag: "hero-grid-${widget.gridItem['id']}",
@@ -97,7 +97,8 @@ class _ItemGridMainState extends State<ItemGridMain> {
                                   padding: EdgeInsets.all(30.0),
                                   child: InkWell(
                                     child: Hero(
-                                        tag: "hero-grid-${widget.gridItem['id']}",
+                                        tag:
+                                            "hero-grid-${widget.gridItem['id']}",
                                         child: Image.network(
                                           widget.gridItem['image']['path'],
                                           width: 300.0,
@@ -114,16 +115,40 @@ class _ItemGridMainState extends State<ItemGridMain> {
                             },
                             transitionDuration: Duration(milliseconds: 500)));
                       },
-                      child: Container(
-                        height: 180,
-
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(7.0),
-                                topRight: Radius.circular(7.0)),
-                            image: DecorationImage(
-                                image: NetworkImage(widget.gridItem['image']['path']),
-                                fit: BoxFit.cover)),
+                      child: Stack(
+                        children: [
+                          Container(
+                            height: 180,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(7.0),
+                                    topRight: Radius.circular(7.0)),
+                                image: DecorationImage(
+                                    image: NetworkImage(
+                                        widget.gridItem['image']['path']),
+                                    fit: BoxFit.cover)),
+                          ),
+                          if (int.parse(
+                                  widget.gridItem['discount'].toString()) >
+                              0)
+                            Positioned(
+                                right: 0,
+                                child: Card(
+                                  color: Colors.teal,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(5.0),
+                                    child: Text(
+                                      widget.gridItem['discount_type'] ==
+                                              'amount'
+                                          ? "GHc ${widget.gridItem['discount']} OFF"
+                                          : "${widget.gridItem['discount']}% OFF",
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w800),
+                                    ),
+                                  ),
+                                ))
+                        ],
                       ),
                     ),
                   ),
@@ -143,19 +168,45 @@ class _ItemGridMainState extends State<ItemGridMain> {
                   ),
                 ),
                 Padding(padding: EdgeInsets.only(top: 1.0)),
-                Padding(
-                  padding: const EdgeInsets.only(left: 15.0, right: 15.0),
-                  child: Text(
-                    widget.gridItem['price'].toString(),
-                    style: TextStyle(
-                        fontFamily: "Sans",
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14.0),
+                if(int.parse(widget.gridItem['discount'].toString()) > 0)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 15.0, right: 15.0),
+                    child: Text(
+                      "GHc " + widget.gridItem['price'].toString(),
+                      style: TextStyle(
+                          fontFamily: "Sans",
+                          fontWeight: FontWeight.w500,
+                          decoration: TextDecoration.lineThrough,
+                          fontSize: 14.0),
+
+                    ),
+                  )
+                else
+                  Padding(
+                    padding: const EdgeInsets.only(left: 15.0, right: 15.0),
+                    child: Text(
+                      "GHc " + widget.gridItem['price'].toString(),
+                      style: TextStyle(
+                          fontFamily: "Sans",
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14.0),
+
+                    ),
                   ),
-                ),
+                if(int.parse(widget.gridItem['discount'].toString()) > 0)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 15.0, right: 15.0),
+                    child: Text(
+                      "GHc " + widget.gridItem['discount_price'].toString(),
+                      style: TextStyle(
+                          fontFamily: "Sans",
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14.0),
+                    ),
+                  ),
                 Padding(
                   padding:
-                  const EdgeInsets.only(left: 15.0, right: 15.0, top: 5.0),
+                      const EdgeInsets.only(left: 15.0, right: 15.0, top: 5.0),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

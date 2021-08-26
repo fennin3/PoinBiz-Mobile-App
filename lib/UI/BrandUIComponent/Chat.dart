@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:treva_shop_flutter/ListItem/BrandDataList.dart';
+import 'package:treva_shop_flutter/constant.dart';
 
 class privatemessage extends StatefulWidget {
 
@@ -158,7 +159,7 @@ class Msg extends StatelessWidget {
             new Container(
               margin: const EdgeInsets.only(right: 18.0),
               child: new CircleAvatar(
-                  backgroundColor: Colors.indigoAccent,
+                  backgroundColor: appColor,
                   child: new Text(defaultUserName[0])),
             ),
             new Expanded(

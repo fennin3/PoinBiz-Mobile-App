@@ -5,6 +5,7 @@ import 'package:treva_shop_flutter/UI/HomeUIComponent/Search.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:treva_shop_flutter/UI/LoginOrSignup/ChoseLoginOrSignup.dart';
 import 'package:provider/provider.dart';
+import 'package:treva_shop_flutter/constant.dart';
 class AppbarGradient extends StatefulWidget {
   final scaKey;
   AppbarGradient({@required this.scaKey});
@@ -27,17 +28,7 @@ class _AppbarGradientState extends State<AppbarGradient> {
     return Container(
       padding: EdgeInsets.only(top: statusBarHeight),
       height: 58.0 + statusBarHeight,
-      decoration: BoxDecoration(
-        /// gradient in appbar
-          gradient: LinearGradient(
-              colors: [
-                const Color(0xFFA3BDED),
-                const Color(0xFF6991C7),
-              ],
-              begin: const FractionalOffset(0.0, 0.0),
-              end: const FractionalOffset(1.0, 0.0),
-              stops: [0.0, 1.0],
-              tileMode: TileMode.clamp)),
+     color: appColor,
       child: Row(
         textBaseline: TextBaseline.ideographic,
         crossAxisAlignment: CrossAxisAlignment.center,

@@ -241,9 +241,13 @@ class _EventCatState extends State<EventCat> {
               "id": widget.data['id'],
               "size": "",
               "store_id": widget.data['store_id'],
-              "total": widget.data['amount']
+              "total": widget.data['amount'],
+              "url": widget.data['link'],
+              "current_stock": "",
+              "shipping_cost": "",
+              "shipping_type": "",
+              "type": 'event'
             }, _scaffoldKey,"offline");
-            // print(widget.data['tickets'][_ticketNum]['amount']);
           }
         },
         child: Icon(Icons.add_shopping_cart),
@@ -269,7 +273,7 @@ class TicketWidget extends StatelessWidget {
         child: Container(
             height: index == nu ? 80 : 70,
             decoration: BoxDecoration(
-                color: index == nu ? Colors.white : Colors.black12,
+
                 borderRadius: BorderRadius.circular(10)),
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: Row(

@@ -183,7 +183,7 @@ class Msg extends StatelessWidget {
 //              margin: const EdgeInsets.only(right: 5.0,left: 10.0),
 //              child: new CircleAvatar(
 //                backgroundImage: AssetImage("assets/avatars/avatar-1.jpg"),
-////                  backgroundColor: Colors.indigoAccent,
+////                  backgroundColor: appColor,
 ////                  child: new Text(defaultUserName[0])),
 //              ),
 //            ),

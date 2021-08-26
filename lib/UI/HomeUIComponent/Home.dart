@@ -30,10 +30,10 @@ class Menu extends StatefulWidget {
 /// Component all widget in home
 class _MenuState extends State<Menu> with TickerProviderStateMixin {
   /// Declare class GridItem from HomeGridItemReoomended.dart in folder ListItem
+  ///
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   GridItem gridItem;
 
-  bool isStarted = false;
-  var hourssub, minutesub, secondsub;
 
   /// CountDown for timer
 
@@ -64,15 +64,14 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
   @override
   void initState() {
     _getInitData();
-    // TODO: implement initState
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     final _pro = Provider.of<PoinBizProvider>(context, listen: true);
+    _pro.getProducts();
     MediaQueryData mediaQueryData = MediaQuery.of(context);
-
     /// Navigation to promoDetail.dart if user Click icon in Week Promotion
     var onClickWeekPromotion = () {
       Navigator.of(context).push(PageRouteBuilder(
@@ -104,8 +103,6 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
             );
           }));
     }
-
-    ;
 
     /// Declare device Size
     var deviceSize = MediaQuery.of(context).size;
@@ -212,7 +209,7 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
                           children: <Widget>[
                             Image.network(
                               cat['icon']['path'],
-                              height: 25,
+                              height: 30,
                             ),
                             Padding(padding: EdgeInsets.only(top: 7.0)),
                             Text(
@@ -284,7 +281,7 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
                     child: ListView.builder(
                       shrinkWrap: true,
                       itemCount: _pro.allpromos.length,
-                      padding: EdgeInsets.only(top: 10.0),
+                      padding: EdgeInsets.only(top: 10.0 ),
                       scrollDirection: Axis.horizontal,
                       itemBuilder: (context, index) {
                         return Padding(
@@ -410,8 +407,8 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
                   image: item['image']['path'],
                   title: item['product']['name'],
                   normalprice: "Ghc ${item['product']['price']}",
-                  discountprice: "\$ 1,300",
-                  reviews: item['product']['reviews'],
+                  discountprice: "GHc ${item['product']['discount_price']}",
+                  // reviews: item['product']['reviews'],
                   place: "Ghana",
                   stock: item['product']['stock'].toString(),
                   colorLine: 0xFFFFA500,
@@ -473,190 +470,45 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
             ),
           );
 
-    // var categoryImageBottom2 = Container(
-    //   height: 310.0,
-    //   color: Colors.white,
-    //   child: Column(
-    //     crossAxisAlignment: CrossAxisAlignment.start,
-    //     children: <Widget>[
-    //       Padding(
-    //         padding: const EdgeInsets.only(left: 20.0, top: 20.0),
-    //         child: Text(
-    //           "Category",
-    //           style: TextStyle(
-    //               fontSize: 17.0,
-    //               fontWeight: FontWeight.w700,
-    //               fontFamily: "Sans"),
-    //         ),
-    //       ),
-    //       // _pro.allcategories == null ?
-    //       Expanded(
-    //           child: ListView(
-    //         scrollDirection: Axis.horizontal,
-    //         children: <Widget>[
-    //           Padding(
-    //             padding: const EdgeInsets.only(left: 20.0),
-    //             child: Column(
-    //               crossAxisAlignment: CrossAxisAlignment.start,
-    //               children: <Widget>[
-    //                 Padding(padding: EdgeInsets.only(top: 15.0)),
-    //                 CategoryItemValue(
-    //                   image: "assets/imgItem/category2.png",
-    //                   title: "Fashion Man",
-    //                   tap: onClickCategory,
-    //                 ),
-    //                 Padding(
-    //                   padding: EdgeInsets.only(top: 10.0),
-    //                 ),
-    //                 CategoryItemValue(
-    //                   image: "assets/imgItem/category1.png",
-    //                   title: "Fashion Girl",
-    //                   tap: onClickCategory,
-    //                 ),
-    //               ],
-    //             ),
-    //           ),
-    //           Padding(padding: EdgeInsets.only(left: 10.0)),
-    //           Column(
-    //             crossAxisAlignment: CrossAxisAlignment.start,
-    //             children: <Widget>[
-    //               Padding(padding: EdgeInsets.only(top: 15.0)),
-    //               CategoryItemValue(
-    //                 image: "assets/imgItem/category3.png",
-    //                 title: "Smartphone",
-    //                 tap: onClickCategory,
-    //               ),
-    //               Padding(
-    //                 padding: EdgeInsets.only(top: 10.0),
-    //               ),
-    //               CategoryItemValue(
-    //                 image: "assets/imgItem/category4.png",
-    //                 title: "Computer",
-    //                 tap: onClickCategory,
-    //               ),
-    //             ],
-    //           ),
-    //           Padding(padding: EdgeInsets.only(left: 10.0)),
-    //           Column(
-    //             crossAxisAlignment: CrossAxisAlignment.start,
-    //             children: <Widget>[
-    //               Padding(padding: EdgeInsets.only(top: 15.0)),
-    //               CategoryItemValue(
-    //                 image: "assets/imgItem/category5.png",
-    //                 title: "Sport",
-    //                 tap: onClickCategory,
-    //               ),
-    //               Padding(
-    //                 padding: EdgeInsets.only(top: 10.0),
-    //               ),
-    //               CategoryItemValue(
-    //                 image: "assets/imgItem/category6.png",
-    //                 title: "Fashion Kids",
-    //                 tap: onClickCategory,
-    //               ),
-    //             ],
-    //           ),
-    //           Padding(padding: EdgeInsets.only(left: 10.0)),
-    //           Column(
-    //             crossAxisAlignment: CrossAxisAlignment.start,
-    //             children: <Widget>[
-    //               Padding(padding: EdgeInsets.only(top: 15.0)),
-    //               CategoryItemValue(
-    //                 image: "assets/imgItem/category7.png",
-    //                 title: "Health",
-    //                 tap: onClickCategory,
-    //               ),
-    //               Padding(
-    //                 padding: EdgeInsets.only(top: 10.0),
-    //               ),
-    //               CategoryItemValue(
-    //                 image: "assets/imgItem/category8.png",
-    //                 title: "Makeup",
-    //                 tap: onClickCategory,
-    //               ),
-    //             ],
-    //           ),
-    //         ],
-    //       ))
-    //
-    //       // GridView.extent(
-    //       //   scrollDirection: Axis.horizontal,
-    //       //   primary: false,
-    //       //   padding: const EdgeInsets.all(5),
-    //       //   crossAxisSpacing: 0,
-    //       //   mainAxisSpacing: 0,
-    //       //   maxCrossAxisExtent: 50.0,
-    //       //   shrinkWrap: true,
-    //       //   children: <Widget>[
-    //       //     for (var cat in _pro.allcategories)
-    //       //       InkWell(
-    //       //         onTap: (){
-    //       //           print("${cat['name']}");
-    //       //         },
-    //       //         child: Column(
-    //       //           children: <Widget>[
-    //       //             Image.network(
-    //       //               cat['icon']['path'],
-    //       //               height: 19.2,
-    //       //             ),
-    //       //             Padding(padding: EdgeInsets.only(top: 7.0)),
-    //       //             Text(
-    //       //               cat['name'],
-    //       //               style: TextStyle(
-    //       //                 fontFamily: "Sans",
-    //       //                 fontSize: 10.0,
-    //       //                 fontWeight: FontWeight.w500,
-    //       //               ),
-    //       //             )
-    //       //           ],
-    //       //         ),
-    //       //       ),
-    //       //
-    //       //   ],
-    //       // ),
-    //     ],
-    //   ),
-    // );
-
     ///  Grid item in bottom of Category
-    var Grid = SingleChildScrollView(
-      child: Container(
-        color: Colors.white,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(left: 20.0, top: 20.0),
-              child: Text(
-                "Recomended",
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 17.0,
-                ),
+    var Grid = Container(
+      color: Colors.white,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(left: 20.0, top: 20.0),
+            child: Text(
+              "Recommended",
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 17.0,
               ),
             ),
+          ),
 
-            /// To set GridView item
-            GridView.extent(
-                shrinkWrap: true,
-                padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
-                crossAxisSpacing: 10.0,
-                mainAxisSpacing: 10.0,
-                childAspectRatio: 0.65,
-                // crossAxisCount: 2,
-                primary: false,
-                maxCrossAxisExtent: 300,
-                children: List.generate(
-                  _pro.allProducts.length,
-                  (index) => ItemGrid(_pro.allProducts[index]),
-                ))
-          ],
-        ),
+          /// To set GridView item
+          GridView.extent(
+              shrinkWrap: true,
+              padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
+              crossAxisSpacing: 10.0,
+              mainAxisSpacing: 10.0,
+              childAspectRatio: 0.65,
+              // crossAxisCount: 2,
+              primary: false,
+              
+              maxCrossAxisExtent: 300,
+              children: List.generate(
+                _pro.allProducts.length,
+                    (index) => ItemGrid(_pro.allProducts[index]),
+              ))
+        ],
       ),
     );
 
     return Scaffold(
       /// Use Stack to costume a appbar
+      key: _scaffoldKey,
       body: SafeArea(
         child: Stack(
           children: <Widget>[
@@ -668,7 +520,7 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
                           top: mediaQueryData.padding.top + 35.5)),
 
                   imageSlider,
-
+                  //
                   categoryIcon,
 
                   if (_pro.allpromos.length > 0) FlashSell,
@@ -679,8 +531,8 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
                   Padding(
                     padding: EdgeInsets.only(bottom: 10.0),
                   ),
-
-                  /// Call a Grid variable, this is item list in Recomended item
+                  //
+                  // /// Call a Grid variable, this is item list in Recomended item
                   Grid,
                 ],
               ),
@@ -716,7 +568,7 @@ class _ItemGridState extends State<ItemGrid> {
     if (widget._data['reviews'].length > 0) {
       for (var rev in widget._data['reviews']) {
         setState(() {
-          rate += double.parse(rev['rating']);
+          rate += double.parse(rev['rating'].toString());
         });
       }
     }
@@ -804,17 +656,33 @@ class _ItemGridState extends State<ItemGrid> {
                             },
                             transitionDuration: Duration(milliseconds: 500)));
                       },
-                      child: Container(
-                        height: 180,
-                        width: 200.0,
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(7.0),
-                                topRight: Radius.circular(7.0)),
-                            image: DecorationImage(
-                                image:
+                      child:
+
+                      Stack(
+                        children: [
+                          Container(
+                            height: 180,
+                            width: 200.0,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(7.0),
+                                    topRight: Radius.circular(7.0)),
+                                image: DecorationImage(
+                                    image:
                                     NetworkImage(widget._data['image']['path']),
-                                fit: BoxFit.cover)),
+                                    fit: BoxFit.cover)),
+                          ),
+                          if(int.parse(widget._data['discount'].toString()) > 0)
+                          Positioned(
+                              right: 0,
+                              child: Card(
+                                color: Colors.teal,
+                            child: Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: Text(widget._data['discount_type'] == 'amount' ? "GHc ${widget._data['discount']} OFF": "${widget._data['discount']}% OFF", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),),
+                            ),
+                          ))
+                        ],
                       ),
                     ),
                   ),
@@ -834,10 +702,36 @@ class _ItemGridState extends State<ItemGrid> {
                   ),
                 ),
                 Padding(padding: EdgeInsets.only(top: 1.0)),
+                if(int.parse(widget._data['discount'].toString()) > 0)
                 Padding(
                   padding: const EdgeInsets.only(left: 15.0, right: 15.0),
                   child: Text(
                     "GHc " + widget._data['price'].toString(),
+                    style: TextStyle(
+                        fontFamily: "Sans",
+                        fontWeight: FontWeight.w500,
+                        decoration: TextDecoration.lineThrough,
+                        fontSize: 14.0),
+
+                  ),
+                )
+                else
+                  Padding(
+                    padding: const EdgeInsets.only(left: 15.0, right: 15.0),
+                    child: Text(
+                      "GHc " + widget._data['price'].toString(),
+                      style: TextStyle(
+                          fontFamily: "Sans",
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14.0),
+
+                    ),
+                  ),
+                if(int.parse(widget._data['discount'].toString()) > 0)
+                Padding(
+                  padding: const EdgeInsets.only(left: 15.0, right: 15.0),
+                  child: Text(
+                    "GHc " + widget._data['discount_price'].toString(),
                     style: TextStyle(
                         fontFamily: "Sans",
                         fontWeight: FontWeight.w500,
@@ -925,12 +819,16 @@ class _flashSaleItemState extends State<flashSaleItem> {
   double rate = 0;
 
   int calRate() {
-    if (widget.reviews.length > 0) {
+    if (widget.reviews!= null && widget.reviews.length > 0) {
       for (var rev in widget.reviews) {
         setState(() {
-          rate += double.parse(rev['rating']);
+          rate += double.parse(rev['rating'].toString());
         });
       }
+    }else{
+      setState(() {
+        rate = 0;
+      });
     }
 
     if (rate > 0) {
@@ -945,7 +843,6 @@ class _flashSaleItemState extends State<flashSaleItem> {
     http.Response response = await http
         .get(Uri.parse(base_url + "general/get-product/${widget.id}"));
     if (response.statusCode < 205) {
-      print(response.body);
       EasyLoading.dismiss();
       Navigator.push(
           context,
@@ -997,7 +894,7 @@ class _flashSaleItemState extends State<flashSaleItem> {
                           EdgeInsets.only(left: 8.0, right: 3.0, top: 15.0),
                       child: Text(widget.title,
                           style: TextStyle(
-                              fontSize: 10.5,
+                              fontSize: 12,
                               fontWeight: FontWeight.w500,
                               fontFamily: "Sans")),
                     ),
@@ -1005,7 +902,7 @@ class _flashSaleItemState extends State<flashSaleItem> {
                       padding: EdgeInsets.only(left: 10.0, top: 5.0),
                       child: Text(widget.normalprice,
                           style: TextStyle(
-                              fontSize: 10.5,
+                              fontSize: 12,
                               decoration: TextDecoration.lineThrough,
                               color: Colors.black54,
                               fontWeight: FontWeight.w600,
@@ -1015,7 +912,7 @@ class _flashSaleItemState extends State<flashSaleItem> {
                       padding: EdgeInsets.only(left: 10.0, top: 5.0),
                       child: Text(widget.discountprice,
                           style: TextStyle(
-                              fontSize: 12.0,
+                              fontSize: 12.5,
                               color: Color(0xFF7F7FD5),
                               fontWeight: FontWeight.w800,
                               fontFamily: "Sans")),
@@ -1050,7 +947,7 @@ class _flashSaleItemState extends State<flashSaleItem> {
                       child: Text(
                         widget.stock + " Available",
                         style: TextStyle(
-                            fontSize: 10.0,
+                            fontSize: 12.0,
                             fontWeight: FontWeight.w500,
                             fontFamily: "Sans",
                             color: Colors.black),

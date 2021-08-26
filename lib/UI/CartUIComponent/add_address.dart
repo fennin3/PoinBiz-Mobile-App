@@ -258,7 +258,7 @@ class _CreateAddressPageState extends State<CreateAddressPage> {
                       height: 55.0,
                       width: 300.0,
                       decoration: BoxDecoration(
-                          color: Colors.indigoAccent,
+                          color: appColor,
                           borderRadius:
                           BorderRadius.all(Radius.circular(40.0))),
                       child: Center(

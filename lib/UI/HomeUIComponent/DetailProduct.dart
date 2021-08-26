@@ -1,4 +1,6 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:treva_shop_flutter/API/provider_class.dart';
 import 'package:treva_shop_flutter/Components/addreview.dart';
 import 'package:treva_shop_flutter/Components/fav_widget.dart';
@@ -11,6 +13,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_rating/flutter_rating.dart';
 import 'package:treva_shop_flutter/UI/HomeUIComponent/ReviewLayout.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:treva_shop_flutter/UI/LoginOrSignup/Login.dart';
 import 'package:treva_shop_flutter/constant.dart';
 import 'package:treva_shop_flutter/database/cart_model.dart';
 
@@ -39,7 +42,7 @@ class _detailProdukState extends State<detailProduk> {
     if (widget.gridItem['reviews'].length > 0) {
       for (var rev in widget.gridItem['reviews']) {
         setState(() {
-          rate += double.parse(rev['rating']);
+          rate += double.parse(rev['rating'].toString());
         });
       }
     }
@@ -51,24 +54,7 @@ class _detailProdukState extends State<detailProduk> {
     }
   }
 
-  void addReview(){
 
-    showModalBottomSheet(
-        isScrollControlled: true,
-
-        enableDrag: true,
-        isDismissible: false,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(topRight: Radius.circular(20), topLeft: Radius.circular(20))
-        ),
-        context: context, builder: (context){
-      return Wrap(
-        children: [
-          AddReview()
-        ],
-      );
-    });
-  }
 
   @override
   void initState() {
@@ -177,7 +163,7 @@ class _detailProdukState extends State<detailProduk> {
                 child: Text(
                   "See All",
                   style: TextStyle(
-                      color: Colors.indigoAccent.withOpacity(0.8),
+                      color: appColor.withOpacity(0.8),
                       fontFamily: "Gotik",
                       fontWeight: FontWeight.w700),
                 ),
@@ -532,7 +518,7 @@ class _detailProdukState extends State<detailProduk> {
                                 child: Text(
                                   "View More",
                                   style: TextStyle(
-                                    color: Colors.indigoAccent,
+                                    color: appColor,
                                     fontSize: 15.0,
                                     fontFamily: "Gotik",
                                     fontWeight: FontWeight.w700,
@@ -587,7 +573,7 @@ class _detailProdukState extends State<detailProduk> {
                                               style: _subHeaderCustomStyle
                                                   .copyWith(
                                                       color:
-                                                          Colors.indigoAccent,
+                                                          appColor,
                                                       fontSize: 14.0),
                                             )),
                                         onTap: () {
@@ -684,7 +670,7 @@ class _detailProdukState extends State<detailProduk> {
                             //       InkWell(
                             //         onTap: ()=>addReview(),
                             //         child: Container(
-                            //             color: Colors.indigoAccent,
+                            //             color: appColor,
                             //             child: Padding(
                             //               padding: const EdgeInsets.all(10.0),
                             //               child: Text(
@@ -725,7 +711,13 @@ class _detailProdukState extends State<detailProduk> {
                 "id": gridItem['id'],
                 "size": gridItem['sizes'].isNotEmpty? gridItem['sizes'][_nu]['name']:"",
                 "store_id": gridItem['store_id'],
-                "total": gridItem['price'].toString()
+                "total": gridItem['price'].toString(),
+                "url": gridItem['link'],
+                "current_stock": gridItem['current_stock'],
+                "shipping_cost": gridItem['shipping_cost'],
+                "shipping_type": gridItem['shipping_type'],
+                "type":"product"
+
               }, _key,'offline');
 
             },
@@ -740,7 +732,7 @@ class _detailProdukState extends State<detailProduk> {
                         height: 40.0,
                         width: 140.0,
                         decoration: BoxDecoration(
-                            color: Colors.indigoAccent,
+                            color: appColor,
                             border: Border.all(color: Colors.black12)),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -779,16 +771,43 @@ class _detailProdukState extends State<detailProduk> {
                     // ),
 
                     /// Button Pay
+                    if(_pro.cart.length < 1)
                     InkWell(
-                      onTap: () {
-                        Navigator.of(context).push(PageRouteBuilder(
-                            pageBuilder: (_, __, ___) => new delivery()));
+                      onTap: () async{
+                        SharedPreferences sharedpref =
+                            await SharedPreferences.getInstance();
+                        final loggedIn = sharedpref.getBool('loggedin');
+
+                        if(loggedIn != null){
+                          EasyLoading.show(status: "Updating Cart");
+                          _pro.addToCart({
+                            "title": gridItem['name'],
+                            "image": gridItem['image']['path'],
+                            "price": gridItem['price'].toString(),
+                            "quantity": "1",
+                            "color": gridItem['colors'].isNotEmpty? gridItem['colors'][_num]['code']:"",
+                            "id": gridItem['id'],
+                            "size": gridItem['sizes'].isNotEmpty? gridItem['sizes'][_nu]['name']:"",
+                            "store_id": gridItem['store_id'],
+                            "total": gridItem['price'].toString()
+                          }, _key,'offline');
+                          EasyLoading.dismiss();
+                          Navigator.of(context).push(PageRouteBuilder(
+                              pageBuilder: (_, __, ___) => new delivery()));
+                        }
+                        else{
+                          EasyLoading.showInfo("You have to log in to proceed");
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => loginScreen()));
+                        }
                       },
                       child: Container(
                         height: 45.0,
                         width: 200.0,
                         decoration: BoxDecoration(
-                          color: Colors.indigoAccent,
+                          color: appColor,
                         ),
                         child: Center(
                           child: Text(
@@ -858,13 +877,13 @@ class SizeWidget extends StatelessWidget {
       decoration: BoxDecoration(
           color: Colors.white,
           border: Border.all(
-              color: index != nu ? Colors.black54 : Colors.indigoAccent),
+              color: index != nu ? Colors.black54 : appColor),
           shape: BoxShape.circle),
       child: Center(
         child: Text(
           text,
           style: TextStyle(
-              color: index != nu ? Colors.black54 : Colors.indigoAccent),
+              color: index != nu ? Colors.black54 : appColor),
         ),
       ),
     );
@@ -886,7 +905,7 @@ class ColorWidget extends StatelessWidget {
       decoration: BoxDecoration(
           color: color,
           border: Border.all(
-              color: index != nu ? Colors.black54 : Colors.indigoAccent),
+              color: index != nu ? Colors.black54 : appColor),
           shape: BoxShape.circle),
     );
   }

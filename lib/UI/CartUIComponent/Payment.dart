@@ -5,6 +5,7 @@ import 'package:treva_shop_flutter/UI/BottomNavigationBar.dart';
 import 'package:treva_shop_flutter/UI/CartUIComponent/CartLayout.dart';
 import 'package:treva_shop_flutter/UI/CartUIComponent/Delivery.dart';
 import 'package:treva_shop_flutter/UI/HomeUIComponent/Home.dart';
+import 'package:treva_shop_flutter/constant.dart';
 
 class payment extends StatefulWidget {
   @override
@@ -221,7 +222,7 @@ class _paymentState extends State<payment> {
                     height: 55.0,
                     width: 300.0,
                     decoration: BoxDecoration(
-                        color: Colors.indigoAccent,
+                        color: appColor,
                         borderRadius: BorderRadius.all(Radius.circular(40.0))),
                     child: Center(
                       child: Text(

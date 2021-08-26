@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:treva_shop_flutter/ListItem/BrandDataList.dart';
 import 'package:treva_shop_flutter/UI/BrandUIComponent/Chat.dart';
 import 'package:treva_shop_flutter/UI/HomeUIComponent/Home.dart';
+import 'package:treva_shop_flutter/constant.dart';
 
 class brandDetail extends StatefulWidget {
   @override
@@ -264,7 +265,7 @@ class _brandDetailState extends State<brandDetail> {
                             ),
                             Padding(padding: EdgeInsets.only(top: 10.0)),
                             buttonCustom(
-                              color: Colors.indigoAccent,
+                              color: appColor,
                               txt: notif,
                               ontap: () {
                                 var snackBar = SnackBar(

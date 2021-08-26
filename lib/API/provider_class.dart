@@ -53,10 +53,6 @@ class PoinBizProvider with ChangeNotifier {
     // final imageName = getRandomString(10);
     Directory documentDirectory;
 
-    // if(item['image']!="ticket") {
-    //   await MyUtils.downloadAndSaveImage(item['image'], imageName);
-    //   documentDirectory = await getApplicationDocumentsDirectory();
-    // }
     var box = await Hive.openBox<CartModel>('cart');
 
     final _item = CartModel(
@@ -68,7 +64,13 @@ class PoinBizProvider with ChangeNotifier {
         id: item['id'].toString(),
         size: item['size'],
         store_id: item['store_id'],
-        total: item['total']);
+        total: item['total'],
+      current_stock: item['current_stock'],
+      shipping_cost: item['shipping_cost'],
+      shipping_type: item['shipping_type'],
+      url: item['url'],
+      type: item['type']
+    );
     int exists = 0;
     CartModel aa;
 
@@ -122,8 +124,14 @@ class PoinBizProvider with ChangeNotifier {
         "name": add.title,
         "quantity": add.quantity,
         "price": add.price,
+        "image":add.image,
         "total": add.total,
-        "variants": {"color": add.color, "size": add.size}
+        "variants": {"color": add.color, "size": add.size},
+        "current_stock":add.current_stock,
+        "shipping_cost": add.shipping_cost,
+        "shipping_type": add.shipping_type,
+        "url": add.url,
+        'type':add.type
       });
     }
 
