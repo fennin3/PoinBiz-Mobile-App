@@ -76,7 +76,6 @@ class _categoryDetailState extends State<categoryDetail> {
   /// All Widget Component layout
   @override
   Widget build(BuildContext context) {
-    print(_products);
     Widget _imageLoading(BuildContext context) {
       return GridView.count(
         shrinkWrap: true,

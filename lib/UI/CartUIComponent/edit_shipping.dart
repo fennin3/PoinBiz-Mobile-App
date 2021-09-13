@@ -81,7 +81,7 @@ class _EditShippingPageState extends State<EditShippingPage> {
                       selectedItem: _pro.regions.data
                           .where((element) =>
                               element.name.toString().toLowerCase() ==
-                              widget.data.region.toLowerCase())
+                              widget.data.region.toString().toLowerCase())
                           .toList()[0],
                       items: [for (var a in _pro.regions.data) a],
                       itemAsString: (Data u) => u.name,

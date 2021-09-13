@@ -206,12 +206,12 @@ class MyDrawer extends StatelessWidget {
               ),
             ],
           ),
-          ListTile(
-            leading: Icon(Icons.store),
-            title: Text("Vendors Near Me"),
-            onTap: () => Navigator.push(
-                context, MaterialPageRoute(builder: (context) => AllVendors())),
-          ),
+          // ListTile(
+          //   leading: Icon(Icons.store),
+          //   title: Text("Vendors Near Me"),
+          //   onTap: () => Navigator.push(
+          //       context, MaterialPageRoute(builder: (context) => AllVendors())),
+          // ),
           ListTile(
             onTap:()=> Navigator.push(context,
                 MaterialPageRoute(builder: (context) => flashSale())),

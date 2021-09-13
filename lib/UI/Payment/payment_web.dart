@@ -31,6 +31,7 @@ class _PaymentWebState extends State<PaymentWeb> {
 
   @override
   Widget build(BuildContext context) {
+    EasyLoading.dismiss();
     final _pro = Provider.of<PoinBizProvider>(context, listen: false);
     void success() {
       if (widget.where == "cart") {

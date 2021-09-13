@@ -188,13 +188,18 @@ class WishItemAdapter extends TypeAdapter<WishItem> {
       color: fields[5] as String,
       prodid: fields[4] as String,
       store_id: fields[8] as String,
+      url: fields[9] as String,
+      current_stock: fields[10] as String,
+      shipping_cost: fields[11] as String,
+      shipping_type: fields[12] as String,
+      type: fields[13] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, WishItem obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(14)
       ..writeByte(0)
       ..write(obj.title)
       ..writeByte(1)
@@ -212,7 +217,17 @@ class WishItemAdapter extends TypeAdapter<WishItem> {
       ..writeByte(7)
       ..write(obj.total)
       ..writeByte(8)
-      ..write(obj.store_id);
+      ..write(obj.store_id)
+      ..writeByte(9)
+      ..write(obj.url)
+      ..writeByte(10)
+      ..write(obj.current_stock)
+      ..writeByte(11)
+      ..write(obj.shipping_cost)
+      ..writeByte(12)
+      ..write(obj.shipping_type)
+      ..writeByte(13)
+      ..write(obj.type);
   }
 
   @override

@@ -13,7 +13,7 @@ import 'package:treva_shop_flutter/database/cart_model.dart';
 import 'package:treva_shop_flutter/sharedPref/savedinfo.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:provider/provider.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 
 Map toUseaddress;
@@ -40,49 +40,7 @@ class _deliveryState extends State<delivery> {
   String tempPoints = "";
   Address shipping;
   String totalAmount = "";
-
-  void placeOrder(Address address, amount, points, a) async {
-    EasyLoading.show(status: "Processing");
-    final _userId = await UserData.getUserId();
-    final _userToken = await UserData.getUserToken();
-
-    final _data = {
-      "user_id": _userId.toString(),
-      "address": json.encode({
-        "region": address.region,
-        "address": address.address,
-        "city": address.city,
-        "phone": address.phone,
-        "recipient": address.recipient,
-        "recipient_number": address.recipient,
-        "default": address.defaultt,
-        "fee": address.fee
-      }),
-      "amount": getTotal(amount, points, a).toString(),
-      "points": _points.text
-    };
-
-    http.Response response = await http.post(
-        Uri.parse(base_url + "user/place-order"),
-        body: _data,
-        headers: {HttpHeaders.authorizationHeader: "Bearer ${_userToken}"});
-
-    EasyLoading.dismiss();
-
-    if (response.statusCode < 206) {
-      // EasyLoading.showSuccess("${json.decode(response.body)['message']}");
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => PaymentWeb(
-                    initUrl: json.decode(response.body)['data']
-                        ['authorization_url'],
-                    where: "cart",
-                  )));
-    } else {
-      EasyLoading.showError("${json.decode(response.body)['message']}");
-    }
-  }
+  bool showSpin = false;
 
   void addAddress() async {
     EasyLoading.show(status: "Saving Address");
@@ -153,7 +111,7 @@ class _deliveryState extends State<delivery> {
     }
 
     if (tempPoints.isNotEmpty &&
-        int.parse(tempPoints) <= int.parse(totalPoints)) {
+        int.parse(tempPoints) <= int.parse(totalPoints.toString())) {
       points = int.parse(tempPoints);
     } else {
       points = 0;
@@ -161,6 +119,56 @@ class _deliveryState extends State<delivery> {
 
     double total = amount - (points * pointsIncash);
     return total > 0 ? total.toStringAsFixed(2) : 0.00;
+  }
+
+  void placeOrder(Address address, amount, points, a) async {
+    setState(() {
+      showSpin = true;
+    });
+    final _userId = await UserData.getUserId();
+    final _userToken = await UserData.getUserToken();
+
+    final _data = {
+      "user_id": _userId.toString(),
+      "address": json.encode({
+        "region": address.region,
+        "address": address.address,
+        "city": address.city,
+        "phone": address.phone,
+        "recipient": address.recipient,
+        "recipient_number": address.recipient,
+        "default": address.defaultt,
+        "fee": address.fee
+      }),
+      "amount": getTotal(amount, points, a).toString(),
+      "points": _points.text
+    };
+
+    http.Response response = await http.post(
+        Uri.parse(base_url + "user/place-order"),
+        body: _data,
+        headers: {HttpHeaders.authorizationHeader: "Bearer ${_userToken}"});
+
+    if (response.statusCode < 206) {
+      print(response.statusCode);
+      setState(() {
+        showSpin = false;
+      });
+      // EasyLoading.showSuccess("${json.decode(response.body)['message']}");
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => PaymentWeb(
+                    initUrl: json.decode(response.body)['data']
+                        ['authorization_url'],
+                    where: "cart",
+                  )));
+    } else {
+      print(response.statusCode);
+      setState(() {
+        showSpin = false;
+      });
+    }
   }
 
   @override
@@ -223,31 +231,34 @@ class _deliveryState extends State<delivery> {
   Widget build(BuildContext context) {
     final _pro = Provider.of<PoinBizProvider>(context, listen: true);
     _pro.getAdds();
-
+    EasyLoading.dismiss();
     bool noCharge = false;
-    if(_pro.cart.length < 2 && _pro.cart.isNotEmpty && _pro.cart[0].type != 'product'){
+    if (_pro.cart.length < 2 &&
+        _pro.cart.isNotEmpty &&
+        _pro.cart[0].type != 'product') {
       noCharge = true;
-    }else{
-      for (var i in _pro.cart){
-        if (i.type != 'product'){
+    } else {
+      for (var i in _pro.cart) {
+        if (i.type != 'product') {
           noCharge = true;
-        }
-        else{
+        } else {
           noCharge = false;
         }
       }
-
     }
 
     shipping = _pro.shipping;
     totalAmount = _pro.getTotal();
     String allTotal = getTotal(
-        cost_ship(_pro.getTotal().toString(),
-         noCharge ? '0.0':   _pro.shipping.fee != null ? _pro.shipping.fee.toString() : "0.0"),
+        cost_ship(
+            _pro.getTotal().toString(),
+            noCharge
+                ? '0.0'
+                : _pro.shipping.fee != null
+                    ? _pro.shipping.fee.toString()
+                    : "0.0"),
         _pro.userDetail['points'],
         _pro.config['points_per_cedi']);
-
-
 
     return Scaffold(
       appBar: AppBar(
@@ -269,452 +280,463 @@ class _deliveryState extends State<delivery> {
         backgroundColor: Colors.white,
         iconTheme: IconThemeData(color: Color(0xFF6991C7)),
       ),
-      body: SafeArea(
-        child: _pro.saveAdds.isEmpty
-            ? SingleChildScrollView(
-                child: Container(
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                        top: 30.0, left: 20.0, right: 20.0),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        children: <Widget>[
-                          Text(
-                            "Please add your address we can deliver your order to.",
-                            style: TextStyle(
-                                letterSpacing: 0.1,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 25.0,
-                                color: Colors.black54,
-                                fontFamily: "Gotik"),
-                          ),
-                          Padding(padding: EdgeInsets.only(top: 50.0)),
-                          DropdownSearch<Data>(
-                            mode: Mode.BOTTOM_SHEET,
-                            label: "Region",
-                            hint: "Select Region",
-                            items: [for (var a in _pro.regions.data) a],
-                            itemAsString: (Data u) => u.name,
-                            onChanged: (Data data) {
-                              setState(() {
-                                if (data != null) {
-                                  cityName = "";
-                                  _cities = [];
-                                  regionName = data.name;
-                                  region = data;
-                                  _cities = data.cities;
+      body: ModalProgressHUD(
+        inAsyncCall: showSpin,
+        color: Colors.black38,
+        progressIndicator: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Processing",
+              style: TextStyle(fontSize: 17),
+            ),
+            SizedBox(height: 5,),
+            CircularProgressIndicator(
+              color: appColor,
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: _pro.saveAdds.isEmpty
+              ? SingleChildScrollView(
+                  child: Container(
+                    color: Colors.white,
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                          top: 30.0, left: 20.0, right: 20.0),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          children: <Widget>[
+                            Text(
+                              "Please add your address we can deliver your order to.",
+                              style: TextStyle(
+                                  letterSpacing: 0.1,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 25.0,
+                                  color: Colors.black54,
+                                  fontFamily: "Gotik"),
+                            ),
+                            Padding(padding: EdgeInsets.only(top: 50.0)),
+                            DropdownSearch<Data>(
+                              mode: Mode.BOTTOM_SHEET,
+                              label: "Region",
+                              hint: "Select Region",
+                              items: [for (var a in _pro.regions.data) a],
+                              itemAsString: (Data u) => u.name,
+                              onChanged: (Data data) {
+                                setState(() {
+                                  if (data != null) {
+                                    cityName = "";
+                                    _cities = [];
+                                    regionName = data.name;
+                                    region = data;
+                                    _cities = data.cities;
+                                  } else {
+                                    regionName = "";
+                                  }
+                                });
+                              },
+                            ),
+                            SizedBox(
+                              height: 20,
+                            ),
+                            DropdownSearch<Cities>(
+                              mode: Mode.BOTTOM_SHEET,
+                              label: "City",
+                              hint: "Select City",
+                              items: [for (var a in _cities) a],
+                              itemAsString: (Cities u) => u.name,
+                              onChanged: (Cities data) {
+                                setState(() {
+                                  if (data != null) {
+                                    cityName = data.name;
+                                    city = data;
+                                  } else {
+                                    cityName = "";
+                                  }
+                                });
+                              },
+                            ),
+                            SizedBox(
+                              height: 20,
+                            ),
+                            TextFormField(
+                              controller: _address,
+                              validator: (e) {
+                                if (_address.text.isEmpty) {
+                                  return "Please enter address";
                                 } else {
-                                  regionName = "";
+                                  return null;
                                 }
-                              });
-                            },
-                          ),
-                          SizedBox(
-                            height: 20,
-                          ),
-                          DropdownSearch<Cities>(
-                            mode: Mode.BOTTOM_SHEET,
-                            label: "City",
-                            hint: "Select City",
-                            items: [for (var a in _cities) a],
-                            itemAsString: (Cities u) => u.name,
-                            onChanged: (Cities data) {
-                              setState(() {
-                                if (data != null) {
-                                  cityName = data.name;
-                                  city = data;
+                              },
+                              decoration: InputDecoration(
+                                  labelText: "Address",
+                                  hintStyle: TextStyle(color: Colors.black54)),
+                            ),
+                            Padding(padding: EdgeInsets.only(top: 20.0)),
+                            TextFormField(
+                              controller: _phone,
+                              validator: (e) {
+                                if (_phone.text.isEmpty) {
+                                  return "Please enter phone";
                                 } else {
-                                  cityName = "";
+                                  return null;
                                 }
-                              });
-                            },
-                          ),
-                          SizedBox(
-                            height: 20,
-                          ),
-                          TextFormField(
-                            controller: _address,
-                            validator: (e) {
-                              if (_address.text.isEmpty) {
-                                return "Please enter address";
-                              } else {
-                                return null;
-                              }
-                            },
-                            decoration: InputDecoration(
-                                labelText: "Address",
-                                hintStyle: TextStyle(color: Colors.black54)),
-                          ),
-                          Padding(padding: EdgeInsets.only(top: 20.0)),
-                          TextFormField(
-                            controller: _phone,
-                            validator: (e) {
-                              if (_phone.text.isEmpty) {
-                                return "Please enter phone";
-                              } else {
-                                return null;
-                              }
-                            },
-                            decoration: InputDecoration(
-                                labelText: "phone number",
-                                hintStyle: TextStyle(color: Colors.black54)),
-                            keyboardType: TextInputType.phone,
-                          ),
-                          Padding(padding: EdgeInsets.only(top: 20.0)),
-                          TextFormField(
-                            controller: _recipient,
-                            validator: (e) {
-                              if (_recipient.text.isEmpty) {
-                                return "Please enter recipient name";
-                              } else {
-                                return null;
-                              }
-                            },
-                            decoration: InputDecoration(
-                                labelText: "Recipient name",
-                                hintStyle: TextStyle(color: Colors.black54)),
-                          ),
-                          Padding(padding: EdgeInsets.only(top: 20.0)),
-                          TextFormField(
-                            controller: _recipientNumber,
-                            decoration: InputDecoration(
-                                labelText: "Recipient number",
-                                hintStyle: TextStyle(color: Colors.black54)),
-                          ),
-                          Padding(padding: EdgeInsets.only(top: 20.0)),
-                          Row(
-                            textBaseline: TextBaseline.ideographic,
-                            children: [
-                              Transform.scale(
-                                scale: 1.2,
-                                child: Checkbox(
-                                    value: checkBoxValue,
-                                    activeColor: appColor,
-                                    onChanged: (bool newValue) {
-                                      setState(() {
-                                        checkBoxValue = newValue;
-                                      });
-                                    }),
-                              ),
-                              Expanded(
-                                  child: Text(
-                                "Make address your default address ?",
-                                style:
-                                    TextStyle(fontSize: 16, color: Colors.blue),
-                              )),
-                            ],
-                          ),
-                          Padding(padding: EdgeInsets.only(top: 40.0)),
-                          InkWell(
-                            onTap: () {
-                              // Navigator.of(context).pushReplacement(
-                              //     PageRouteBuilder(
-                              //         pageBuilder: (_, __, ___) => payment()));
-                              if (_formKey.currentState.validate()) {
-                                _pro.sendAddress({
-                                  "address": _address.text,
-                                  "region": regionName,
-                                  "phone": _phone.text,
-                                  "city": cityName,
-                                  "recipient": _recipient.text,
-                                  "recipient_number": _recipientNumber.text,
-                                  "defaultt": checkBoxValue,
-                                  "fee": city.fee.toString()
-                                }, "aa");
-
-                                Future.delayed(Duration(seconds: 2))
-                                    .then((value) => z());
-                              }
-                            },
-                            child: Container(
-                              height: 55.0,
-                              width: 300.0,
-                              decoration: BoxDecoration(
-                                  color: appColor,
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(40.0))),
-                              child: Center(
-                                child: Text(
-                                  "Save",
+                              },
+                              decoration: InputDecoration(
+                                  labelText: "phone number",
+                                  hintStyle: TextStyle(color: Colors.black54)),
+                              keyboardType: TextInputType.phone,
+                            ),
+                            Padding(padding: EdgeInsets.only(top: 20.0)),
+                            TextFormField(
+                              controller: _recipient,
+                              validator: (e) {
+                                if (_recipient.text.isEmpty) {
+                                  return "Please enter recipient name";
+                                } else {
+                                  return null;
+                                }
+                              },
+                              decoration: InputDecoration(
+                                  labelText: "Recipient name",
+                                  hintStyle: TextStyle(color: Colors.black54)),
+                            ),
+                            Padding(padding: EdgeInsets.only(top: 20.0)),
+                            TextFormField(
+                              controller: _recipientNumber,
+                              decoration: InputDecoration(
+                                  labelText: "Recipient number",
+                                  hintStyle: TextStyle(color: Colors.black54)),
+                            ),
+                            Padding(padding: EdgeInsets.only(top: 20.0)),
+                            Row(
+                              textBaseline: TextBaseline.ideographic,
+                              children: [
+                                Transform.scale(
+                                  scale: 1.2,
+                                  child: Checkbox(
+                                      value: checkBoxValue,
+                                      activeColor: appColor,
+                                      onChanged: (bool newValue) {
+                                        setState(() {
+                                          checkBoxValue = newValue;
+                                        });
+                                      }),
+                                ),
+                                Expanded(
+                                    child: Text(
+                                  "Make address your default address ?",
                                   style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 16.5,
-                                      letterSpacing: 1.0),
+                                      fontSize: 16, color: Colors.blue),
+                                )),
+                              ],
+                            ),
+                            Padding(padding: EdgeInsets.only(top: 40.0)),
+                            InkWell(
+                              onTap: () {
+                                // Navigator.of(context).pushReplacement(
+                                //     PageRouteBuilder(
+                                //         pageBuilder: (_, __, ___) => payment()));
+                                if (_formKey.currentState.validate()) {
+                                  _pro.sendAddress({
+                                    "address": _address.text,
+                                    "region": regionName,
+                                    "phone": _phone.text,
+                                    "city": cityName,
+                                    "recipient": _recipient.text,
+                                    "recipient_number": _recipientNumber.text,
+                                    "defaultt": checkBoxValue,
+                                    "fee": city.fee.toString()
+                                  }, "aa");
+
+                                  Future.delayed(Duration(seconds: 2))
+                                      .then((value) => z());
+                                }
+                              },
+                              child: Container(
+                                height: 55.0,
+                                width: 300.0,
+                                decoration: BoxDecoration(
+                                    color: appColor,
+                                    borderRadius: BorderRadius.all(
+                                        Radius.circular(40.0))),
+                                child: Center(
+                                  child: Text(
+                                    "Save",
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 16.5,
+                                        letterSpacing: 1.0),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          SizedBox(
-                            height: 20.0,
-                          )
-                        ],
+                            SizedBox(
+                              height: 20.0,
+                            )
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              )
-            : _pro.shipping == null
-                ? Container(
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        color: appColor,
-                        backgroundColor: Colors.white,
+                )
+              : _pro.shipping == null
+                  ? Container(
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: appColor,
+                          backgroundColor: Colors.white,
+                        ),
                       ),
-                    ),
-                  )
-                : SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        Padding(
-                            padding: const EdgeInsets.only(
-                                top: 10, bottom: 10, right: 10, left: 10),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                CheckoutTitle(
-                                  text: "ADDRESS DETAILS",
-                                ),
-                                AddressWidget(
-                                  fun: editShipping,
-                                  data: _pro.shipping,
-                                ),
-                                SizedBox(
-                                  height: 17,
-                                ),
-                                CheckoutTitle(
-                                  text: "SELECT A DELIVERY METHOD",
-                                ),
-                                // Card(
-                                //   elevation: 1,
-                                //   child: Container(
-                                //     padding: EdgeInsets.all(20),
-                                //     width: double.infinity,
-                                //     child: Column(
-                                //       children: [
-                                //         Row(
-                                //           children: [
-                                //             CircleAvatar(
-                                //               radius: 9,
-                                //               backgroundColor: appColor,
-                                //               child: CircleAvatar(
-                                //                 radius: 7,
-                                //                 backgroundColor: Colors.white,
-                                //                 child: CircleAvatar(
-                                //                   radius: 5,
-                                //                   backgroundColor: appColor,
-                                //                 ),
-                                //               ),
-                                //             ),
-                                //             SizedBox(
-                                //               width: 20,
-                                //             ),
-                                //             Expanded(
-                                //                 child: Text(
-                                //                     "Collect at any of our Pickup Stations(Cheaper Fees)",
-                                //                     style: TextStyle(
-                                //                         fontSize: 14)))
-                                //           ],
-                                //         ),
-                                //         Divider(),
-                                //         Padding(
-                                //           padding: const EdgeInsets.symmetric(
-                                //               vertical: 5.0),
-                                //           child: Text(
-                                //             "SELECT A PICKUP STATION",
-                                //             style: TextStyle(color: appColor),
-                                //           ),
-                                //         )
-                                //       ],
-                                //     ),
-                                //   ),
-                                // ),
-                                Card(
-                                  elevation: 1,
-                                  child: Container(
-                                    padding: EdgeInsets.all(20),
-                                    width: double.infinity,
-                                    child: Column(
-                                      children: [
-                                        Row(
-                                          children: [
-                                            CircleAvatar(
-                                              radius: 9,
-                                              backgroundColor: appColor,
-                                              child: CircleAvatar(
-                                                radius: 7,
-                                                backgroundColor: Colors.white,
+                    )
+                  : SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          Padding(
+                              padding: const EdgeInsets.only(
+                                  top: 10, bottom: 10, right: 10, left: 10),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  CheckoutTitle(
+                                    text: "ADDRESS DETAILS",
+                                  ),
+                                  AddressWidget(
+                                    fun: editShipping,
+                                    data: _pro.shipping,
+                                  ),
+                                  SizedBox(
+                                    height: 17,
+                                  ),
+                                  CheckoutTitle(
+                                    text: "SELECT A DELIVERY METHOD",
+                                  ),
+                                  // Card(
+                                  //   elevation: 1,
+                                  //   child: Container(
+                                  //     padding: EdgeInsets.all(20),
+                                  //     width: double.infinity,
+                                  //     child: Column(
+                                  //       children: [
+                                  //         Row(
+                                  //           children: [
+                                  //             CircleAvatar(
+                                  //               radius: 9,
+                                  //               backgroundColor: appColor,
+                                  //               child: CircleAvatar(
+                                  //                 radius: 7,
+                                  //                 backgroundColor: Colors.white,
+                                  //                 child: CircleAvatar(
+                                  //                   radius: 5,
+                                  //                   backgroundColor: appColor,
+                                  //                 ),
+                                  //               ),
+                                  //             ),
+                                  //             SizedBox(
+                                  //               width: 20,
+                                  //             ),
+                                  //             Expanded(
+                                  //                 child: Text(
+                                  //                     "Collect at any of our Pickup Stations(Cheaper Fees)",
+                                  //                     style: TextStyle(
+                                  //                         fontSize: 14)))
+                                  //           ],
+                                  //         ),
+                                  //         Divider(),
+                                  //         Padding(
+                                  //           padding: const EdgeInsets.symmetric(
+                                  //               vertical: 5.0),
+                                  //           child: Text(
+                                  //             "SELECT A PICKUP STATION",
+                                  //             style: TextStyle(color: appColor),
+                                  //           ),
+                                  //         )
+                                  //       ],
+                                  //     ),
+                                  //   ),
+                                  // ),
+                                  Card(
+                                    elevation: 1,
+                                    child: Container(
+                                      padding: EdgeInsets.all(20),
+                                      width: double.infinity,
+                                      child: Column(
+                                        children: [
+                                          Row(
+                                            children: [
+                                              CircleAvatar(
+                                                radius: 9,
+                                                backgroundColor: appColor,
                                                 child: CircleAvatar(
-                                                  radius: 5,
-                                                  backgroundColor: appColor,
+                                                  radius: 7,
+                                                  backgroundColor: Colors.white,
+                                                  child: CircleAvatar(
+                                                    radius: 5,
+                                                    backgroundColor: appColor,
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                            SizedBox(
-                                              width: 20,
-                                            ),
-                                            Expanded(
-                                                child: Text(
-                                                    "Home and Office Delivery",
-                                                    style: TextStyle(
-                                                        fontSize: 14)))
-                                          ],
-                                        ),
-                                      ],
+                                              SizedBox(
+                                                width: 20,
+                                              ),
+                                              Expanded(
+                                                  child: Text(
+                                                      "Home and Office Delivery",
+                                                      style: TextStyle(
+                                                          fontSize: 14)))
+                                            ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                                SizedBox(
-                                  height: 20,
-                                ),
-                              ],
-                            )),
-                        Card(
-                          elevation: 1,
-                          child: Container(
-                            width: double.infinity,
-                            padding: EdgeInsets.symmetric(
-                                vertical: 20, horizontal: 10),
-                            child: Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text("Subtotal"),
-                                    Text("GHc ${_pro.getTotal().toString()}")
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: 15,
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      "Delivery",
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600),
-                                    ),
-                                    Text(
-                                      "GHc ${noCharge ? 0 : _pro.shipping.fee}",
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          color: appColor,
-                                          fontWeight: FontWeight.w600),
-                                    )
-                                  ],
-                                ),
-                                Divider(),
-                                SizedBox(
-                                  height: 15,
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      "Total",
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600),
-                                    ),
-                                    Text(
-                                      "GHc ${double.parse(_pro.getTotal().toString()) + double.parse(noCharge ? '0.0': _pro.shipping.fee ?? '0.0')}",
-                                      style: TextStyle(
-                                          fontSize: 17,
-                                          color: Colors.green,
-                                          fontWeight: FontWeight.w600),
-                                    )
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                Divider(),
-                                SizedBox(
-                                  height: 15,
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    CheckoutTitle(text: "USE POINT"),
-                                    Text(
-                                      "Your Points: ${_pro.userDetail['points']} (Ghc ${int.parse(_pro.userDetail['points'].toString()) / int.parse(_pro.config['points_per_cedi'].toString())})",
-                                      style: TextStyle(
-                                          fontSize: 17,
-                                          fontWeight: FontWeight.w500),
-                                    )
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Card(
-                                      elevation: 5,
-                                      child: Container(
-                                        width: 180,
-                                        height: 45,
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 20.0),
-                                          child: TextField(
-                                            controller: _points,
-                                            keyboardType: TextInputType.number,
+                                  SizedBox(
+                                    height: 20,
+                                  ),
+                                ],
+                              )),
+                          Card(
+                            elevation: 1,
+                            child: Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 20, horizontal: 10),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text("Subtotal"),
+                                      Text("GHc ${_pro.getTotal().toString()}")
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 15,
+                                  ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "Delivery",
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                      Text(
+                                        "GHc ${noCharge ? 0 : _pro.shipping.fee}",
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            color: appColor,
+                                            fontWeight: FontWeight.w600),
+                                      )
+                                    ],
+                                  ),
+                                  Divider(),
+                                  SizedBox(
+                                    height: 15,
+                                  ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "Total",
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                      Text(
+                                        "GHc ${double.parse(_pro.getTotal().toString()) + double.parse(noCharge ? '0.0' : _pro.shipping.fee ?? '0.0')}",
+                                        style: TextStyle(
+                                            fontSize: 17,
+                                            color: Colors.green,
+                                            fontWeight: FontWeight.w600),
+                                      )
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  Divider(),
+                                  SizedBox(
+                                    height: 15,
+                                  ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      CheckoutTitle(text: "USE POINT"),
+                                      Text(
+                                        "Your Points: ${_pro.userDetail['points']} (Ghc ${int.parse(_pro.userDetail['points'].toString() ?? '0') / int.parse(_pro.config['points_per_cedi'].toString())})",
+                                        style: TextStyle(
+                                            fontSize: 17,
+                                            fontWeight: FontWeight.w500),
+                                      )
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Card(
+                                        elevation: 5,
+                                        child: Container(
+                                          width: 180,
+                                          height: 45,
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 20.0),
+                                            child: TextField(
+                                              controller: _points,
+                                              keyboardType:
+                                                  TextInputType.number,
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                    InkWell(
-                                      onTap: () {
-                                        if (int.parse(_points.text) >
-                                            int.parse(
-                                                _pro.userDetail['points'])) {
-                                          EasyLoading.showError(
-                                              "Insufficient Points");
-                                        } else {
-                                          EasyLoading.show(
-                                              status: "Apply Points");
-                                          Future.delayed(Duration(seconds: 2))
-                                              .then((value) {
-                                            EasyLoading.dismiss();
+                                      InkWell(
+                                        onTap: () {
+                                          if (int.parse(_points.text) >
+                                              int.parse(
+                                                  _pro.userDetail['points'].toString())) {
+                                            final snackBar = SnackBar(
+                                                content: Text(
+                                                    'You have insufficient points'));
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(snackBar);
+                                          } else {
                                             setState(() {
                                               tempPoints = _points.text;
                                             });
-                                          });
-                                        }
-                                      },
-                                      child: Card(
-                                        child: Container(
-                                            color: appColor,
-                                            height: 45,
-                                            child: Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 10.0),
-                                                child: Center(
-                                                    child: Text(
-                                                  "APPLY",
-                                                  style: TextStyle(
-                                                      color: Colors.white),
-                                                )))),
+
+                                            EasyLoading.dismiss();
+                                          }
+                                        },
+                                        child: Card(
+                                          child: Container(
+                                              color: appColor,
+                                              height: 45,
+                                              child: Padding(
+                                                  padding: const EdgeInsets
+                                                          .symmetric(
+                                                      horizontal: 10.0),
+                                                  child: Center(
+                                                      child: Text(
+                                                    "APPLY",
+                                                    style: TextStyle(
+                                                        color: Colors.white),
+                                                  )))),
+                                        ),
                                       ),
-                                    ),
-                                    InkWell(
-                                      onTap: () {
-                                        EasyLoading.show(
-                                            status: "Apply Points");
-                                        Future.delayed(Duration(seconds: 2))
-                                            .then((value) {
-                                          EasyLoading.dismiss();
+                                      InkWell(
+                                        onTap: () {
                                           setState(() {
                                             final allPointCash = int.parse(_pro
                                                     .userDetail['points']
@@ -735,65 +757,72 @@ class _deliveryState extends State<delivery> {
                                               tempPoints = a.toString();
                                             }
                                           });
-                                        });
-                                      },
-                                      child: Card(
-                                        child: Container(
-                                          color: appColor,
-                                          height: 45,
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 10.0),
-                                            child: Center(
-                                              child: Text(
-                                                "APPLY ALL",
-                                                style: TextStyle(
-                                                    color: Colors.white),
+                                        },
+                                        child: Card(
+                                          child: Container(
+                                            color: appColor,
+                                            height: 45,
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 10.0),
+                                              child: Center(
+                                                child: Text(
+                                                  "APPLY ALL",
+                                                  style: TextStyle(
+                                                      color: Colors.white),
+                                                ),
                                               ),
                                             ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: 20,
-                                ),
-                                InkWell(
-                                  onTap: () => placeOrder(
-                                      shipping,
-                                      cost_ship(totalAmount,
-                                         noCharge ? '0.0' : _pro.shipping.fee ?? 0.00.toString()),
-                                      _pro.userDetail['points'],
-                                      _pro.config['points_per_cedi']),
-                                  child: Card(
-                                    elevation: 2,
-                                    child: Container(
-                                      width: double.infinity,
-                                      color: appColor,
-                                      height: 50,
-                                      child: Center(
-                                        child: Text(
-                                            "PROCEED TO PAYMENT - ( GHc ${allTotal} )",
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 17,
-                                                fontWeight: FontWeight.w500)),
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 20,
+                                  ),
+                                  InkWell(
+                                    onTap: () =>
+                                    placeOrder(
+                                        shipping,
+                                        cost_ship(
+                                            totalAmount,
+                                            noCharge
+                                                ? '0.0'
+                                                : _pro.shipping.fee ??
+                                                    0.00.toString()),
+                                        _pro.userDetail['points'],
+                                        _pro.config['points_per_cedi']),
+
+                                    child: Card(
+                                      elevation: 2,
+                                      child: Container(
+                                        width: double.infinity,
+                                        color: appColor,
+                                        height: 50,
+                                        child: Center(
+                                          child: Text(
+                                              "PROCEED TO PAYMENT - ( GHc ${allTotal} )",
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 17,
+                                                  fontWeight: FontWeight.w500)),
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                        SizedBox(
-                          height: 30,
-                        ),
-                      ],
+                          SizedBox(
+                            height: 30,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+        ),
       ),
     );
   }
@@ -1144,8 +1173,8 @@ class _AddressWidget1State extends State<AddressWidget1> {
                 right: 7,
                 bottom: 7,
                 child: InkWell(
-                    onTap: () =>
-                        _pro.deleteAddress(_pro.saveAdds[widget.index]),
+                    onTap: () => _pro.deleteAddress(
+                        _pro.saveAdds.reversed.toList()[widget.index]),
                     child: Icon(
                       Icons.delete,
                       size: 30,

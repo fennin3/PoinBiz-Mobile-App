@@ -181,7 +181,6 @@ class _AddAuctionSaleState extends State<AddAuctionSale> {
                 initUrl: json.decode(res.body)['data']['authorization_url'],
               )));
     } else {
-      print(res.body);
       EasyLoading.showError("${json.decode(res.body)['message']}");
     }
   }

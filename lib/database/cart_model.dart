@@ -140,6 +140,23 @@ class WishItem {
   @HiveField(8)
   final String store_id;
 
+  @HiveField(9)
+  final String url;
+
+
+  @HiveField(10)
+  final String current_stock;
+
+
+  @HiveField(11)
+  final String shipping_cost;
+
+  @HiveField(12)
+  final String shipping_type;
+
+  @HiveField(13)
+  final String type;
+
   WishItem(
       {this.quantity,
       this.price,
@@ -149,5 +166,27 @@ class WishItem {
       this.size,
       this.color,
       this.prodid,
-      this.store_id});
+      this.store_id,
+      this.url,
+      this.current_stock,
+      this.shipping_cost,
+      this.shipping_type,
+      this.type
+      });
 }
+
+//{this.quantity,
+//       this.price,
+//       this.title,
+//       this.image,
+//       this.total,
+//       this.size,
+//       this.color,
+//       this.id,
+//       this.store_id,
+//       this.url,
+//       this.current_stock,
+//       this.shipping_cost,
+//       this.shipping_type,
+//       this.type
+//       }

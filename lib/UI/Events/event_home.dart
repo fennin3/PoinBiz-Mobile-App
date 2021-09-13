@@ -267,13 +267,7 @@ class _EventHomeState extends State<EventHome> {
                                             fontSize: 13,
                                           ),
                                         ),
-                                        Text(
-                                          "From Ghc 30",
-                                          style: TextStyle(
-                                              fontFamily: "Sans",
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.bold),
-                                        )
+
                                       ],
                                     ),
                                   ),
@@ -398,13 +392,7 @@ class _EventHomeState extends State<EventHome> {
                                             fontSize: 13,
                                           ),
                                         ),
-                                        Text(
-                                          "From Ghc 30",
-                                          style: TextStyle(
-                                              fontFamily: "Sans",
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.bold),
-                                        )
+
                                       ],
                                     ),
                                   ),

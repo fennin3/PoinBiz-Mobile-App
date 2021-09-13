@@ -10,7 +10,6 @@ import 'package:treva_shop_flutter/ListItem/HomeGridItemRecomended.dart';
 import 'package:treva_shop_flutter/UI/HomeUIComponent/AppbarGradient.dart';
 import 'package:treva_shop_flutter/UI/HomeUIComponent/CategoryDetail.dart';
 import 'package:treva_shop_flutter/UI/HomeUIComponent/DetailProduct.dart';
-import 'package:treva_shop_flutter/UI/HomeUIComponent/FlashSale.dart';
 import 'package:treva_shop_flutter/UI/HomeUIComponent/PromotionDetail.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -59,6 +58,7 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
     _pro.getAllBusinessTypes();
     _pro.getAuction();
     _pro.getRegions();
+
   }
 
   @override
@@ -71,6 +71,7 @@ class _MenuState extends State<Menu> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final _pro = Provider.of<PoinBizProvider>(context, listen: true);
     _pro.getProducts();
+    _pro.getUserDetail();
     MediaQueryData mediaQueryData = MediaQuery.of(context);
     /// Navigation to promoDetail.dart if user Click icon in Week Promotion
     var onClickWeekPromotion = () {
@@ -691,7 +692,7 @@ class _ItemGridState extends State<ItemGrid> {
                 Padding(
                   padding: const EdgeInsets.only(left: 15.0, right: 15.0),
                   child: Text(
-                    widget._data['name'],
+                    widget._data['name'].toString().length > 18 ? widget._data['name'].toString().substring(0,19) + "...": widget._data['name'],
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                         letterSpacing: 0.5,

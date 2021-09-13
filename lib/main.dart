@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import 'package:hive/hive.dart';
 import 'package:treva_shop_flutter/database/cart_model.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:upgrader/upgrader.dart';
 
 /// Run first apps open
 void main() async {
@@ -59,6 +60,9 @@ class myApp extends StatelessWidget {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light.copyWith(
       statusBarColor: Colors.transparent, //or set color with: Color(0xFF0000FF)
     ));
+
+    Upgrader().clearSavedSettings(); //
+
     return new MaterialApp(
       title: "Treva Shop",
       theme: ThemeData(
@@ -70,8 +74,6 @@ class myApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       builder: EasyLoading.init(),
       home: SplashScreen(),
-
-
     );
   }
 }
@@ -106,7 +108,9 @@ class _SplashScreenState extends State<SplashScreen> {
     } else {
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
-          builder: (BuildContext context) => bottomNavigationBar(),
+          builder: (BuildContext context) => UpgradeAlert(
+            child: bottomNavigationBar(),
+          ),
         ),
         (Route<dynamic> route) => false,
       );
@@ -126,12 +130,11 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       backgroundColor: Color.fromRGBO(2, 72, 0, 1),
       body: Container(
-
         /// Set Background image in splash screen layout (Click to open code)
         decoration: BoxDecoration(
-
-            image: DecorationImage(
-                image: AssetImage('assets/img/spl.jpg'), fit: BoxFit.contain)),
+          image: DecorationImage(
+              image: AssetImage('assets/img/spl.jpg'), fit: BoxFit.contain),
+        ),
       ),
     );
   }

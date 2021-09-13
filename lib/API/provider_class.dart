@@ -65,7 +65,7 @@ class PoinBizProvider with ChangeNotifier {
         size: item['size'],
         store_id: item['store_id'],
         total: item['total'],
-      current_stock: item['current_stock'],
+      current_stock: item['current_stock'].toString(),
       shipping_cost: item['shipping_cost'],
       shipping_type: item['shipping_type'],
       url: item['url'],
@@ -263,16 +263,11 @@ class PoinBizProvider with ChangeNotifier {
       box.add(_item);
     }
 
-    var snackbar = SnackBar(
-      content: Text("Address Saved"),
-    );
-
-    if (_key != "aa") _key.currentState.showSnackBar(snackbar);
-
     getAdds();
     EasyLoading.dismiss();
     if(how != "online"){
       EasyLoading.showInfo("Address Saved");
+      EasyLoading.dismiss();
     }
     notifyListeners();
   }
@@ -337,6 +332,7 @@ class PoinBizProvider with ChangeNotifier {
     } on SocketException {
       EasyLoading.dismiss();
       EasyLoading.showInfo("No internet connection");
+      EasyLoading.dismiss();
     }
   }
 
@@ -402,17 +398,23 @@ class PoinBizProvider with ChangeNotifier {
           "name": wish.title,
           "quantity": wish.quantity,
           "price": wish.price,
+          "image":wish.image,
           "total": wish.total,
-          "variants": {"color": wish.color, "size": wish.size}
+          "variants": {"color": wish.color, "size": wish.size},
+          "current_stock":wish.current_stock,
+          "shipping_cost": wish.shipping_cost,
+          "shipping_type": wish.shipping_type,
+          "url": wish.url,
+          'type':wish.type
         },
       );
     }
 
-    final _data = {"user_id": user_id, "addresses": json.encode(_adds)};
+    final _data = {"user_id": user_id, "wishlist_data": json.encode(_adds)};
 
     try {
       http.Response response = await http.post(
-        Uri.parse(base_url + "user/address-process"),
+        Uri.parse(base_url + "user/wishlist-process"),
         body: _data,
         headers: {
           HttpHeaders.authorizationHeader: "Bearer $user_token",
@@ -484,13 +486,18 @@ class PoinBizProvider with ChangeNotifier {
       WishItem aa = WishItem(
           quantity: item['quantity'],
           price: item['price'],
-          image: "https://images.unsplash.com/photo-1606171687424-429b65889052?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTF8fHBzNXxlbnwwfHwwfHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60", //To Be modified
+          image: item['image'], //To Be modified
           title: item['name'],
           color: item['variants']['color'],
           prodid: item['id'].toString(),
     size: item['variants']['size'],
     store_id: item['store_id'],
-    total: item['total']
+    total: item['total'],
+        url: item['url'],
+          current_stock: item['current_stock'],
+          shipping_cost: item['shipping_cost'],
+          shipping_type: item['shipping_type'],
+          type: item['type']
       );
       addWishList(item, "online");
     }
@@ -512,7 +519,14 @@ class PoinBizProvider with ChangeNotifier {
         "id": item['id'].toString(),
         "size": item['variants']['size'],
         "store_id": item['store_id'],
-        "total": item['total']
+        "total": item['total'],
+        "url":item['url'],
+        "current_stock": item['current_stock'],
+        "shipping_cost": item['shipping_cost'],
+        "shipping_type": item['shipping_type'],
+
+        "type": item['type']
+
       };
       addToCart(a, "aa", "online");
     }

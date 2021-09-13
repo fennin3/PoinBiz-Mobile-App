@@ -93,7 +93,7 @@ class _EventCatState extends State<EventCat> {
                       ],
                     ),
                   ),
-                  Positioned(right: 20, bottom: 20, child: FavWidget())
+                  // Positioned(right: 20, bottom: 20, child: FavWidget())
                 ],
               ),
               Padding(

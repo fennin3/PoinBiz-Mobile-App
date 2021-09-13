@@ -84,7 +84,7 @@ class _ReviewsAllState extends State<ReviewsAll> {
                         height: 45.0,
                         width: 45.0,
                         decoration: BoxDecoration(
-                            image: DecorationImage(image: AssetImage("assets/avatars/avatar-4.jpg"),fit: BoxFit.cover),
+                            image: DecorationImage(image: NetworkImage("${review['user']['avatar']['path']}"),fit: BoxFit.cover),
                             borderRadius: BorderRadius.all(Radius.circular(50.0))
                         ),
                       ),

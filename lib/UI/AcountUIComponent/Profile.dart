@@ -120,7 +120,7 @@ class _profilState extends State<profil> {
                               borderRadius: BorderRadius.all(Radius.circular(5))
                             ),
                             padding: EdgeInsets.all(5),
-                            child: Text("Your Point\n${_pro.userDetail['points']}\nGHc ${int.parse(_pro.userDetail['points']) / int.parse(_pro.config['points_per_cedi'])} ",textAlign: TextAlign.center, style: TextStyle(fontSize: 30,color: Colors.black, fontWeight: FontWeight.w800),)),
+                            child: Text("Your Point\n${_pro.userDetail['points']}\nGHc ${int.parse(_pro.userDetail['points'].toString()) / int.parse(_pro.config['points_per_cedi'])} ",textAlign: TextAlign.center, style: TextStyle(fontSize: 30,color: Colors.black, fontWeight: FontWeight.w800),)),
                       ),
                       decoration: BoxDecoration(
                           image: DecorationImage(

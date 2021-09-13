@@ -157,7 +157,7 @@ class _ItemGridMainState extends State<ItemGridMain> {
                 Padding(
                   padding: const EdgeInsets.only(left: 15.0, right: 15.0),
                   child: Text(
-                    widget.gridItem['name'],
+                    widget.gridItem['name'].toString().length > 18 ? widget.gridItem['name'].toString().substring(0, 19) + "...": widget.gridItem['name'],
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                         letterSpacing: 0.5,

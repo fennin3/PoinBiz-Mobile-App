@@ -299,7 +299,12 @@ class _detailProdukState extends State<detailProduk> {
                         total: gridItem['price'].toString(),
                         price: gridItem['price'].toString(),
                         size: gridItem['sizes'].isNotEmpty ? gridItem['sizes'][_nu]['name']:"",
-                        quantity: "1"
+                        quantity: "1",
+                          url: gridItem['link'],
+                          current_stock: gridItem['stock'].toString(),
+                          shipping_cost: "",
+                          shipping_type: "",
+                          type: ""
                       ),))
                     ],
                   ),
@@ -717,7 +722,6 @@ class _detailProdukState extends State<detailProduk> {
                 "shipping_cost": gridItem['shipping_cost'],
                 "shipping_type": gridItem['shipping_type'],
                 "type":"product"
-
               }, _key,'offline');
 
             },
@@ -789,7 +793,13 @@ class _detailProdukState extends State<detailProduk> {
                             "id": gridItem['id'],
                             "size": gridItem['sizes'].isNotEmpty? gridItem['sizes'][_nu]['name']:"",
                             "store_id": gridItem['store_id'],
-                            "total": gridItem['price'].toString()
+                            "total": gridItem['price'].toString(),
+                            "url": gridItem['link'],
+                            "current_stock": gridItem['current_stock'],
+                            "shipping_cost": gridItem['shipping_cost'],
+                            "shipping_type": gridItem['shipping_type'],
+                            "type":"product"
+
                           }, _key,'offline');
                           EasyLoading.dismiss();
                           Navigator.of(context).push(PageRouteBuilder(
