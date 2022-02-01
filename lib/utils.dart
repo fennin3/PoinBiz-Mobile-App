@@ -10,4 +10,5 @@ class MyUtils{
     File file = new File(join(documentDirectory.path, '$imageName.png'));
     file.writeAsBytesSync(response.bodyBytes);
   }
+
 }

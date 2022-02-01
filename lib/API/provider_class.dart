@@ -48,23 +48,22 @@ class PoinBizProvider with ChangeNotifier {
 
   ///Cart
   addToCart(Map item, _key, how) async {
-    if(how!='online')
-      EasyLoading.show(status: "Updating cart");
-    // final imageName = getRandomString(10);
-    Directory documentDirectory;
+    // if(how!='online')
+    //   EasyLoading.show(status: "Updating cart");
+
 
     var box = await Hive.openBox<CartModel>('cart');
 
     final _item = CartModel(
         quantity: item['quantity'],
-        price: item['price'],
+        price: item['price'].toString(),
         image: item['image'] != "ticket" ? item['image'] : "ticket",
         title: item['title'],
         color: item['color'],
         id: item['id'].toString(),
         size: item['size'],
         store_id: item['store_id'],
-        total: item['total'],
+        total: item['total'].toString(),
       current_stock: item['current_stock'].toString(),
       shipping_cost: item['shipping_cost'],
       shipping_type: item['shipping_type'],
@@ -288,6 +287,8 @@ class PoinBizProvider with ChangeNotifier {
     // box1.deleteFromDisk();
     // box2.deleteFromDisk();
 
+    notifyListeners();
+
   }
 
   void sendAddress(Map item, _key) async {
@@ -471,9 +472,12 @@ class PoinBizProvider with ChangeNotifier {
   void getAddresses() async {
     List addresses = await GetFunc.getAddresses();
 
-    for (var item in addresses) {
-      addAddress(item, "aa", 'online');
+    try{
+      for (var item in addresses) {
+        addAddress(item, "aa", 'online');
+      }
     }
+    catch(e){}
 
     notifyListeners();
   }
@@ -482,25 +486,28 @@ class PoinBizProvider with ChangeNotifier {
   void getWishListData() async {
     List wishes = await GetFunc.getWishListData();
 
-    for (var item in wishes) {
-      WishItem aa = WishItem(
-          quantity: item['quantity'],
-          price: item['price'],
-          image: item['image'], //To Be modified
-          title: item['name'],
-          color: item['variants']['color'],
-          prodid: item['id'].toString(),
-    size: item['variants']['size'],
-    store_id: item['store_id'],
-    total: item['total'],
-        url: item['url'],
-          current_stock: item['current_stock'],
-          shipping_cost: item['shipping_cost'],
-          shipping_type: item['shipping_type'],
-          type: item['type']
-      );
-      addWishList(item, "online");
+    try{
+      for (var item in wishes) {
+        WishItem aa = WishItem(
+            quantity: item['quantity'],
+            price: item['price'],
+            image: item['image'], //To Be modified
+            title: item['name'],
+            color: item['variants']['color'],
+            prodid: item['id'].toString(),
+            size: item['variants']['size'],
+            store_id: item['store_id'],
+            total: item['total'],
+            url: item['url'],
+            current_stock: item['current_stock'],
+            shipping_cost: item['shipping_cost'],
+            shipping_type: item['shipping_type'],
+            type: item['type']
+        );
+        addWishList(aa, "online");
+      }
     }
+    catch(e){}
 
     notifyListeners();
   }
@@ -508,28 +515,31 @@ class PoinBizProvider with ChangeNotifier {
   void getCartData() async {
     List cc = await GetFunc.getCartData();
 
-    for (var item in cc) {
+    try{
+      for (var item in cc) {
 
-      Map a = {
-        "quantity": item['quantity'],
-        "price": item['price'],
-        "image": item['image'], //To Be modified
-        "title": item['name'],
-        "color": item['variants']['color'],
-        "id": item['id'].toString(),
-        "size": item['variants']['size'],
-        "store_id": item['store_id'],
-        "total": item['total'],
-        "url":item['url'],
-        "current_stock": item['current_stock'],
-        "shipping_cost": item['shipping_cost'],
-        "shipping_type": item['shipping_type'],
+        Map a = {
+          "quantity": item['quantity'],
+          "price": item['price'],
+          "image": item['image'], //To Be modified
+          "title": item['name'],
+          "color": item['variants']['color'],
+          "id": item['id'].toString(),
+          "size": item['variants']['size'],
+          "store_id": item['store_id'],
+          "total": item['total'],
+          "url":item['url'],
+          "current_stock": item['current_stock'],
+          "shipping_cost": item['shipping_cost'],
+          "shipping_type": item['shipping_type'],
 
-        "type": item['type']
+          "type": item['type']
 
-      };
-      addToCart(a, "aa", "online");
+        };
+        addToCart(a, "aa", "online");
+      }
     }
+    catch(e){}
 
     notifyListeners();
   }
@@ -573,7 +583,6 @@ class PoinBizProvider with ChangeNotifier {
 
   void setShipping(Address data) {
     shipping = data;
-
     notifyListeners();
   }
 
@@ -590,13 +599,19 @@ class PoinBizProvider with ChangeNotifier {
   }
 
   void getOrders() async {
-    allorders = await GetFunc.getOrders();
-    notifyListeners();
+    try{
+      allorders = await GetFunc.getOrders();
+
+      notifyListeners();
+    }
+    catch(e){}
+
   }
 
 
   void getPlacedOrders() async {
     placedOrders = await GetFunc.getPlacedOrders();
+    
     notifyListeners();
   }
 

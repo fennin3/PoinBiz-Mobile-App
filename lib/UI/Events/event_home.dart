@@ -133,7 +133,7 @@ class _EventHomeState extends State<EventHome> {
                       height: 8,
                     ),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Padding(
                             padding: EdgeInsets.symmetric(horizontal: 15),
@@ -144,147 +144,24 @@ class _EventHomeState extends State<EventHome> {
                                   fontFamily: "Sans",
                                   fontWeight: FontWeight.w700),
                             )),
-                        Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 15),
-                            child: Text(
-                              "See all >>",
-                              style: TextStyle(
-                                  color: appColor,
-                                  fontSize: 14.0,
-                                  fontFamily: "Sans",
-                                  fontWeight: FontWeight.w500),
-                            )),
+                        // Padding(
+                        //     padding: EdgeInsets.symmetric(horizontal: 15),
+                        //     child: Text(
+                        //       "See all >>",
+                        //       style: TextStyle(
+                        //           color: appColor,
+                        //           fontSize: 14.0,
+                        //           fontFamily: "Sans",
+                        //           fontWeight: FontWeight.w500),
+                        //     )),
                       ],
                     ),
                     SizedBox(
                       height: 10,
                     ),
-                    if (_pro.allevents.length > 4)
-                      for (var event in _pro.allevents.sublist(0, 4))
-                        Padding(
-                          padding: const EdgeInsets.only(
-                              left: 15.0, right: 15, bottom: 20),
-                          child: TextButton(
-                            onPressed: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => EventCat(data: event,))),
-                            child: Container(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Stack(
-                                    clipBehavior: Clip.none,
-                                    children: [
-                                      Container(
-                                        width: double.infinity,
-                                        color: Colors.white,
-                                        height: 180,
-                                        child: Image.network(
-                                          "${event['image']['path']}",
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                      Positioned(
-                                          bottom: -30,
-                                          left: 15,
-                                          child: Card(
-                                              elevation: 5,
-                                              child: Padding(
-                                                padding: EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                                                child: Column(
-                                                    children: [
-                                                      Text(
-                                                        "${event['date'].toString().split(" at ")[0].split(", ")[1].split(" ")[0]}",
-                                                        style: TextStyle(
-                                                            fontFamily: "Sans",
-                                                            fontSize: 14,
-                                                            color: appColor,
-                                                            fontWeight:
-                                                                FontWeight.bold),
-                                                      ),
-                                                      Text(
-                                                        "${event['date'].toString().split(" at ")[0].split(", ")[0]}",
-                                                        style: TextStyle(
-                                                            fontFamily: "Sans",
-                                                            fontSize: 14,
-                                                            color: appColor,
-                                                            fontWeight:
-                                                                FontWeight.bold),
-                                                      ),
-                                                      Text(
-                                                        "${event['date'].toString().split(" at ")[0].split(", ")[1].split(" ")[1]}",
-                                                        style: TextStyle(
-                                                            fontFamily: "Sans",
-                                                            fontSize: 14,
-                                                            color: appColor,
-                                                            fontWeight:
-                                                                FontWeight.bold),
-                                                      ),
-                                                    ],
-                                                  ),
-
-                                              ))
-                                      )],
-                                  ),
-                                  SizedBox(
-                                    height: 30,
-                                  ),
-                                  Padding(
-                                      padding:
-                                          EdgeInsets.symmetric(horizontal: 10),
-                                      child: Text(
-                                        "${event['name']}",
-                                        style: TextStyle(
-                                            fontFamily: "Sans",
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold),
-                                      )),
-                                  SizedBox(
-                                    height: 6,
-                                  ),
-                                  Padding(
-                                      padding:
-                                          EdgeInsets.symmetric(horizontal: 10),
-                                      child: Text(
-                                        "${event['venue']}",
-                                        style: TextStyle(
-                                          fontFamily: "Sans",
-                                          fontSize: 13,
-                                        ),
-                                      )),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10.0),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          "${event['date'].toString().split(" at ")[1]}",
-                                          style: TextStyle(
-                                            fontFamily: "Sans",
-                                            fontSize: 13,
-                                          ),
-                                        ),
-
-                                      ],
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
-                                ],
-                              ),
-                              decoration: BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(6)),
-                                  border: Border.all(
-                                      color: Colors.black.withOpacity(0.1))),
-                            ),
-                          ),
-                        )
-                    else
+                      if(_pro.allevents.isEmpty)
+                        Center(child: Text("No events"),)
+                        else
                       for (var event in _pro.allevents)
                         Padding(
                           padding: const EdgeInsets.only(

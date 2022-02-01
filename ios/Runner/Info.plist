@@ -7,6 +7,13 @@
       <string>https</string>
       <string>http</string>
     </array>
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+      <string>https</string>
+      <string>http</string>
+    </array>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>This app needs access to location when open.</string>
     <key>NSPhotoLibraryUsageDescription</key>
     <string>Allow access to photo library</string>
     <key>NSCameraUsageDescription</key>

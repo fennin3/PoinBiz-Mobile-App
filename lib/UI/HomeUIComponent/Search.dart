@@ -79,7 +79,7 @@ class _searchAppbarState extends State<searchAppbar> {
     final _pro = Provider.of<PoinBizProvider>(context, listen: true);
 
     var _search = Padding(
-      padding: const EdgeInsets.only(top: 35.0, right: 20.0, left: 20.0),
+      padding: const EdgeInsets.only(top: 35.0, right: 20.0, left: 20.0, bottom: 25),
       child: Container(
         height: 50.0,
         decoration: BoxDecoration(
@@ -186,63 +186,63 @@ class _searchAppbarState extends State<searchAppbar> {
     //     ],
     //   ),
     // );
-    var _sugestedText = Container(
-      height: _pro.searchedWords.isNotEmpty ? 150 : 60,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(left: 20.0, top: 20.0),
-            child: Text(
-              "Search History",
-              style: TextStyle(fontFamily: "Gotik", color: Colors.black26),
-            ),
-          ),
-
-          Padding(padding: EdgeInsets.only(top: 5.0)),
-          // Expanded(
-          //     child: ListView(
-          //       scrollDirection: Axis.horizontal,
-          //       children: <Widget>[
-          //         Padding(padding: EdgeInsets.only(left: 20.0)),
-          //         for(var word in _pro.searchedWords)
-          //           KeywordItem(
-          //             title: "Iphone X",
-          //             title2: "Mackbook",
-          //           ),
-          //
-          //       ],
-          //     ))
-          if (_pro.searchedWords.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 5, left: 15),
-              child: Container(
-                height: 70,
-                child: GridView.count(
-                  scrollDirection: Axis.horizontal,
-                  childAspectRatio: (2 / 4),
-                  crossAxisSpacing: 5,
-                  mainAxisSpacing: 5,
-                  children: [
-                    for (var cat in _pro.searchedWords)
-                      InkWell(
-                        onTap: () {
-                          setState(() {});
-                        },
-                        child: Card(
-                          elevation: 3,
-                          child: Center(child: Text(cat.text)),
-                        ),
-                      ),
-                  ],
-                  shrinkWrap: true,
-                  crossAxisCount: 2,
-                ),
-              ),
-            )
-        ],
-      ),
-    );
+    // var _sugestedText = Container(
+    //   height: _pro.searchedWords.isNotEmpty ? 150 : 60,
+    //   child: Column(
+    //     crossAxisAlignment: CrossAxisAlignment.start,
+    //     children: <Widget>[
+    //       Padding(
+    //         padding: const EdgeInsets.only(left: 20.0, top: 20.0),
+    //         child: Text(
+    //           "Search History",
+    //           style: TextStyle(fontFamily: "Gotik", color: Colors.black26),
+    //         ),
+    //       ),
+    //
+    //       Padding(padding: EdgeInsets.only(top: 5.0)),
+    //       // Expanded(
+    //       //     child: ListView(
+    //       //       scrollDirection: Axis.horizontal,
+    //       //       children: <Widget>[
+    //       //         Padding(padding: EdgeInsets.only(left: 20.0)),
+    //       //         for(var word in _pro.searchedWords)
+    //       //           KeywordItem(
+    //       //             title: "Iphone X",
+    //       //             title2: "Mackbook",
+    //       //           ),
+    //       //
+    //       //       ],
+    //       //     ))
+    //       if (_pro.searchedWords.isNotEmpty)
+    //         Padding(
+    //           padding: const EdgeInsets.only(top: 5, left: 15),
+    //           child: Container(
+    //             height: 70,
+    //             child: GridView.count(
+    //               scrollDirection: Axis.horizontal,
+    //               childAspectRatio: (2 / 4),
+    //               crossAxisSpacing: 5,
+    //               mainAxisSpacing: 5,
+    //               children: [
+    //                 for (var cat in _pro.searchedWords)
+    //                   InkWell(
+    //                     onTap: () {
+    //                       setState(() {});
+    //                     },
+    //                     child: Card(
+    //                       elevation: 3,
+    //                       child: Center(child: Text(cat.text)),
+    //                     ),
+    //                   ),
+    //               ],
+    //               shrinkWrap: true,
+    //               crossAxisCount: 2,
+    //             ),
+    //           ),
+    //         )
+    //     ],
+    //   ),
+    // );
     var _searchResults = Container(
       child: Column(
         children: <Widget>[
@@ -335,7 +335,7 @@ class _searchAppbarState extends State<searchAppbar> {
                 /// Caliing a variable
                 _textHello,
                 _search,
-                _sugestedText,
+                // _sugestedText,
                 _searchResults,
                 Padding(padding: EdgeInsets.only(bottom: 30.0, top: 2.0))
               ],

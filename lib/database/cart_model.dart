@@ -46,6 +46,12 @@ class CartModel {
   @HiveField(13)
   final String type;
 
+  @HiveField(14)
+  final String discount_price;
+
+  @HiveField(14)
+  final String original_price;
+
 
 
   CartModel(
@@ -62,7 +68,9 @@ class CartModel {
       this.current_stock,
       this.shipping_cost,
       this.shipping_type,
-      this.type
+      this.type,
+      this.discount_price,
+        this.original_price
       });
 }
 

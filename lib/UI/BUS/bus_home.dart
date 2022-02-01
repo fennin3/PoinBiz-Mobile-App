@@ -39,8 +39,6 @@ class _BusHomeState extends State<BusHome> {
     setState(() {
       busData = _pro.allbuses;
     });
-
-    print("busdate = $busData");
   }
 
   @override
@@ -52,7 +50,7 @@ class _BusHomeState extends State<BusHome> {
 
   @override
   Widget build(BuildContext context) {
-    final _pro = Provider.of<PoinBizProvider>(context, listen: true);
+    final _pro = Provider.of<PoinBizProvider>(context, listen: false);
 
     var _bigCircleNotYet = Padding(
       padding: const EdgeInsets.only(top: 8.0),
@@ -144,7 +142,7 @@ class _BusHomeState extends State<BusHome> {
                               children: <Widget>[
                                 DropdownSearch<String>(
                                   mode: Mode.BOTTOM_SHEET,
-                                  showSelectedItem: true,
+                                  showSelectedItems: true,
                                   dropdownSearchBaseStyle:
                                       TextStyle(fontSize: 14),
 
@@ -188,7 +186,7 @@ class _BusHomeState extends State<BusHome> {
                                 Padding(padding: EdgeInsets.only(top: 20.0)),
                                 DropdownSearch<String>(
                                   mode: Mode.BOTTOM_SHEET,
-                                  showSelectedItem: true,
+                                  showSelectedItems: true,
                                   dropdownSearchBaseStyle:
                                       TextStyle(fontSize: 14),
                                   showSearchBox: true,

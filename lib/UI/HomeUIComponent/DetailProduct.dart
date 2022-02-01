@@ -2,11 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:treva_shop_flutter/API/provider_class.dart';
-import 'package:treva_shop_flutter/Components/addreview.dart';
 import 'package:treva_shop_flutter/Components/fav_widget.dart';
 import 'package:treva_shop_flutter/Library/carousel_pro/carousel_pro.dart';
 import 'package:flutter/material.dart';
-import 'package:treva_shop_flutter/ListItem/HomeGridItemRecomended.dart';
 import 'package:treva_shop_flutter/UI/CartUIComponent/CartLayout.dart';
 import 'package:treva_shop_flutter/UI/CartUIComponent/Delivery.dart';
 import 'package:provider/provider.dart';
@@ -16,6 +14,9 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:treva_shop_flutter/UI/LoginOrSignup/Login.dart';
 import 'package:treva_shop_flutter/constant.dart';
 import 'package:treva_shop_flutter/database/cart_model.dart';
+import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
+
+
 
 class detailProduk extends StatefulWidget {
   Map gridItem;
@@ -54,8 +55,6 @@ class _detailProdukState extends State<detailProduk> {
     }
   }
 
-
-
   @override
   void initState() {
     // TODO: implement initState
@@ -73,6 +72,12 @@ class _detailProdukState extends State<detailProduk> {
   /// BottomSheet for view more in specification
   void _bottomSheet(String text) {
     showModalBottomSheet(
+      backgroundColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20.0),
+            topRight: Radius.circular(20.0))
+      ),
         context: context,
         builder: (builder) {
           return SingleChildScrollView(
@@ -99,7 +104,7 @@ class _detailProdukState extends State<detailProduk> {
                       Padding(
                         padding: const EdgeInsets.only(
                             top: 20.0, left: 20.0, right: 20.0, bottom: 20.0),
-                        child: Text("$text", style: _detailText),
+                        child: HtmlWidget("$text", textStyle: _detailText,)
                       ),
 
                       // Padding(
@@ -250,6 +255,9 @@ class _detailProdukState extends State<detailProduk> {
         elevation: 0.5,
         centerTitle: true,
         backgroundColor: Colors.white,
+        leading: InkWell(
+            onTap: ()=>Navigator.pop(context),
+            child: Icon(Icons.arrow_back_ios, color: Colors.black26,)),
         title: Text(
           "Product Detail",
           style: TextStyle(
@@ -290,22 +298,30 @@ class _detailProdukState extends State<detailProduk> {
                           ),
                         ),
                       ),
-                      Positioned(bottom: 10, right: 10, child: FavWidget(item: WishItem(
-                        image: gridItem['image']['path'],
-                        title: gridItem['name'],
-                        prodid: gridItem['id'].toString(),
-                        store_id:gridItem['store_id'].toString(),
-                        color: gridItem['colors'].isNotEmpty? gridItem['colors'][_num]['code']:"",
-                        total: gridItem['price'].toString(),
-                        price: gridItem['price'].toString(),
-                        size: gridItem['sizes'].isNotEmpty ? gridItem['sizes'][_nu]['name']:"",
-                        quantity: "1",
-                          url: gridItem['link'],
-                          current_stock: gridItem['stock'].toString(),
-                          shipping_cost: "",
-                          shipping_type: "",
-                          type: ""
-                      ),))
+                      Positioned(
+                          bottom: 10,
+                          right: 10,
+                          child: FavWidget(
+                            item: WishItem(
+                                image: gridItem['image']['path'],
+                                title: gridItem['name'],
+                                prodid: gridItem['id'].toString(),
+                                store_id: gridItem['store_id'].toString(),
+                                color: gridItem['colors'].isNotEmpty
+                                    ? gridItem['colors'][_num]['code']
+                                    : "",
+                                total: gridItem['price'].toString(),
+                                price: gridItem['price'].toString(),
+                                size: gridItem['sizes'].isNotEmpty
+                                    ? gridItem['sizes'][_nu]['name']
+                                    : "",
+                                quantity: "1",
+                                url: gridItem['link'],
+                                current_stock: gridItem['stock'].toString(),
+                                shipping_cost: "",
+                                shipping_type: "",
+                                type: ""),
+                          ))
                     ],
                   ),
 
@@ -328,9 +344,24 @@ class _detailProdukState extends State<detailProduk> {
                             style: _customTextStyle,
                           ),
                           Padding(padding: EdgeInsets.only(top: 5.0)),
+                          if(gridItem['discount_price'] > 0)
+                          Text(
+                            "GHc " + gridItem['discount_price'].toString(),
+                            style: _customTextStyle,
+                          )
+                          else
+                            Text(
+                              "GHc " + gridItem['price'].toString(),
+                              style: _customTextStyle,
+                            )
+                            ,
+
+                          if(gridItem['discount_price'] > 0)
+                          Padding(padding: EdgeInsets.only(top: 5.0)),
+                          if(gridItem['discount_price'] > 0)
                           Text(
                             "GHc " + gridItem['price'].toString(),
-                            style: _customTextStyle,
+                            style: _customTextStyle.copyWith(fontSize: 14, decoration: TextDecoration.lineThrough),
                           ),
                           Padding(padding: EdgeInsets.only(top: 10.0)),
                           Divider(
@@ -425,7 +456,6 @@ class _detailProdukState extends State<detailProduk> {
                                         child: InkWell(
                                             onTap: () {
                                               setState(() {
-
                                                 _nu = gridItem['sizes']
                                                     .indexOf(size);
                                               });
@@ -512,8 +542,13 @@ class _detailProdukState extends State<detailProduk> {
                                   right: 20.0,
                                   bottom: 10.0,
                                   left: 20.0),
-                              child: Text(gridItem['description'],
-                                  style: _detailText),
+                              child:
+                              HtmlWidget(
+                                gridItem['description']
+                              )
+                              //
+                              // Text(gridItem['description'],
+                              //     style: _detailText),
                             ),
                             Center(
                               child: InkWell(
@@ -577,8 +612,7 @@ class _detailProdukState extends State<detailProduk> {
                                               'View All',
                                               style: _subHeaderCustomStyle
                                                   .copyWith(
-                                                      color:
-                                                          appColor,
+                                                      color: appColor,
                                                       fontSize: 14.0),
                                             )),
                                         onTap: () {
@@ -666,6 +700,7 @@ class _detailProdukState extends State<detailProduk> {
                             SizedBox(
                               height: 30,
                             ),
+
                             ///Add Review Button
                             // Padding(
                             //   padding: const EdgeInsets.only(right: 20.0),
@@ -710,20 +745,27 @@ class _detailProdukState extends State<detailProduk> {
               _pro.addToCart({
                 "title": gridItem['name'],
                 "image": gridItem['image']['path'],
-                "price": gridItem['price'].toString(),
+                "price": gridItem['discount_price'] > 0
+                    ? gridItem['discount_price']
+                    : gridItem['price'].toString(),
                 "quantity": "1",
-                "color": gridItem['colors'].isNotEmpty? gridItem['colors'][_num]['code']:"",
+                "color": gridItem['colors'].isNotEmpty
+                    ? gridItem['colors'][_num]['code']
+                    : "",
                 "id": gridItem['id'],
-                "size": gridItem['sizes'].isNotEmpty? gridItem['sizes'][_nu]['name']:"",
+                "size": gridItem['sizes'].isNotEmpty
+                    ? gridItem['sizes'][_nu]['name']
+                    : "",
                 "store_id": gridItem['store_id'],
-                "total": gridItem['price'].toString(),
+                "total": gridItem['discount_price'] > 0
+                    ? gridItem['discount_price']
+                    : gridItem['price'].toString(),
                 "url": gridItem['link'],
                 "current_stock": gridItem['current_stock'],
                 "shipping_cost": gridItem['shipping_cost'],
                 "shipping_type": gridItem['shipping_type'],
-                "type":"product"
-              }, _key,'offline');
-
+                "type": "product"
+              }, _key, 'offline');
             },
             child: Padding(
               padding: const EdgeInsets.only(bottom: 5.0),
@@ -775,60 +817,63 @@ class _detailProdukState extends State<detailProduk> {
                     // ),
 
                     /// Button Pay
-                    if(_pro.cart.length < 1)
-                    InkWell(
-                      onTap: () async{
-                        SharedPreferences sharedpref =
-                            await SharedPreferences.getInstance();
-                        final loggedIn = sharedpref.getBool('loggedin');
+                    if (_pro.cart.length < 1)
+                      InkWell(
+                        onTap: () async {
+                          SharedPreferences sharedpref =
+                              await SharedPreferences.getInstance();
+                          final loggedIn = sharedpref.getBool('loggedin');
 
-                        if(loggedIn != null){
-                          EasyLoading.show(status: "Updating Cart");
-                          _pro.addToCart({
-                            "title": gridItem['name'],
-                            "image": gridItem['image']['path'],
-                            "price": gridItem['price'].toString(),
-                            "quantity": "1",
-                            "color": gridItem['colors'].isNotEmpty? gridItem['colors'][_num]['code']:"",
-                            "id": gridItem['id'],
-                            "size": gridItem['sizes'].isNotEmpty? gridItem['sizes'][_nu]['name']:"",
-                            "store_id": gridItem['store_id'],
-                            "total": gridItem['price'].toString(),
-                            "url": gridItem['link'],
-                            "current_stock": gridItem['current_stock'],
-                            "shipping_cost": gridItem['shipping_cost'],
-                            "shipping_type": gridItem['shipping_type'],
-                            "type":"product"
-
-                          }, _key,'offline');
-                          EasyLoading.dismiss();
-                          Navigator.of(context).push(PageRouteBuilder(
-                              pageBuilder: (_, __, ___) => new delivery()));
-                        }
-                        else{
-                          EasyLoading.showInfo("You have to log in to proceed");
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => loginScreen()));
-                        }
-                      },
-                      child: Container(
-                        height: 45.0,
-                        width: 200.0,
-                        decoration: BoxDecoration(
-                          color: appColor,
-                        ),
-                        child: Center(
-                          child: Text(
-                            "Pay",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700),
+                          if (loggedIn != null) {
+                            EasyLoading.show(status: "Updating Cart");
+                            _pro.addToCart({
+                              "title": gridItem['name'],
+                              "image": gridItem['image']['path'],
+                              "price": gridItem['price'].toString(),
+                              "quantity": "1",
+                              "color": gridItem['colors'].isNotEmpty
+                                  ? gridItem['colors'][_num]['code']
+                                  : "",
+                              "id": gridItem['id'],
+                              "size": gridItem['sizes'].isNotEmpty
+                                  ? gridItem['sizes'][_nu]['name']
+                                  : "",
+                              "store_id": gridItem['store_id'],
+                              "total": gridItem['price'].toString(),
+                              "url": gridItem['link'],
+                              "current_stock": gridItem['current_stock'],
+                              "shipping_cost": gridItem['shipping_cost'],
+                              "shipping_type": gridItem['shipping_type'],
+                              "type": "product"
+                            }, _key, 'offline');
+                            EasyLoading.dismiss();
+                            Navigator.of(context).push(PageRouteBuilder(
+                                pageBuilder: (_, __, ___) => new delivery()));
+                          } else {
+                            EasyLoading.showInfo(
+                                "You have to log in to proceed");
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => loginScreen()));
+                          }
+                        },
+                        child: Container(
+                          height: 45.0,
+                          width: 200.0,
+                          decoration: BoxDecoration(
+                            color: appColor,
+                          ),
+                          child: Center(
+                            child: Text(
+                              "Pay",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700),
+                            ),
                           ),
                         ),
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -886,14 +931,12 @@ class SizeWidget extends StatelessWidget {
       width: index != nu ? 37.0 : 50,
       decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(
-              color: index != nu ? Colors.black54 : appColor),
+          border: Border.all(color: index != nu ? Colors.black54 : appColor),
           shape: BoxShape.circle),
       child: Center(
         child: Text(
           text,
-          style: TextStyle(
-              color: index != nu ? Colors.black54 : appColor),
+          style: TextStyle(color: index != nu ? Colors.black54 : appColor),
         ),
       ),
     );
@@ -914,8 +957,7 @@ class ColorWidget extends StatelessWidget {
       width: index != nu ? 37.0 : 50,
       decoration: BoxDecoration(
           color: color,
-          border: Border.all(
-              color: index != nu ? Colors.black54 : appColor),
+          border: Border.all(color: index != nu ? Colors.black54 : appColor),
           shape: BoxShape.circle),
     );
   }

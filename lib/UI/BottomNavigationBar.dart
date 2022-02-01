@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:treva_shop_flutter/API/provider_class.dart';
 import 'package:treva_shop_flutter/Components/add_auction_sale.dart';
 import 'package:treva_shop_flutter/UI/Auction/add_sale.dart';
@@ -15,10 +16,13 @@ import 'package:treva_shop_flutter/UI/HomeUIComponent/Home.dart';
 import 'package:provider/provider.dart';
 import 'package:treva_shop_flutter/UI/OrderRequest/add_order.dart';
 import 'package:treva_shop_flutter/UI/OrderRequest/my_orders.dart';
+import 'package:treva_shop_flutter/UI/VenderNearMe/data_loading.dart';
+import 'package:treva_shop_flutter/UI/VenderNearMe/home.dart';
 import 'package:treva_shop_flutter/UI/Vendor/all_venders.dart';
 import 'package:treva_shop_flutter/constant.dart';
 
 import 'BUS/bus_home.dart';
+import 'LoginOrSignup/ChoseLoginOrSignup.dart';
 
 class bottomNavigationBar extends StatefulWidget {
   @override
@@ -90,7 +94,7 @@ class _bottomNavigationBarState extends State<bottomNavigationBar> {
                   ),
                   title: Text(
                     "Shop",
-                    style: TextStyle(fontFamily: "Berlin", letterSpacing: 0.5),
+                    style: TextStyle(fontFamily: "Berlin", letterSpacing: 0.5, fontSize: 16),
                   )),
               // BottomNavigationBarItem(
               //     icon: Icon(Icons.search),
@@ -106,14 +110,14 @@ class _bottomNavigationBarState extends State<bottomNavigationBar> {
                   ),
                   title: Text(
                     "Bus",
-                    style: TextStyle(fontFamily: "Berlin", letterSpacing: 0.5),
+                    style: TextStyle(fontFamily: "Berlin", letterSpacing: 0.5, fontSize: 16),
                   )),
 
               BottomNavigationBarItem(
                 icon: Icon(Icons.event),
                 title: Text(
                   "Events",
-                  style: TextStyle(fontFamily: "Berlin", letterSpacing: 0.5),
+                  style: TextStyle(fontFamily: "Berlin", letterSpacing: 0.5, fontSize: 16),
                 ),
               ),
 
@@ -134,7 +138,7 @@ class _bottomNavigationBarState extends State<bottomNavigationBar> {
                   ),
                   title: Text(
                     "Cart",
-                    style: TextStyle(fontFamily: "Berlin", letterSpacing: 0.5),
+                    style: TextStyle(fontFamily: "Berlin", letterSpacing: 0.5, fontSize: 16),
                   )),
             ],
           )),
@@ -149,6 +153,23 @@ class MyDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    void _getInitData() {
+      final _pro = Provider.of<PoinBizProvider>(context, listen: false);
+      _pro.getCartItem();
+      _pro.getCartData();
+      _pro.getWishListData();
+      _pro.getOrders();
+      _pro.getUserDetail();
+      _pro.getPlacedOrders();
+      try{
+        _pro.getAddresses();
+      }
+      catch(e){}
+      try{
+        _pro.getUserDetail();
+      }catch(e){}
+    }
+    final _pro = Provider.of<PoinBizProvider>(context, listen: false);
     return Drawer(
         child: SingleChildScrollView(
           child: Column(
@@ -237,6 +258,19 @@ class MyDrawer extends StatelessWidget {
             // onTap: () => Navigator.push(
             //     context, MaterialPageRoute(builder: (context) => AllVendors())),
           ),
+
+          ListTile(
+
+            leading: Icon(Icons.location_on),
+            title: Text("Vendor Near Me"),
+            onTap: () async{
+              SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+              final value = sharedPreferences.getBool("loggedin");
+              Navigator.of(context).push(PageRouteBuilder(
+                  pageBuilder: (_, __, ___) => value != null ? DataLoading() : ChoseLogin())).then((value) => _pro.getUserDetail());
+            },
+          ),
+
           ListTile(
 
             leading: Icon(Icons.policy),
@@ -262,3 +296,5 @@ showAddAuctionSaleModal(context) {
         return AddAuctionSale();
       });
 }
+
+

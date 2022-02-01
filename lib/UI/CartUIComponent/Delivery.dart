@@ -5,6 +5,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:treva_shop_flutter/API/provider_class.dart';
 import 'package:provider/provider.dart';
 import 'package:treva_shop_flutter/API/provider_model.dart';
+import 'package:treva_shop_flutter/UI/AcountUIComponent/MyOrders.dart';
 import 'package:treva_shop_flutter/UI/CartUIComponent/add_address.dart';
 import 'package:treva_shop_flutter/UI/CartUIComponent/edit_shipping.dart';
 import 'package:treva_shop_flutter/UI/Payment/payment_web.dart';
@@ -15,6 +16,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:dropdown_search/dropdown_search.dart';
+import 'package:toast/toast.dart';
 
 Map toUseaddress;
 
@@ -111,14 +113,14 @@ class _deliveryState extends State<delivery> {
     }
 
     if (tempPoints.isNotEmpty &&
-        int.parse(tempPoints) <= int.parse(totalPoints.toString())) {
-      points = int.parse(tempPoints);
+        int.parse(tempPoints.toString()) <= int.parse(totalPoints.toString())) {
+      points = int.parse(tempPoints.toString());
     } else {
       points = 0;
     }
 
     double total = amount - (points * pointsIncash);
-    return total > 0 ? total.toStringAsFixed(2) : 0.00;
+    return total > 0 ? total.toStringAsFixed(2).toString() : 0.00.toString();
   }
 
   void placeOrder(Address address, amount, points, a) async {
@@ -155,14 +157,27 @@ class _deliveryState extends State<delivery> {
         showSpin = false;
       });
       // EasyLoading.showSuccess("${json.decode(response.body)['message']}");
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => PaymentWeb(
-                    initUrl: json.decode(response.body)['data']
-                        ['authorization_url'],
-                    where: "cart",
-                  )));
+      setState(() {
+        showSpin = false;
+      });
+
+      if (json
+          .decode(response.body)['data']['authorization_url']
+          .toString()
+          .contains('thank')) {
+        Toast.show('Order has been placed successfully', context, gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => order()));
+      } else {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => PaymentWeb(
+                      initUrl: json.decode(response.body)['data']
+                          ['authorization_url'],
+                      where: "cart",
+                    )));
+      }
     } else {
       print(response.statusCode);
       setState(() {
@@ -249,7 +264,7 @@ class _deliveryState extends State<delivery> {
 
     shipping = _pro.shipping;
     totalAmount = _pro.getTotal();
-    String allTotal = getTotal(
+    var allTotal = getTotal(
         cost_ship(
             _pro.getTotal().toString(),
             noCharge
@@ -290,7 +305,9 @@ class _deliveryState extends State<delivery> {
               "Processing",
               style: TextStyle(fontSize: 17),
             ),
-            SizedBox(height: 5,),
+            SizedBox(
+              height: 5,
+            ),
             CircularProgressIndicator(
               color: appColor,
             ),
@@ -704,8 +721,9 @@ class _deliveryState extends State<delivery> {
                                       InkWell(
                                         onTap: () {
                                           if (int.parse(_points.text) >
-                                              int.parse(
-                                                  _pro.userDetail['points'].toString())) {
+                                              int.parse(_pro
+                                                  .userDetail['points']
+                                                  .toString())) {
                                             final snackBar = SnackBar(
                                                 content: Text(
                                                     'You have insufficient points'));
@@ -713,7 +731,7 @@ class _deliveryState extends State<delivery> {
                                                 .showSnackBar(snackBar);
                                           } else {
                                             setState(() {
-                                              tempPoints = _points.text;
+                                              tempPoints = _points.text.toString();
                                             });
 
                                             EasyLoading.dismiss();
@@ -744,17 +762,22 @@ class _deliveryState extends State<delivery> {
                                                 int.parse(_pro
                                                     .config['points_per_cedi']);
                                             if (allPointCash <=
-                                                double.parse(allTotal)) {
+                                                double.parse(allTotal.toString())) {
                                               tempPoints = _pro
                                                   .userDetail['points']
                                                   .toString();
                                               _points.text = tempPoints;
                                             } else {
-                                              final a = (allPointCash -
-                                                      double.parse(allTotal)) *
+                                              double a =
+                                                      double.parse(allTotal.toString()) *
                                                   int.parse(_pro.config[
-                                                      'points_per_cedi']);
-                                              tempPoints = a.toString();
+                                                      'points_per_cedi'].toString());
+                                              var z = a.toString().split('.');
+
+                                              tempPoints = z[0];
+
+                                              print(tempPoints);
+                                              _points.text = tempPoints;
                                             }
                                           });
                                         },
@@ -783,8 +806,7 @@ class _deliveryState extends State<delivery> {
                                     height: 20,
                                   ),
                                   InkWell(
-                                    onTap: () =>
-                                    placeOrder(
+                                    onTap: () => placeOrder(
                                         shipping,
                                         cost_ship(
                                             totalAmount,
@@ -794,7 +816,6 @@ class _deliveryState extends State<delivery> {
                                                     0.00.toString()),
                                         _pro.userDetail['points'],
                                         _pro.config['points_per_cedi']),
-
                                     child: Card(
                                       elevation: 2,
                                       child: Container(

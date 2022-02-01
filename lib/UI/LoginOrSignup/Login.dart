@@ -64,7 +64,10 @@ class _loginScreenState extends State<loginScreen>
             json.decode(response.body)['token'],
             json.decode(response.body)['data']['id'],
           ]);
+
           sharedPreferences.setBool("loggedin", true);
+
+
           EasyLoading.dismiss();
           Navigator.of(context).pushReplacement(MaterialPageRoute(
               builder: (BuildContext context) => new bottomNavigationBar()));

@@ -139,8 +139,9 @@ class _orderState extends State<order> {
     setState(() {
       _openOrders = _pro.allorders
           .where((element) => element['status'].toString() != 'cancelled')
-          .toList().reversed.toList();
-      print(_openOrders.length);
+          .toList();
+
+
       _closedOrders = _pro.allorders
           .where((element) => element['status'].toString() == 'cancelled')
           .toList();
@@ -183,170 +184,173 @@ class _orderState extends State<order> {
           physics: NeverScrollableScrollPhysics(),
           children: [
             _openOrders.isNotEmpty
-                ? ListView.builder(
-                    itemCount: _openOrders.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(top: 10.0, right: 10),
-                        child: InkWell(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => OrderDetail(
-                                          data: _openOrders[index],
-                                        )));
-                          },
-                          child: Slidable(
-                            actionPane: SlidableDrawerActionPane(),
-                            child: Container(
-                              padding: EdgeInsets.all(10),
-                              width: double.infinity,
-                              color: Colors.white,
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              "Order ID: ${_openOrders[index]['id']}",
-                                              style: TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w800),
-                                            ),
-                                            SizedBox(
-                                              height: 5,
-                                            ),
-                                            Text(
-                                                "Total Amount:  GHc ${_openOrders[index]['amount']}",
-                                                style: TextStyle(
-                                                    fontSize: 13,
-                                                    fontWeight:
-                                                        FontWeight.w600)),
-                                            Text(
-                                                "Point Used:  ${_openOrders[index]['points']}",
-                                                style: TextStyle(
-                                                    fontSize: 13,
-                                                    fontWeight:
-                                                        FontWeight.w600)),
-                                          ],
-                                        ),
-                                        SizedBox(
-                                          height: 10,
-                                        ),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                                "Unique Items:  ${_openOrders[index]['items'].length} Items",
+                ? Padding(
+                  padding: const EdgeInsets.only(bottom: 15.0),
+                  child: ListView.builder(
+                      itemCount: _openOrders.length,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 10.0, right: 10),
+                          child: InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => OrderDetail(
+                                            data: _openOrders[index],
+                                          )));
+                            },
+                            child: Slidable(
+                              actionPane: SlidableDrawerActionPane(),
+                              child: Container(
+                                padding: EdgeInsets.all(10),
+                                width: double.infinity,
+                                color: Colors.white,
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                "Order ID: ${_openOrders[index]['id']}",
                                                 style: TextStyle(
                                                     fontSize: 14,
-                                                    fontWeight:
-                                                        FontWeight.w400)),
-                                            SizedBox(
-                                              height: 5,
-                                            ),
-                                            Text(
-                                                "Ordered:  ${_openOrders[index]['created']}",
-                                                style: TextStyle(fontSize: 12)),
-                                            SizedBox(
-                                              height: 5,
-                                            ),
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Text(
-                                                    "Updated:  ${_openOrders[index]['updated']}",
-                                                    style: TextStyle(
-                                                        fontSize: 12)),
-                                                Text("Slide to edit <<<",
-                                                    style: TextStyle(
-                                                        fontSize: 11,
-                                                        color: appColor))
-                                              ],
-                                            ),
-                                            SizedBox(
-                                              height: 5,
-                                            ),
-                                            Container(
-                                                decoration: BoxDecoration(
-                                                    color: _openOrders[index]
-                                                                    ['status']
-                                                                .toString()
-                                                                .toLowerCase() ==
-                                                            "delivered"
-                                                        ? Colors.lightGreen
-                                                        : _openOrders[index]['status']
-                                                                    .toString()
-                                                                    .toLowerCase() ==
-                                                                "pending"
-                                                            ? Colors.grey
-                                                            : _openOrders[index]['status']
-                                                                        .toString()
-                                                                        .toLowerCase() ==
-                                                                    "processing"
-                                                                ? Colors.blue
-                                                                : _openOrders[index]['status']
-                                                                            .toString()
-                                                                            .toLowerCase() ==
-                                                                        "on_delivery"
-                                                                    ? Colors
-                                                                        .yellow
-                                                                    : _openOrders[index]['status'].toString().toLowerCase() ==
-                                                                            "received"
-                                                                        ? Colors
-                                                                            .lightGreen
-                                                                        : Colors
-                                                                            .teal,
-                                                    borderRadius:
-                                                        BorderRadius.all(
-                                                            Radius.circular(2))),
-                                                padding: EdgeInsets.all(3),
-                                                child: Text(
-                                                  "${_openOrders[index]['status']}",
+                                                    fontWeight: FontWeight.w800),
+                                              ),
+                                              SizedBox(
+                                                height: 5,
+                                              ),
+                                              Text(
+                                                  "Total Amount:  GHc ${_openOrders[index]['amount']}",
                                                   style: TextStyle(
-                                                      color: Colors.white,
                                                       fontSize: 13,
                                                       fontWeight:
-                                                          FontWeight.w800),
-                                                )),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                ],
+                                                          FontWeight.w600)),
+                                              Text(
+                                                  "Point Used:  ${_openOrders[index]['points']}",
+                                                  style: TextStyle(
+                                                      fontSize: 13,
+                                                      fontWeight:
+                                                          FontWeight.w600)),
+                                            ],
+                                          ),
+                                          SizedBox(
+                                            height: 10,
+                                          ),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                  "Unique Items:  ${_openOrders[index]['items'].length} Items",
+                                                  style: TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w400)),
+                                              SizedBox(
+                                                height: 5,
+                                              ),
+                                              Text(
+                                                  "Ordered:  ${_openOrders[index]['created']}",
+                                                  style: TextStyle(fontSize: 12)),
+                                              SizedBox(
+                                                height: 5,
+                                              ),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Text(
+                                                      "Updated:  ${_openOrders[index]['updated']}",
+                                                      style: TextStyle(
+                                                          fontSize: 12)),
+                                                  Text("Slide to edit <<<",
+                                                      style: TextStyle(
+                                                          fontSize: 11,
+                                                          color: appColor))
+                                                ],
+                                              ),
+                                              SizedBox(
+                                                height: 5,
+                                              ),
+                                              Container(
+                                                  decoration: BoxDecoration(
+                                                      color: _openOrders[index]
+                                                                      ['status']
+                                                                  .toString()
+                                                                  .toLowerCase() ==
+                                                              "delivered"
+                                                          ? Colors.lightGreen
+                                                          : _openOrders[index]['status']
+                                                                      .toString()
+                                                                      .toLowerCase() ==
+                                                                  "pending"
+                                                              ? Colors.grey
+                                                              : _openOrders[index]['status']
+                                                                          .toString()
+                                                                          .toLowerCase() ==
+                                                                      "processing"
+                                                                  ? Colors.blue
+                                                                  : _openOrders[index]['status']
+                                                                              .toString()
+                                                                              .toLowerCase() ==
+                                                                          "on_delivery"
+                                                                      ? Colors
+                                                                          .yellow
+                                                                      : _openOrders[index]['status'].toString().toLowerCase() ==
+                                                                              "received"
+                                                                          ? Colors
+                                                                              .lightGreen
+                                                                          : Colors
+                                                                              .teal,
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(2))),
+                                                  padding: EdgeInsets.all(3),
+                                                  child: Text(
+                                                    "${_openOrders[index]['status']}",
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 13,
+                                                        fontWeight:
+                                                            FontWeight.w800),
+                                                  )),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  ],
+                                ),
                               ),
+                              secondaryActions: <Widget>[
+                                IconSlideAction(
+                                  caption: 'Cancel',
+                                  color: Colors.red,
+                                  icon: Icons.close,
+                                  onTap: () => _showMyDialog(_openOrders[index]['id'], 'c'),
+                                ),
+                                IconSlideAction(
+                                  caption: 'Mark as received',
+                                  color: Colors.lightGreen,
+                                  icon: Icons.check,
+                                  onTap: () => _showMyDialog(_openOrders[index]['id'], 'd'),
+                                ),
+                              ],
                             ),
-                            secondaryActions: <Widget>[
-                              IconSlideAction(
-                                caption: 'Cancel',
-                                color: Colors.red,
-                                icon: Icons.close,
-                                onTap: () => _showMyDialog(_openOrders[index]['id'], 'c'),
-                              ),
-                              IconSlideAction(
-                                caption: 'Mark as received',
-                                color: Colors.lightGreen,
-                                icon: Icons.check,
-                                onTap: () => _showMyDialog(_openOrders[index]['id'], 'd'),
-                              ),
-                            ],
                           ),
-                        ),
-                      );
-                    })
+                        );
+                      }),
+                )
                 : Center(
                     child: Text(
                       "You have no open order",

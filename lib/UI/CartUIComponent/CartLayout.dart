@@ -31,7 +31,7 @@ class _cartState extends State<cart> {
 
   @override
   Widget build(BuildContext context) {
-    final _pro = Provider.of<PoinBizProvider>(context, listen: true);
+    final _pro = Provider.of<PoinBizProvider>(context, listen: false);
     return Scaffold(
         appBar: AppBar(
           iconTheme: IconThemeData(color: Color(0xFF6991C7)),
@@ -296,21 +296,27 @@ class _cartState extends State<cart> {
                     right: 0,
                     child: InkWell(
                       onTap: () async {
-                        SharedPreferences sharedpref =
-                            await SharedPreferences.getInstance();
+
+                        SharedPreferences sharedpref = await SharedPreferences.getInstance();
                         final loggedIn = sharedpref.getBool('loggedin');
-                        print(loggedIn);
+
                         if (loggedIn != null) {
+
                           Navigator.of(context).push(PageRouteBuilder(
                               pageBuilder: (_, __, ___) => delivery()));
+
                         } else {
+
                           EasyLoading.showInfo("You have to log in to proceed");
+
                           Navigator.push(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => loginScreen()));
                         }
                       },
+
+
                       child: Padding(
                         padding: const EdgeInsets.only(right: 10.0),
                         child: Container(

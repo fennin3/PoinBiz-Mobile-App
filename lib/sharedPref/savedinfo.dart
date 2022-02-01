@@ -4,14 +4,25 @@ class UserData{
 
   static getUserId()async{
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    final userId = sharedPreferences.getStringList("data")[1];
+    String userId;
+    try{
+      userId = sharedPreferences.getStringList("data")[1].toString();
+    }
+    catch(e){}
+
 
     return userId;
   }
 
   static getUserToken()async{
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    final userToken = sharedPreferences.getStringList("data")[0];
+    String userToken;
+    try{
+      userToken = sharedPreferences.getStringList("data")[0];
+    }
+    catch(e){
+
+    }
 
     return userToken;
   }

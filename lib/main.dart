@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -29,22 +30,6 @@ void main() async {
     child: myApp(),
   ));
 }
-
-// void configLoading() {
-//   EasyLoading.instance
-//     ..displayDuration = const Duration(milliseconds: 2000)
-//     ..indicatorType = EasyLoadingIndicatorType.fadingCircle
-//     ..loadingStyle = EasyLoadingStyle.dark
-//     ..indicatorSize = 45.0
-//     ..radius = 10.0
-//     ..progressColor = Colors.yellow
-//     ..backgroundColor = Colors.green
-//     ..indicatorColor = Colors.yellow
-//     ..textColor = Colors.yellow
-//     ..maskColor = Colors.blue.withOpacity(0.5)
-//     ..userInteractions = true
-//     ..dismissOnTap = false;
-// }
 
 /// Set orienttation
 class myApp extends StatelessWidget {
@@ -89,31 +74,104 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
 
   /// Setting duration in splash screen
-  startTime() async {
-    return new Timer(Duration(milliseconds: 4500), NavigatorPage);
-  }
+  // startTime() async {
+  //   return new Timer(Duration(milliseconds: 100), NavigatorPage);
+  // }
 
   /// To navigate layout change
-  void NavigatorPage() async {
+  // void NavigatorPage() async {
+  //
+  //   WidgetsFlutterBinding.ensureInitialized();
+  //   SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+  //
+  //   await _getInitData().then((value) {
+  //     if (sharedPreferences.getBool("installed") == null) {
+  //       Navigator.of(context).pushAndRemoveUntil(
+  //         MaterialPageRoute(
+  //           builder: (BuildContext context) => onBoarding(),
+  //         ),
+  //             (Route<dynamic> route) => false,
+  //       );
+  //     } else {
+  //       Navigator.of(context).pushAndRemoveUntil(
+  //         MaterialPageRoute(
+  //           builder: (BuildContext context) => UpgradeAlert(
+  //             child: bottomNavigationBar(),
+  //           ),
+  //         ),
+  //             (Route<dynamic> route) => false,
+  //       );
+  //     }
+  //   });
+  //
+  // }
+
+  void _navigate()async{
     WidgetsFlutterBinding.ensureInitialized();
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    final result = await _getInitData();
 
-    if (sharedPreferences.getBool("installed") == null) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (BuildContext context) => onBoarding(),
-        ),
-        (Route<dynamic> route) => false,
-      );
-    } else {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (BuildContext context) => UpgradeAlert(
-            child: bottomNavigationBar(),
-          ),
-        ),
-        (Route<dynamic> route) => false,
-      );
+    Future.delayed(Duration(seconds: 3)).then((value){
+      if(result == 1 ){
+        if (sharedPreferences.getBool("installed") == null) {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (BuildContext context) => onBoarding(),
+            ),
+                (Route<dynamic> route) => false,
+          );
+        } else {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (BuildContext context) => UpgradeAlert(
+                child: bottomNavigationBar(),
+              ),
+            ),
+                (Route<dynamic> route) => false,
+          );
+        }
+      }
+      else{
+        EasyLoading.showInfo("No internet connection");
+      }
+    });
+
+  }
+
+
+  Future<int> _getInitData()async{
+    try{
+      final _pro = Provider.of<PoinBizProvider>(context, listen: false);
+      _pro.getallCategories();
+      _pro.getBanners();
+      _pro.getPromos();
+      _pro.getProducts();
+      _pro.getAddresses();
+      _pro.getCartItem();
+      _pro.getEventCategories();
+      _pro.getAllEvent();
+      _pro.getAllBuses();
+      _pro.getDestinations();
+      _pro.getCartData();
+      _pro.getWishListData();
+      _pro.getConfig();
+      _pro.getOrders();
+      _pro.getUserDetail();
+      _pro.getPlacedOrders();
+      _pro.getAllBusinessTypes();
+      _pro.getAuction();
+      _pro.getRegions();
+      try{
+        _pro.getAddresses();
+      }
+      catch(e){}
+      try{
+        _pro.getUserDetail();
+      }catch(e){}
+      return 1;
+    }
+    on SocketException{
+      return 0;
     }
   }
 
@@ -121,7 +179,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    startTime();
+    _navigate();
   }
 
   /// Code Create UI Splash Screen

@@ -179,27 +179,33 @@ class _categoryDetailState extends State<categoryDetail> {
                       padding: const EdgeInsets.only(bottom: 10.0, top: 10),
                       child: Container(
                         height: 130,
-                        child: GridView.count(
+                        child: GridView.builder(
                           scrollDirection: Axis.horizontal,
-                          crossAxisCount: 2,
-                          childAspectRatio: 0.7,
-                          crossAxisSpacing: 5,
-                          mainAxisSpacing: 5,
-                          children: [
-                            for (var cat in widget.data['sub-categories'])
-                              InkWell(
-                                onTap: () {
-                                  setState(() {
-                                    _current = cat['id'];
-                                    _products = cat['products'];
-                                  });
-                                },
-                                child: SubCategoryWidget(
-                                  cat: cat,
-                                  current: _current,
-                                ),
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              mainAxisExtent: 200,
+                              crossAxisSpacing: 5,
+                              mainAxisSpacing: 5,
+                          ),
+
+                          itemCount: widget.data['sub-categories'].length,
+                          itemBuilder: (BuildContext context, int index){
+                            return InkWell(
+                              onTap: () {
+                                setState(() {
+                                  _current = widget.data['sub-categories'][index]['id'];
+                                  _products = widget.data['sub-categories'][index]['products'];
+                                });
+                              },
+                              child: SubCategoryWidget(
+                                cat: widget.data['sub-categories'][index],
+                                current: _current,
                               ),
-                          ],
+                            );
+                          },
+
+
+
                           shrinkWrap: true,
                         ),
                       ),
@@ -290,21 +296,24 @@ class _categoryDetailState extends State<categoryDetail> {
                     padding: EdgeInsets.only(top: 50),
                     child: Text("No Products", style: TextStyle(fontSize: 20),),
                   )
-                          : GridView.extent(
+                          : GridView.builder(
+                              cacheExtent: 1000,
                               shrinkWrap: true,
                               padding: EdgeInsets.symmetric(
                                   horizontal: 7.0, vertical: 10.0),
-                              crossAxisSpacing: 10.0,
-                              mainAxisSpacing: 15.0,
-                              childAspectRatio: 0.62,
-
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: (MediaQuery.of(context).orientation == Orientation.portrait) ? 2 : 3,
+                            crossAxisSpacing: 10.0,
+                            mainAxisSpacing: 15.0,
+                            childAspectRatio: 0.62,
+                            // mainAxisExtent: 350,
+                          ),
                               primary: false,
-                              maxCrossAxisExtent: 350,
-                              children: List.generate(
-                                /// Get data in flashSaleItem.dart (ListItem folder)
-                                _products.length,
-                                (index) => ItemGridMain(_products[index], ""),
-                              ),
+
+                              itemCount: _products.length,
+                                itemBuilder: (BuildContext context, int index){
+                                return ItemGridMain(_products[index], "");
+                    },
                             )
                 ],
               ),
@@ -424,7 +433,7 @@ class _categoryDetailState extends State<categoryDetail> {
                             .toList()[0],
                       )));
             },
-            icon: Icon(Icons.search, color: Color(0xFF6991C7)),
+            icon: Icon(Icons.search, color: Colors.white),
           ),
         ],
         centerTitle: true,
@@ -433,11 +442,12 @@ class _categoryDetailState extends State<categoryDetail> {
           style: TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: 16.0,
-              color: Colors.black54,
+              color: Colors.white,
               fontFamily: "Gotik"),
         ),
+        backgroundColor: appColor,
         iconTheme: IconThemeData(
-          color: Color(0xFF6991C7),
+          color: Colors.white,
         ),
         elevation: 0.0,
       ),
@@ -474,6 +484,8 @@ class SubCategoryWidget extends StatelessWidget {
         child: Text(
           "${cat['name']}",
           style: TextStyle(
+            overflow: TextOverflow.ellipsis
+            ,
             color: cat['id'] == current ? Colors.white : Colors.black,
           ),
           textAlign: TextAlign.center,
@@ -982,3 +994,6 @@ Widget _loadingImageAnimationDiscount(BuildContext context) {
     itemCount: itemDiscount.length,
   );
 }
+
+
+

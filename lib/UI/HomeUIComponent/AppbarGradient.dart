@@ -19,7 +19,23 @@ class _AppbarGradientState extends State<AppbarGradient> {
     /// Build Appbar in layout home
   @override
   Widget build(BuildContext context) {
-    final _pro = Provider.of<PoinBizProvider>(context);
+    final _pro = Provider.of<PoinBizProvider>(context, listen: false);
+    void _getInitData() {
+      final _pro = Provider.of<PoinBizProvider>(context, listen: false);
+      _pro.getCartItem();
+      _pro.getCartData();
+      _pro.getWishListData();
+      _pro.getOrders();
+      _pro.getUserDetail();
+      _pro.getPlacedOrders();
+      try{
+        _pro.getAddresses();
+      }
+      catch(e){}
+      try{
+        _pro.getUserDetail();
+      }catch(e){}
+    }
     /// Create responsive height and padding
     final MediaQueryData media = MediaQuery.of(context);
     final double statusBarHeight = MediaQuery.of(context).padding.top;
@@ -27,7 +43,7 @@ class _AppbarGradientState extends State<AppbarGradient> {
     /// Create component in appbar
     return Container(
       padding: EdgeInsets.only(top: statusBarHeight),
-      height: 58.0 + statusBarHeight,
+      height: media.size.height * 0.065,
      color: appColor,
       child: Row(
         textBaseline: TextBaseline.ideographic,
@@ -97,14 +113,14 @@ class _AppbarGradientState extends State<AppbarGradient> {
                       SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
                       final value = sharedPreferences.getBool("loggedin");
                       Navigator.of(context).push(PageRouteBuilder(
-                          pageBuilder: (_, __, ___) => value != null ? profil() : ChoseLogin()));
+                          pageBuilder: (_, __, ___) => value != null ? profil() : ChoseLogin())).then((value) => _getInitData());
                     },
                     child:
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.person, size: 26,color: Colors.white,),
-                        Text("Account", style: TextStyle(fontSize: 10, color: Colors.white),)
+                        Text("Account", style: TextStyle(fontSize: 14, color: Colors.white),)
                       ],
                     )
 
@@ -123,7 +139,7 @@ class _AppbarGradientState extends State<AppbarGradient> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.more_horiz, size: 26,color: Colors.white,),
-                        Text("More", style: TextStyle(fontSize: 10, color: Colors.white),)
+                        Text("More", style: TextStyle(fontSize: 14, color: Colors.white),)
                       ],
                     )
 
